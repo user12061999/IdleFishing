@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c544908e039a3c74b84e740a8bbdaaf5, type: 3}
+  m_Name: great_white_shark_chain
+  m_EditorClassIdentifier: 
+  speciesId: great_white_shark
+  speciesName: Great White Leviathan
+  tier: 5
+  catchDifficulty: 4.8
+  spawnWeight: 12
+  minWeightKg: 80
+  maxWeightKg: 220
+  isApexBoss: 1
+  bossTitle: Great White Leviathan
+  wholeFish: {fileID: 11400000, guid: bccd00fd0910a7b4789d8b089a8b3c58, type: 2}

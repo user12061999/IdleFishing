@@ -1,0 +1,45 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f1e0bcda53c26a04bb0edf524c1e1153, type: 3}
+  m_Name: DefaultGameBalanceConfig
+  m_EditorClassIdentifier: 
+  wranglerBaseHealth: 120
+  wranglerBaseDamage: 15
+  wranglerAttackInterval: 0.85
+  wranglerKnockoutDuration: 4
+  wranglerBaseMoveSpeed: 3.2
+  playerClickBaseDamage: 12
+  fishHopIntervalMin: 0.8
+  fishHopIntervalMax: 1.4
+  fishHopDistance: 1.2
+  fishHopHeight: 0.85
+  bossSpawnChance: 0.1
+  bossHealthMultiplier: 3.5
+  bossDamageMultiplier: 1.5
+  bossScaleMultiplier: 1.8
+  bossBaseBonusGold: 180
+  offlineBaseCoinsPerSecond: 0.4
+  offlineMinAwaySeconds: 30
+  offlineMaxHours: 6
+  fishermanBaseCastTime: 5.5
+  maxPendingFishOnGround: 3
+  treasureChestSpawnChance: 0.08
+  treasureChestRequiredTaps: 5
+  treasureChestMinGold: 250
+  treasureChestMaxGold: 500
+  frenzyDuration: 20
+  frenzyChargePerFish: 4
+  frenzyChargePerDefeat: 6
+  frenzyChargePerTap: 1
+  frenzyChargePerChest: 40
+  frenzySpeedMultiplier: 2
+  frenzyDamageMultiplier: 2

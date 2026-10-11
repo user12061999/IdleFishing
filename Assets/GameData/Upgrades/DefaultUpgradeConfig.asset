@@ -1,0 +1,69 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fc31f87a76a32104d96cb0c7ea5f0a93, type: 3}
+  m_Name: DefaultUpgradeConfig
+  m_EditorClassIdentifier: 
+  upgrades:
+  - type: 0
+    title: Expand Fishermen
+    description: Unlock additional fishing slots on the pier (Max 5 fishermen)
+    baseCost: 100
+    costMultiplier: 2.5
+    baseValue: 1
+    valueIncreasePerLevel: 1
+    maxLevel: 4
+    icon: {fileID: 0}
+  - type: 1
+    title: Fishing Technique
+    description: Fishermen reel in fish faster, increasing catch rate
+    baseCost: 50
+    costMultiplier: 1.55
+    baseValue: 1
+    valueIncreasePerLevel: 0.15
+    maxLevel: 10
+    icon: {fileID: 0}
+  - type: 2
+    title: Hire Fish Wranglers
+    description: Hire wranglers to battle and carry fish (Max 4 wranglers)
+    baseCost: 100
+    costMultiplier: 2.2
+    baseValue: 0
+    valueIncreasePerLevel: 1
+    maxLevel: 4
+    icon: {fileID: 0}
+  - type: 3
+    title: Wrangler Gear
+    description: Boost wrangler power, health, speed & tap damage
+    baseCost: 70
+    costMultiplier: 1.55
+    baseValue: 1
+    valueIncreasePerLevel: 0.25
+    maxLevel: 10
+    icon: {fileID: 0}
+  - type: 4
+    title: Express Logistics
+    description: Increase transporter cart speed and harbor fish delivery rate
+    baseCost: 80
+    costMultiplier: 1.55
+    baseValue: 1
+    valueIncreasePerLevel: 0.2
+    maxLevel: 10
+    icon: {fileID: 0}
+  - type: 5
+    title: Seafood Brand
+    description: Increase wholesale value and gold earned at the market stall
+    baseCost: 120
+    costMultiplier: 1.65
+    baseValue: 1
+    valueIncreasePerLevel: 0.15
+    maxLevel: 10
+    icon: {fileID: 0}

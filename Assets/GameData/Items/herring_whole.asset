@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4ca1a89e251ef2045a28c480ab78f816, type: 3}
+  m_Name: herring_whole
+  m_EditorClassIdentifier: 
+  itemId: herring_whole
+  itemName: Fresh Herring
+  itemType: 0
+  description: 
+  basePrice: 20
+  prefab: {fileID: 1090111983686138834, guid: cece3b410bbedb143b3b98419fe7581b, type: 3}
+  icon: {fileID: 0}

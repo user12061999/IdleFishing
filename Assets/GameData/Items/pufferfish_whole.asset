@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4ca1a89e251ef2045a28c480ab78f816, type: 3}
+  m_Name: pufferfish_whole
+  m_EditorClassIdentifier: 
+  itemId: pufferfish_whole
+  itemName: Pufferfish
+  itemType: 0
+  description: 
+  basePrice: 580
+  prefab: {fileID: 6533800365972444643, guid: ec54b5bb0f37c384b91e5aa2573540ca, type: 3}
+  icon: {fileID: 0}

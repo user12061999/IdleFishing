@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 58eeffafc9a17b54e909a52828493ec3, type: 3}
+  m_Name: world_1
+  m_EditorClassIdentifier: 
+  worldId: world_1
+  worldName: Temperate Bay
+  description: A lush temperate bay teeming with familiar salmon and cod.
+  worldOrder: 1
+  waterColor: {r: 0.15, g: 0.5, b: 0.7, a: 1}
+  groundColor: {r: 0.35, g: 0.55, b: 0.35, a: 1}
+  lightColor: {r: 1, g: 0.95, b: 0.85, a: 1}
+  lightIntensity: 1
+  nativeSpecies:
+  - {fileID: 11400000, guid: 24f3ca18fae0a7b44b5c3e21571963cf, type: 2}
+  - {fileID: 11400000, guid: f291e5843cee93e4992f32a7a2fa1aad, type: 2}
+  - {fileID: 11400000, guid: 1c0221bee78d1264bafbf9d4915a029b, type: 2}
+  - {fileID: 11400000, guid: 68fc1a341dfb7d64793d899731290dd4, type: 2}
+  - {fileID: 11400000, guid: 5caa13c3bbae5d04298113479406e355, type: 2}
+  startingCoins: 30
+  unlockRequiredCoins: 0
+  unlockRequiredUpgrades: 0
+  worldUpgradeConfig: {fileID: 11400000, guid: e4aecedf1de78bf49ab84255a3b46f7f, type: 2}
