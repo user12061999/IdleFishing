@@ -40,9 +40,9 @@ namespace IdleFishing.Economy
             foreach (var entry in upgradeConfig.Upgrades)
             {
                 string key = GetUpgradeKey(currentWorldId, entry.type);
-                // Fallback to legacy key for world_1 if needed
-                int legacyLevel = PlayerPrefs.GetInt("IdleFishing_Upgrade_" + entry.type.ToString(), 0);
-                int level = PlayerPrefs.GetInt(key, legacyLevel);
+                // Fallback to legacy key only for world_1, new worlds start clean at level 0
+                int fallbackLevel = currentWorldId == "world_1" ? PlayerPrefs.GetInt("IdleFishing_Upgrade_" + entry.type.ToString(), 0) : 0;
+                int level = PlayerPrefs.GetInt(key, fallbackLevel);
                 upgradeLevels[entry.type] = level;
             }
         }
@@ -126,11 +126,111 @@ namespace IdleFishing.Economy
             int newLevel = GetLevel(type) + 1;
             upgradeLevels[type] = newLevel;
             PlayerPrefs.SetInt(GetUpgradeKey(currentWorldId, type), newLevel);
-            PlayerPrefs.SetInt("IdleFishing_Upgrade_" + type.ToString(), newLevel); // Legacy sync
+            if (currentWorldId == "world_1")
+            {
+                PlayerPrefs.SetInt("IdleFishing_Upgrade_" + type.ToString(), newLevel); // Legacy sync for world_1 only
+            }
             PlayerPrefs.Save();
 
             GameEvents.TriggerUpgradePurchased(type, newLevel);
+            if (type == UpgradeType.WranglerTeam)
+            {
+                GameEvents.TriggerWorkerHired("wrangler", GetUnlockedWranglerCount());
+            }
+            else if (type == UpgradeType.FishermanTeam)
+            {
+                GameEvents.TriggerWorkerHired("fisherman", GetUnlockedFishermanSlots());
+            }
             return true;
+        }
+
+        #region Streamlined Pillar Milestones
+        /// <summary>
+        /// Mở khóa slot cần thủ theo cấp độ Đội Cần Thủ (FishermanTeam):
+        /// Lv 0: 1 slot | Lv 2: 2 slots | Lv 5: 3 slots | Lv 9: 4 slots | Lv 14: 5 slots (Max)
+        /// </summary>
+        public int GetUnlockedFishermanSlots()
+        {
+            int lvl = GetLevel(UpgradeType.FishermanTeam);
+            if (lvl >= 14) return 5;
+            if (lvl >= 9) return 4;
+            if (lvl >= 5) return 3;
+            if (lvl >= 2) return 2;
+            return 1;
+        }
+
+        public int GetNextFishermanSlotRequiredLevel()
+        {
+            int lvl = GetLevel(UpgradeType.FishermanTeam);
+            if (lvl < 2) return 2;
+            if (lvl < 5) return 5;
+            if (lvl < 9) return 9;
+            if (lvl < 14) return 14;
+            return -1; // Max
+        }
+
+        /// <summary>
+        /// Mở khóa số lượng thợ săn cá theo cấp độ Đội Thợ Săn (WranglerTeam):
+        /// Lv 0: 1 thợ | Lv 3: 2 thợ | Lv 7: 3 thợ | Lv 12: 4 thợ (Max)
+        /// </summary>
+        public int GetUnlockedWranglerCount()
+        {
+            int lvl = GetLevel(UpgradeType.WranglerTeam);
+            if (lvl >= 12) return 4;
+            if (lvl >= 7) return 3;
+            if (lvl >= 3) return 2;
+            return 1;
+        }
+
+        public int GetNextWranglerRequiredLevel()
+        {
+            int lvl = GetLevel(UpgradeType.WranglerTeam);
+            if (lvl < 3) return 3;
+            if (lvl < 7) return 7;
+            if (lvl < 12) return 12;
+            return -1; // Max
+        }
+        #endregion
+
+        public long GetTotalInvestedGoldAllWorlds()
+        {
+            long totalInvested = 0;
+            string[] worldIds = new string[] { "world_1", "world_2", "world_3", "world_4", "world_5" };
+            UpgradeType[] types = new UpgradeType[] { UpgradeType.FishermanTeam, UpgradeType.WranglerTeam, UpgradeType.FishValue };
+
+            foreach (var wId in worldIds)
+            {
+                foreach (var type in types)
+                {
+                    int lvl = (wId == currentWorldId && upgradeLevels.TryGetValue(type, out int curLvl))
+                        ? curLvl
+                        : PlayerPrefs.GetInt(GetUpgradeKey(wId, type), 0);
+
+                    if (lvl > 0 && upgradeConfig != null)
+                    {
+                        var entry = upgradeConfig.GetEntry(type);
+                        if (entry != null)
+                        {
+                            for (int l = 0; l < lvl; l++)
+                            {
+                                totalInvested += entry.GetCostForLevel(l);
+                            }
+                        }
+                    }
+                }
+            }
+            return totalInvested;
+        }
+
+        public int GetTotalUpgradeLevelsAllWorlds()
+        {
+            int total = 0;
+            string[] worldIds = new string[] { "world_1", "world_2", "world_3", "world_4", "world_5" };
+            foreach (var wId in worldIds)
+            {
+                total += GetTotalUpgradeLevelsForWorld(wId);
+            }
+            return total;
         }
 
         public void ResetWorldUpgrades(string worldId)
@@ -145,6 +245,31 @@ namespace IdleFishing.Economy
                     upgradeLevels[entry.type] = 0;
                     GameEvents.TriggerUpgradePurchased(entry.type, 0);
                 }
+            }
+            PlayerPrefs.Save();
+        }
+
+        public void ResetAllWorldsUpgrades()
+        {
+            string[] worldIds = new string[] { "world_1", "world_2", "world_3", "world_4", "world_5" };
+            UpgradeType[] types = new UpgradeType[] { UpgradeType.FishermanTeam, UpgradeType.WranglerTeam, UpgradeType.FishValue };
+
+            foreach (var wId in worldIds)
+            {
+                foreach (var type in types)
+                {
+                    PlayerPrefs.DeleteKey(GetUpgradeKey(wId, type));
+                    if (wId == "world_1")
+                    {
+                        PlayerPrefs.DeleteKey("IdleFishing_Upgrade_" + type.ToString());
+                    }
+                }
+            }
+            upgradeLevels.Clear();
+            foreach (var type in types)
+            {
+                upgradeLevels[type] = 0;
+                GameEvents.TriggerUpgradePurchased(type, 0);
             }
             PlayerPrefs.Save();
         }

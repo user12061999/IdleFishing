@@ -42,7 +42,7 @@ namespace IdleFishing.Fishing
             // Setup Floating Badge
             GameObject barObj = new GameObject("Chest_TapBar");
             tapBarUI = barObj.AddComponent<FloatingHealthBarUI>();
-            tapBarUI.Setup(transform, "TREASURE CHEST", new Vector3(0, 1.4f, 0), new Color(1f, 0.85f, 0.2f));
+            tapBarUI.Setup(transform, "TREASURE CHEST", new Vector3(0, 1.8f, 0), new Color(1f, 0.85f, 0.2f));
             tapBarUI.UpdateHealth(requiredTaps - currentTaps, requiredTaps);
 
             // Arc flight to ground
@@ -80,10 +80,18 @@ namespace IdleFishing.Fishing
             transform.rotation = Quaternion.identity;
         }
 
+        private int lastTapFrame = -1;
+
+        public void Tap()
+        {
+            if (Time.frameCount == lastTapFrame) return;
+            lastTapFrame = Time.frameCount;
+            TapChest(isPlayer: true);
+        }
+
         public void OnMouseDown()
         {
-            if (isOpened) return;
-            TapChest(isPlayer: true);
+            Tap();
         }
 
         public void TapChest(bool isPlayer = true)

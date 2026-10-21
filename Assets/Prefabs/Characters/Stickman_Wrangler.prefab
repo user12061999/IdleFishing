@@ -2835,7 +2835,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0.000000011131531, y: -1.8218676e-24, z: 8.985615e-25, w: 1}
   m_LocalPosition: {x: 1.1641535e-10, y: 0.027141688, z: 0.0014319142}
-  m_LocalScale: {x: 0.9999999, y: 0.9999998, z: 1}
+  m_LocalScale: {x: 1.12, y: 1.12, z: 1.12}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 6493080476389698022}
@@ -2977,7 +2977,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0.014760526, y: 3.485459e-25, z: 2.826638e-25, w: 0.9998911}
   m_LocalPosition: {x: 1.1641535e-10, y: 0.17140345, z: -0.0000000018626451}
-  m_LocalScale: {x: 1, y: 0.9999999, z: 0.9999999}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 9117657308942537827}
@@ -3230,7 +3230,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: -0.014760559, y: -0.000000031785362, z: -3.135813e-10, w: 0.9998911}
   m_LocalPosition: {x: 1.6968812e-10, y: 0.11421931, z: -0.003372979}
-  m_LocalScale: {x: 1, y: 1.0000001, z: 0.99999994}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 251074523977074680}
@@ -4392,7 +4392,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7526086891641462508}
   - component: {fileID: 88519777235965267}
-  m_Layer: 0
+  m_Layer: 2
   m_Name: Stickman_Wrangler
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4434,10 +4434,10 @@ CapsuleCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Radius: 0.52
-  m_Height: 2.45
+  m_Radius: 0.58
+  m_Height: 1.95
   m_Direction: 1
-  m_Center: {x: 0, y: 1.22, z: 0}
+  m_Center: {x: 0, y: 0.98, z: 0}
 --- !u!1 &3447944734630245768
 GameObject:
   m_ObjectHideFlags: 0
@@ -5445,7 +5445,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0.7071069, y: 0.000000022586494, z: 0.000000022366418, w: 0.7071067}
   m_LocalPosition: {x: -0.0016095352, y: 0.0030268966, z: 0.647812}
-  m_LocalScale: {x: 1, y: 0.99999994, z: 1}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 9209938681496567346}
@@ -6236,7 +6236,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1.45, y: 1.45, z: 1.45}
+  m_LocalScale: {x: 1.36, y: 1.1, z: 1.26}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 2284989164955148515}
@@ -6285,6 +6285,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   role: 1
   autoDetectMovement: 1
+  applyChubbyProportions: 1
+  chubbyRootScale: {x: 1.36, y: 1.1, z: 1.26}
+  chubbyHeadScale: {x: 1.12, y: 1.12, z: 1.12}
   walkFrequency: 9.2
   legSwingAngle: 34
   armSwingAngle: 28
@@ -6314,6 +6317,18 @@ MonoBehaviour:
   leftLeg: {fileID: 7485603658819341566}
   rightFoot: {fileID: 2450375270026835622}
   leftFoot: {fileID: 3026683805118014496}
+  rIndex1: {fileID: 0}
+  rMiddle1: {fileID: 0}
+  rRing1: {fileID: 0}
+  rPinky1: {fileID: 0}
+  rThumb1: {fileID: 0}
+  rThumb2: {fileID: 0}
+  lIndex1: {fileID: 0}
+  lMiddle1: {fileID: 0}
+  lRing1: {fileID: 0}
+  lPinky1: {fileID: 0}
+  lThumb1: {fileID: 0}
+  lThumb2: {fileID: 0}
   hasBindPose: 1
   initHips: {x: 0.7071069, y: 0.000000022586494, z: 0.000000022366418, w: 0.7071067}
   initSpine: {x: -0.014760559, y: -0.000000031785362, z: -3.135813e-10, w: 0.9998911}
@@ -6333,7 +6348,7 @@ MonoBehaviour:
   initRightFoot: {x: 0.45437428, y: -0.10358324, z: 0.03058163, w: 0.8842394}
   initLeftFoot: {x: 0.45671037, y: 0.102194585, z: -0.030348388, w: 0.88320494}
   initHipsPos: {x: -0.0016095352, y: 0.0030268966, z: 0.647812}
-  initVisualScale: {x: 1.45, y: 1.45, z: 1.45}
+  initVisualScale: {x: 1.36, y: 1.1, z: 1.26}
 --- !u!1 &5623064474557188508
 GameObject:
   m_ObjectHideFlags: 0
@@ -8927,8 +8942,8 @@ Transform:
   m_GameObject: {fileID: 8373380180888281383}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.16, z: 0}
-  m_LocalScale: {x: 0.36, y: 0.035, z: 0.36}
+  m_LocalPosition: {x: 0, y: 0.36, z: 0.02}
+  m_LocalScale: {x: 0.38, y: 0.035, z: 0.38}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 9117657308942537827}
@@ -9267,7 +9282,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0.000000004656613, y: -2.4556922e-25, z: -1.3877788e-17, w: 1}
   m_LocalPosition: {x: 4.965646e-17, y: 0.13331379, z: -9.313226e-10}
-  m_LocalScale: {x: 1.0000001, y: 1, z: 1.0000001}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 6095995391638027502}

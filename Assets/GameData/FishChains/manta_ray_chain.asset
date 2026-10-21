@@ -15,8 +15,8 @@ MonoBehaviour:
   speciesId: manta_ray
   speciesName: Emperor Manta Ray
   tier: 4
-  catchDifficulty: 4
-  spawnWeight: 18
+  catchDifficulty: 3.8
+  spawnWeight: 14
   minWeightKg: 55
   maxWeightKg: 130
   isApexBoss: 1

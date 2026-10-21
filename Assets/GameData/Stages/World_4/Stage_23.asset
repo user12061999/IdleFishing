@@ -1,0 +1,43 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8fb4bf1520bf6cd4592f26e0e019b0f7, type: 3}
+  m_Name: Stage_23
+  m_EditorClassIdentifier: 
+  stageId: stage_23
+  stageNumber: 23
+  worldId: world_4
+  stageInWorld: 5
+  stageTitle: Glacier Treasure
+  mechanicDescription: Icebergs thaw during polar daylight, releasing crystal fish.
+    Trigger frenzy to harvest fortune.
+  targetMinutes: 5.5
+  estimatedBaseGoldPerMin: 3381843
+  rewardGoldEquivalentMinutes: 0.35
+  grantFameOnFirstClear: 1
+  replayable: 0
+  goals:
+  - goalType: 6
+    targetCount: 1
+    targetId: 
+    targetLevel: 1
+    customDescription: Activate Fishing Frenzy 1x
+  - goalType: 2
+    targetCount: 25
+    targetId: 
+    targetLevel: 1
+    customDescription: Sell 25 Fish at Market
+  guaranteedFirstCatch: {fileID: 0}
+  bossToSpawn: {fileID: 0}
+  isWorldBossStage: 0
+  worldVoyageUnlock: 
+  featureUnlocks:
+  - iceberg_trophy

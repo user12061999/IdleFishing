@@ -86,8 +86,17 @@ namespace IdleFishing.UI
             GameObject bgObj = new GameObject("ProgressBar_BG");
             bgObj.transform.SetParent(transform, false);
             bgImage = bgObj.AddComponent<Image>();
-            bgImage.sprite = whiteSp;
-            bgImage.color = new Color(0.10f, 0.13f, 0.18f, 0.88f); // Dark Slate
+            if (CasualUITheme.SliderBg != null)
+            {
+                bgImage.sprite = CasualUITheme.SliderBg;
+                bgImage.type = Image.Type.Sliced;
+                bgImage.color = Color.white;
+            }
+            else
+            {
+                bgImage.sprite = whiteSp;
+                bgImage.color = new Color(0.10f, 0.13f, 0.18f, 0.88f); // Dark Slate
+            }
 
             RectTransform bgRect = bgObj.GetComponent<RectTransform>();
             bgRect.sizeDelta = new Vector2(150, 20);
@@ -97,8 +106,8 @@ namespace IdleFishing.UI
             GameObject fillObj = new GameObject("ProgressBar_Fill");
             fillObj.transform.SetParent(bgObj.transform, false);
             fillImage = fillObj.AddComponent<Image>();
-            fillImage.sprite = whiteSp;
-            fillImage.color = castingColor;
+            fillImage.sprite = CasualUITheme.SliderFillBlue != null ? CasualUITheme.SliderFillBlue : whiteSp;
+            fillImage.color = Color.white;
             fillImage.type = Image.Type.Filled;
             fillImage.fillMethod = Image.FillMethod.Horizontal;
             fillImage.fillOrigin = (int)Image.OriginHorizontal.Left;
@@ -119,6 +128,7 @@ namespace IdleFishing.UI
             titleText.alignment = TextAlignmentOptions.Center;
             titleText.color = Color.white;
             titleText.raycastTarget = false;
+            titleText.ApplyFont(UIFontCategory.Button);
 
             RectTransform titleRect = titleObj.GetComponent<RectTransform>();
             titleRect.sizeDelta = new Vector2(180, 24);
@@ -155,12 +165,20 @@ namespace IdleFishing.UI
             switch (state)
             {
                 case FishermanState.Casting:
-                    if (fillImage != null) fillImage.color = castingColor;
-                    if (titleText != null) titleText.gameObject.SetActive(false); // Thanh nạp mượt mà, không cần chữ
+                    if (fillImage != null)
+                    {
+                        if (CasualUITheme.SliderFillBlue != null) fillImage.sprite = CasualUITheme.SliderFillBlue;
+                        fillImage.color = Color.white;
+                    }
+                    if (titleText != null) titleText.gameObject.SetActive(false);
                     break;
 
                 case FishermanState.HookedReeling:
-                    if (fillImage != null) fillImage.color = hookedColor;
+                    if (fillImage != null)
+                    {
+                        if (CasualUITheme.SliderFillGreen != null) fillImage.sprite = CasualUITheme.SliderFillGreen;
+                        fillImage.color = Color.white;
+                    }
                     if (titleText != null)
                     {
                         titleText.gameObject.SetActive(true);
@@ -169,7 +187,11 @@ namespace IdleFishing.UI
                     break;
 
                 case FishermanState.CrowdedWait:
-                    if (fillImage != null) fillImage.color = crowdedColor;
+                    if (fillImage != null)
+                    {
+                        if (CasualUITheme.SliderFillYellow != null) fillImage.sprite = CasualUITheme.SliderFillYellow;
+                        fillImage.color = Color.white;
+                    }
                     if (titleText != null)
                     {
                         titleText.gameObject.SetActive(true);

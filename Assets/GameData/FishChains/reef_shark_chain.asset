@@ -16,7 +16,7 @@ MonoBehaviour:
   speciesName: Blacktip Reef Shark
   tier: 2
   catchDifficulty: 2.4
-  spawnWeight: 20
+  spawnWeight: 18
   minWeightKg: 18
   maxWeightKg: 45
   isApexBoss: 1

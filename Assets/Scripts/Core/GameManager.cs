@@ -33,8 +33,10 @@ namespace IdleFishing.Core
             Instance = this;
 
             Time.timeScale = 1.0f;
+            QualitySettings.vSyncCount = 0;
             Application.targetFrameRate = 60;
             Application.runInBackground = true;
+            Screen.sleepTimeout = SleepTimeout.NeverSleep;
 
             EnsureStandaloneInputModule();
         }

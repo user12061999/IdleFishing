@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: clownfish_whole
   m_EditorClassIdentifier: 
   itemId: clownfish_whole
-  itemName: Clownfish
+  itemName: Darwin Clownfish
   itemType: 0
-  description: 
-  basePrice: 360
+  description: 'Fresh 3D fish: Darwin Clownfish'
+  basePrice: 85
   prefab: {fileID: 1862337990956668661, guid: 15afb72f2a8d03945a239a1da96d13f7, type: 3}
   icon: {fileID: 0}

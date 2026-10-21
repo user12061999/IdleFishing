@@ -15,10 +15,10 @@ MonoBehaviour:
   speciesId: snow_crab
   speciesName: Snow Crab
   tier: 3
-  catchDifficulty: 2.5
+  catchDifficulty: 3.4
   spawnWeight: 50
-  minWeightKg: 2
-  maxWeightKg: 5.5
+  minWeightKg: 2.5
+  maxWeightKg: 7
   isApexBoss: 0
   bossTitle: 
   wholeFish: {fileID: 11400000, guid: fcfdcad51ac40ae44b28d0cdd2a76dc5, type: 2}

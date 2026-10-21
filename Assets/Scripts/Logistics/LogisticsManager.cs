@@ -23,6 +23,7 @@ namespace IdleFishing.Logistics
         [Header("Hire Station Pad")]
         [SerializeField] private GameObject hirePadObj;
         [SerializeField] private InWorldPurchasePad hirePad;
+        [SerializeField] private WorldTransporterHirePad transporterHirePad;
         [SerializeField] private int maxTransporters = 2;
         [SerializeField] private int hireCost = 120;
 
@@ -40,10 +41,26 @@ namespace IdleFishing.Logistics
             Instance = this;
         }
 
+        [Header("Progression Gating")]
+        [SerializeField] private bool autoSpawnFirstWorkerOnStart = true;
+
         private void Start()
         {
-            // Spawn default 1st Transporter worker if none exists
-            if (activeWorkers.Count == 0)
+            if (transporterHirePad == null)
+            {
+                transporterHirePad = FindAnyObjectByType<WorldTransporterHirePad>();
+            }
+
+            // Early tutorial check: If Stage 1 or 2 is active, hold off first transporter until Stage 3
+            bool isEarlyTutorial = false;
+            if (IdleFishing.Progression.StageProgressionManager.Instance != null &&
+                IdleFishing.Progression.StageProgressionManager.Instance.CurrentStageNumber < 3)
+            {
+                isEarlyTutorial = true;
+            }
+
+            // Spawn default 1st Transporter worker if none exists and not early tutorial
+            if (!isEarlyTutorial && activeWorkers.Count == 0 && autoSpawnFirstWorkerOnStart)
             {
                 SpawnTransporterWorker(0);
             }
@@ -108,10 +125,42 @@ namespace IdleFishing.Logistics
             return bestRoute;
         }
 
+        public LogisticsRoute FindRouteForDropoff(Inventory.Inventory cartInv)
+        {
+            if (routes == null || routes.Count == 0 || cartInv == null || cartInv.TotalItemCount == 0) return null;
+
+            for (int i = 0; i < routes.Count; i++)
+            {
+                var r = routes[i];
+                if (r == null) continue;
+
+                if (cartInv.GetCountOfType(r.itemType) > 0)
+                {
+                    return r;
+                }
+            }
+            return routes[0];
+        }
+
+        public bool IsMarketShelfFull()
+        {
+            // Đã bỏ cơ chế chợ chờ khách — Transporter bán cá trực tiếp nên không bao giờ bị đầy
+            return false;
+        }
+
         public void SetupHirePad(GameObject padObj, InWorldPurchasePad padScript, Vector3 restPos, GameObject modelPrefab = null)
         {
             hirePadObj = padObj;
             hirePad = padScript;
+            defaultRestPosition = restPos;
+            if (modelPrefab != null) workerModelPrefab = modelPrefab;
+            UpdateHirePadVisuals();
+        }
+
+        public void SetupHirePad(GameObject padObj, WorldTransporterHirePad padScript, Vector3 restPos, GameObject modelPrefab = null)
+        {
+            hirePadObj = padObj;
+            transporterHirePad = padScript;
             defaultRestPosition = restPos;
             if (modelPrefab != null) workerModelPrefab = modelPrefab;
             UpdateHirePadVisuals();
@@ -243,6 +292,7 @@ namespace IdleFishing.Logistics
             );
 
             activeWorkers.Add(workerScript);
+            IdleFishing.Core.GameEvents.TriggerWorkerHired("transporter", activeWorkers.Count);
             return workerScript;
         }
 
@@ -261,6 +311,11 @@ namespace IdleFishing.Logistics
                     hirePad.SetSubtitle($"Current: {activeWorkers.Count}/{maxTransporters} Vehicles ({hireCost} G)");
                 }
                 hirePad.UpdateVisuals();
+            }
+
+            if (transporterHirePad != null)
+            {
+                transporterHirePad.UpdateVisuals();
             }
         }
 

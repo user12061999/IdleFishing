@@ -15,7 +15,7 @@ MonoBehaviour:
   itemId: snow_crab_whole
   itemName: Snow Crab
   itemType: 0
-  description: 
-  basePrice: 280
+  description: 'Fresh 3D fish: Snow Crab'
+  basePrice: 3800
   prefab: {fileID: 9023729551389186467, guid: 48c6de1c855351e41a2560d0ccc68a2f, type: 3}
   icon: {fileID: 0}

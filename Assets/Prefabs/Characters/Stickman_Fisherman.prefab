@@ -2634,7 +2634,7 @@ Transform:
   m_GameObject: {fileID: 3214812520885185563}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.18, z: 0}
+  m_LocalPosition: {x: 0, y: 0.46, z: 0.02}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -3015,7 +3015,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0.000000004656613, y: -2.4556922e-25, z: -1.3877788e-17, w: 1}
   m_LocalPosition: {x: 4.965646e-17, y: 0.13331379, z: -9.313226e-10}
-  m_LocalScale: {x: 1.0000001, y: 1, z: 1.0000001}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 6108751782304047988}
@@ -3460,7 +3460,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0.000000011131531, y: -1.8218676e-24, z: 8.985615e-25, w: 1}
   m_LocalPosition: {x: 1.1641535e-10, y: 0.027141688, z: 0.0014319142}
-  m_LocalScale: {x: 0.9999999, y: 0.9999998, z: 1}
+  m_LocalScale: {x: 1.12, y: 1.12, z: 1.12}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 6085074192718256915}
@@ -5508,7 +5508,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: -0.014760559, y: -0.000000031785362, z: -3.135813e-10, w: 0.9998911}
   m_LocalPosition: {x: 1.6968812e-10, y: 0.11421931, z: -0.003372979}
-  m_LocalScale: {x: 1, y: 1.0000001, z: 0.99999994}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 2773155119130013682}
@@ -5981,7 +5981,7 @@ Transform:
   m_GameObject: {fileID: 6219292038283040182}
   serializedVersion: 2
   m_LocalRotation: {x: -0.6680871, y: 0.31316367, z: 0.48746175, w: 0.46687177}
-  m_LocalPosition: {x: 0, y: 0.08, z: 0}
+  m_LocalPosition: {x: -0.01, y: 0.09, z: -0.02}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -7298,7 +7298,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0.014760526, y: 3.485459e-25, z: 2.826638e-25, w: 0.9998911}
   m_LocalPosition: {x: 1.1641535e-10, y: 0.17140345, z: -0.0000000018626451}
-  m_LocalScale: {x: 1, y: 0.9999999, z: 0.9999999}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 2088272026119403366}
@@ -7428,7 +7428,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0.02, z: 0}
-  m_LocalScale: {x: 0.52, y: 0.015, z: 0.52}
+  m_LocalScale: {x: 0.5, y: 0.015, z: 0.5}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 997167769643136931}
@@ -7609,7 +7609,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1.45, y: 1.45, z: 1.45}
+  m_LocalScale: {x: 1.36, y: 1.1, z: 1.26}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 3279472243142632292}
@@ -7658,6 +7658,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   role: 0
   autoDetectMovement: 1
+  applyChubbyProportions: 1
+  chubbyRootScale: {x: 1.36, y: 1.1, z: 1.26}
+  chubbyHeadScale: {x: 1.12, y: 1.12, z: 1.12}
   walkFrequency: 9.2
   legSwingAngle: 34
   armSwingAngle: 28
@@ -7687,26 +7690,38 @@ MonoBehaviour:
   leftLeg: {fileID: 4488523274948317113}
   rightFoot: {fileID: 2125978964163599911}
   leftFoot: {fileID: 2848363005773450113}
+  rIndex1: {fileID: 0}
+  rMiddle1: {fileID: 0}
+  rRing1: {fileID: 0}
+  rPinky1: {fileID: 0}
+  rThumb1: {fileID: 0}
+  rThumb2: {fileID: 0}
+  lIndex1: {fileID: 0}
+  lMiddle1: {fileID: 0}
+  lRing1: {fileID: 0}
+  lPinky1: {fileID: 0}
+  lThumb1: {fileID: 0}
+  lThumb2: {fileID: 0}
   hasBindPose: 1
-  initHips: {x: 0.7071069, y: 0.000000022586494, z: 0.000000022366418, w: 0.7071067}
-  initSpine: {x: -0.014760559, y: -0.000000031785362, z: -3.135813e-10, w: 0.9998911}
-  initSpine1: {x: 0.000000004656613, y: -2.4556922e-25, z: -1.3877788e-17, w: 1}
-  initNeck: {x: 0.014760526, y: 3.485459e-25, z: 2.826638e-25, w: 0.9998911}
-  initHead: {x: 0.000000011131531, y: -1.8218676e-24, z: 8.985615e-25, w: 1}
-  initRightArm: {x: -0.12768845, y: 0.01639934, z: 0.00833096, w: 0.9916438}
-  initLeftArm: {x: -0.1278774, y: -0.014576195, z: 0.0038174556, w: 0.9916755}
-  initRightForeArm: {x: 0.0000004351046, y: -0.00000009164942, z: 0.042687412, w: 0.99908847}
-  initLeftForeArm: {x: -0.000000101611136, y: -0.0000006324561, z: -0.048310608, w: 0.99883235}
-  initRightHand: {x: -0.0571816, y: -0.015671553, z: -0.016595785, w: 0.99810284}
-  initLeftHand: {x: -0.041798275, y: 0.015665032, z: 0.024419965, w: 0.9987048}
-  initRightUpLeg: {x: 0.000009724253, y: -0.0055385632, z: 0.9999819, w: -0.0023500281}
-  initLeftUpLeg: {x: -0.000011991926, y: -0.004749434, z: 0.999986, w: 0.0023498966}
-  initRightLeg: {x: -0.029411975, y: -0.0000026123728, z: -0.000000100558644, w: 0.9995674}
-  initLeftLeg: {x: -0.029250354, y: -0.00000013872722, z: -0.000000039516028, w: 0.99957216}
-  initRightFoot: {x: 0.45437428, y: -0.10358324, z: 0.03058163, w: 0.8842394}
-  initLeftFoot: {x: 0.45671037, y: 0.102194585, z: -0.030348388, w: 0.88320494}
-  initHipsPos: {x: -0.0016095352, y: 0.0030268966, z: 0.647812}
-  initVisualScale: {x: 1.45, y: 1.45, z: 1.45}
+  initHips: {x: 0.70710677, y: 0, z: 0, w: 0.70710677}
+  initSpine: {x: 0.014756295, y: 0, z: 0, w: -0.9998911}
+  initSpine1: {x: 0, y: 0, z: 0, w: 1}
+  initNeck: {x: 0.014756223, y: 0, z: 0, w: 0.9998911}
+  initHead: {x: 0, y: 0, z: 0, w: 1}
+  initRightArm: {x: 0.12769131, y: -0.016402047, z: -0.00833465, w: -0.9916433}
+  initLeftArm: {x: -0.12788114, y: -0.01457248, z: 0.0038154828, w: 0.991675}
+  initRightForeArm: {x: 0, y: 0, z: 0.042686507, w: 0.9990885}
+  initLeftForeArm: {x: 0, y: 0, z: 0.048309263, w: -0.9988324}
+  initRightHand: {x: 0.057178393, y: 0.015670765, z: 0.016598836, w: -0.998103}
+  initLeftHand: {x: 0.04179758, y: -0.015664766, z: -0.02441643, w: -0.9987049}
+  initRightUpLeg: {x: 0.000013171651, y: -0.005541438, z: 0.9999819, w: -0.0023472104}
+  initLeftUpLeg: {x: -0.000015035702, y: -0.0047473265, z: 0.999986, w: 0.0023472726}
+  initRightLeg: {x: 0.029413423, y: 0, z: 0, w: -0.99956733}
+  initLeftLeg: {x: 0.029247556, y: 0, z: 0, w: -0.9995722}
+  initRightFoot: {x: 0.45437536, y: -0.103584625, z: 0.0305815, w: 0.88423866}
+  initLeftFoot: {x: 0.4567088, y: 0.10219127, z: -0.030345563, w: 0.8832062}
+  initHipsPos: {x: -0.002, y: 0.003, z: 0.648}
+  initVisualScale: {x: 1.36, y: 1.1, z: 1.26}
 --- !u!1 &7380160736093934205
 GameObject:
   m_ObjectHideFlags: 0
@@ -7844,7 +7859,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4228918659407221212}
   - component: {fileID: 5858657436405128517}
-  m_Layer: 0
+  m_Layer: 2
   m_Name: Stickman_Fisherman
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -7886,10 +7901,10 @@ CapsuleCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Radius: 0.52
-  m_Height: 2.45
+  m_Radius: 0.58
+  m_Height: 1.95
   m_Direction: 1
-  m_Center: {x: 0, y: 1.22, z: 0}
+  m_Center: {x: 0, y: 0.98, z: 0}
 --- !u!1 &7547903289379254559
 GameObject:
   m_ObjectHideFlags: 0
@@ -8456,7 +8471,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0.08, z: 0}
-  m_LocalScale: {x: 0.35, y: 0.065, z: 0.35}
+  m_LocalScale: {x: 0.34, y: 0.07, z: 0.34}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 997167769643136931}
@@ -9229,7 +9244,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0.7071069, y: 0.000000022586494, z: 0.000000022366418, w: 0.7071067}
   m_LocalPosition: {x: -0.0016095352, y: 0.0030268966, z: 0.647812}
-  m_LocalScale: {x: 1, y: 0.99999994, z: 1}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 2796759011433265960}

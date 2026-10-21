@@ -242,9 +242,14 @@ namespace IdleFishing.Market
             }
 
             // 2. Grant rewards
+            int actualGold = contract.rewardGold;
+            if (IdleFishing.Economy.PrestigeManager.Instance != null)
+            {
+                actualGold = Mathf.RoundToInt(actualGold * IdleFishing.Economy.PrestigeManager.Instance.BossAndContractBonusMultiplier);
+            }
             if (EconomyManager.Instance != null)
             {
-                EconomyManager.Instance.AddCoins(contract.rewardGold);
+                EconomyManager.Instance.AddCoins(actualGold);
             }
 
             AddFame(contract.rewardFame);
@@ -268,7 +273,7 @@ namespace IdleFishing.Market
 
             if (FloatingDamageManager.Instance != null)
             {
-                FloatingDamageManager.Instance.SpawnDamage(effectPos, contract.rewardGold, DamageStyle.GoldBonus, $"CONTRACT COMPLETED! +{contract.rewardGold}G +{contract.rewardFame} FAME");
+                FloatingDamageManager.Instance.SpawnDamage(effectPos, contract.rewardGold, DamageStyle.GoldBonus, $"CONTRACT COMPLETED! +{NumberFormatter.Format(contract.rewardGold)} G +{contract.rewardFame} FAME");
             }
             if (FlyingCoinManager.Instance != null)
             {
@@ -306,7 +311,7 @@ namespace IdleFishing.Market
 
             if (harborLevel > oldLevel)
             {
-                Debug.Log($"[ContractManager] 🎉 HARBOR PROMOTED TO LEVEL {harborLevel}: {GetLevelTitle(harborLevel)}! Sell price & processing speed permanently increased!");
+                Debug.Log($"[ContractManager] [PROMOTION] HARBOR PROMOTED TO LEVEL {harborLevel}: {GetLevelTitle(harborLevel)}! Sell price & processing speed permanently increased!");
             }
         }
 
@@ -378,6 +383,19 @@ namespace IdleFishing.Market
             currentFame = PlayerPrefs.GetInt(PREF_FAME, 0);
             harborLevel = PlayerPrefs.GetInt(PREF_LEVEL, 1);
             CheckLevelUp();
+        }
+
+        public void ResetAllContracts()
+        {
+            currentFame = 0;
+            harborLevel = 1;
+            PlayerPrefs.DeleteKey(PREF_FAME);
+            PlayerPrefs.DeleteKey(PREF_LEVEL);
+            PlayerPrefs.Save();
+
+            activeContracts.Clear();
+            EnsureActiveContracts();
+            Debug.Log("[ContractManager] VOYAGE RESET: Contracts and Harbor Fame reset.");
         }
 
         private void SaveProgression()

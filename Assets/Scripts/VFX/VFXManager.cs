@@ -41,6 +41,8 @@ namespace IdleFishing.VFX
         private GameObject frenzyAuraObj;
         private ParticleSystem frenzyAuraSystem;
 
+        public Material SharedParticleMaterial => particleMaterial;
+
         private void Awake()
         {
             if (Instance != null && Instance != this)
@@ -85,11 +87,31 @@ namespace IdleFishing.VFX
 
         private void Start()
         {
+            PrewarmPools();
+
             GameEvents.FrenzyStarted += OnFrenzyStarted;
             GameEvents.FrenzyEnded += OnFrenzyEnded;
             GameEvents.TreasureChestOpened += OnChestOpened;
             GameEvents.PrestigeCompleted += OnPrestigeCompleted;
             GameEvents.UpgradePurchased += OnUpgradePurchased;
+        }
+
+        private void PrewarmPools()
+        {
+            if (ObjectPoolManager.Instance == null) return;
+
+            ObjectPoolManager.Instance.Prewarm(waterSplashPrefab, 10);
+            ObjectPoolManager.Instance.Prewarm(waterRipplePrefab, 10);
+            ObjectPoolManager.Instance.Prewarm(cfxrWaterRipplePrefab, 10);
+            ObjectPoolManager.Instance.Prewarm(cfxrWaterRippleLoopPrefab, 4);
+            ObjectPoolManager.Instance.Prewarm(stunStarsPrefab, 5);
+            ObjectPoolManager.Instance.Prewarm(hitPunchPrefab, 15);
+            ObjectPoolManager.Instance.Prewarm(dustPuffPrefab, 10);
+            ObjectPoolManager.Instance.Prewarm(swordSlashPrefab, 15);
+            ObjectPoolManager.Instance.Prewarm(smokeWhitePrefab, 5);
+            ObjectPoolManager.Instance.Prewarm(heartPoofPrefab, 10);
+            ObjectPoolManager.Instance.Prewarm(confettiPrefab, 5);
+            ObjectPoolManager.Instance.Prewarm(levelUpPrefab, 3);
         }
 
         private void OnDestroy()
@@ -204,7 +226,9 @@ namespace IdleFishing.VFX
 
             var vel = frenzyAuraSystem.velocityOverLifetime;
             vel.enabled = true;
+            vel.x = new ParticleSystem.MinMaxCurve(-0.25f, 0.25f);
             vel.y = new ParticleSystem.MinMaxCurve(1.8f, 2.6f);
+            vel.z = new ParticleSystem.MinMaxCurve(-0.25f, 0.25f);
 
             // Size animation: grow then taper
             var sol = frenzyAuraSystem.sizeOverLifetime;
@@ -291,9 +315,17 @@ namespace IdleFishing.VFX
 
             if (waterSplashPrefab != null)
             {
-                var splash = Instantiate(waterSplashPrefab, position, Quaternion.identity);
-                splash.transform.localScale = Vector3.one * scale;
-                Destroy(splash, 1.8f);
+                if (ObjectPoolManager.Instance != null)
+                {
+                    var splash = ObjectPoolManager.Instance.SpawnAutoRelease(waterSplashPrefab, position, Quaternion.identity, 1.8f);
+                    if (splash != null) splash.transform.localScale = Vector3.one * scale;
+                }
+                else
+                {
+                    var splash = Instantiate(waterSplashPrefab, position, Quaternion.identity);
+                    splash.transform.localScale = Vector3.one * scale;
+                    Destroy(splash, 1.8f);
+                }
             }
             else if (splashPool != null)
             {
@@ -312,9 +344,18 @@ namespace IdleFishing.VFX
             GameObject prefab = cfxrWaterRipplePrefab != null ? cfxrWaterRipplePrefab : waterRipplePrefab;
             if (prefab != null)
             {
-                var ripple = Instantiate(prefab, position + Vector3.up * 0.05f, Quaternion.identity);
-                ripple.transform.localScale = Vector3.one * scale;
-                Destroy(ripple, 2.0f);
+                Vector3 spawnPos = position + Vector3.up * 0.05f;
+                if (ObjectPoolManager.Instance != null)
+                {
+                    var ripple = ObjectPoolManager.Instance.SpawnAutoRelease(prefab, spawnPos, Quaternion.identity, 2.0f);
+                    if (ripple != null) ripple.transform.localScale = Vector3.one * scale;
+                }
+                else
+                {
+                    var ripple = Instantiate(prefab, spawnPos, Quaternion.identity);
+                    ripple.transform.localScale = Vector3.one * scale;
+                    Destroy(ripple, 2.0f);
+                }
             }
         }
 
@@ -328,10 +369,20 @@ namespace IdleFishing.VFX
             GameObject prefab = cfxrWaterRipplePrefab != null ? cfxrWaterRipplePrefab : waterRipplePrefab;
             if (prefab != null)
             {
-                var ripple = Instantiate(prefab, position + Vector3.up * 0.05f, Quaternion.identity);
-                ripple.transform.localScale = Vector3.one * scale;
-                Destroy(ripple, 2.0f);
-                return ripple;
+                Vector3 spawnPos = position + Vector3.up * 0.05f;
+                if (ObjectPoolManager.Instance != null)
+                {
+                    var ripple = ObjectPoolManager.Instance.SpawnAutoRelease(prefab, spawnPos, Quaternion.identity, 2.0f);
+                    if (ripple != null) ripple.transform.localScale = Vector3.one * scale;
+                    return ripple;
+                }
+                else
+                {
+                    var ripple = Instantiate(prefab, spawnPos, Quaternion.identity);
+                    ripple.transform.localScale = Vector3.one * scale;
+                    Destroy(ripple, 2.0f);
+                    return ripple;
+                }
             }
             return null;
         }
@@ -339,9 +390,21 @@ namespace IdleFishing.VFX
         public GameObject AttachCFXRWaterRippleLoop(Transform parent, Vector3 localOffset = default, float scale = 1.0f)
         {
             if (cfxrWaterRippleLoopPrefab == null || parent == null) return null;
-            var ripple = Instantiate(cfxrWaterRippleLoopPrefab, parent.position + localOffset, Quaternion.identity, parent);
-            ripple.transform.localPosition = localOffset;
-            ripple.transform.localScale = Vector3.one * scale;
+            GameObject ripple = null;
+            if (ObjectPoolManager.Instance != null)
+            {
+                ripple = ObjectPoolManager.Instance.Spawn(cfxrWaterRippleLoopPrefab, parent.position + localOffset, Quaternion.identity, parent);
+            }
+            else
+            {
+                ripple = Instantiate(cfxrWaterRippleLoopPrefab, parent.position + localOffset, Quaternion.identity, parent);
+            }
+
+            if (ripple != null)
+            {
+                ripple.transform.localPosition = localOffset;
+                ripple.transform.localScale = Vector3.one * scale;
+            }
             return ripple;
         }
 
@@ -365,28 +428,63 @@ namespace IdleFishing.VFX
             if (stunStarsPrefab == null || targetParent == null) return null;
 
             Vector3 offset = localOffset != default ? localOffset : new Vector3(0f, 1.35f, 0f);
-            GameObject stars = Instantiate(stunStarsPrefab, targetParent.position + offset, Quaternion.identity, targetParent);
-            stars.transform.localPosition = offset;
-            stars.transform.localRotation = Quaternion.identity;
-            stars.transform.localScale = Vector3.one * 0.75f;
-            Destroy(stars, duration);
+            Vector3 worldPos = targetParent.position + offset;
+            Quaternion worldHaloRot = Quaternion.Euler(-90f, 0f, 0f); // StunnedCirclingStars root circles around local Z, which points to world up at -90 deg X
+
+            GameObject stars = null;
+            if (ObjectPoolManager.Instance != null)
+            {
+                stars = ObjectPoolManager.Instance.SpawnAutoRelease(stunStarsPrefab, worldPos, worldHaloRot, duration, null);
+            }
+            else
+            {
+                stars = Instantiate(stunStarsPrefab, worldPos, worldHaloRot);
+                Destroy(stars, duration);
+            }
+
+            if (stars != null)
+            {
+                stars.transform.position = worldPos;
+                stars.transform.rotation = worldHaloRot;
+                stars.transform.localScale = Vector3.one * 0.75f;
+
+                var follower = stars.GetComponent<StunStarsFollower>();
+                if (follower == null) follower = stars.AddComponent<StunStarsFollower>();
+                follower.Setup(targetParent, offset);
+            }
             return stars;
         }
 
         public void SpawnHitPunch(Vector3 position, float scale = 0.85f)
         {
             if (hitPunchPrefab == null) return;
-            GameObject punch = Instantiate(hitPunchPrefab, position, Quaternion.identity);
-            punch.transform.localScale = Vector3.one * scale;
-            Destroy(punch, 1.0f);
+            if (ObjectPoolManager.Instance != null)
+            {
+                var punch = ObjectPoolManager.Instance.SpawnAutoRelease(hitPunchPrefab, position, Quaternion.identity, 1.0f);
+                if (punch != null) punch.transform.localScale = Vector3.one * scale;
+            }
+            else
+            {
+                GameObject punch = Instantiate(hitPunchPrefab, position, Quaternion.identity);
+                punch.transform.localScale = Vector3.one * scale;
+                Destroy(punch, 1.0f);
+            }
         }
 
         public void SpawnDustPuff(Vector3 position, float scale = 0.5f)
         {
             if (dustPuffPrefab == null) return;
-            GameObject dust = Instantiate(dustPuffPrefab, position, Quaternion.identity);
-            dust.transform.localScale = Vector3.one * scale;
-            Destroy(dust, 1.2f);
+            if (ObjectPoolManager.Instance != null)
+            {
+                var dust = ObjectPoolManager.Instance.SpawnAutoRelease(dustPuffPrefab, position, Quaternion.identity, 1.2f);
+                if (dust != null) dust.transform.localScale = Vector3.one * scale;
+            }
+            else
+            {
+                GameObject dust = Instantiate(dustPuffPrefab, position, Quaternion.identity);
+                dust.transform.localScale = Vector3.one * scale;
+                Destroy(dust, 1.2f);
+            }
         }
 
         // --- GROUP 2: KITCHEN & MARKET ---
@@ -394,17 +492,37 @@ namespace IdleFishing.VFX
         {
             if (swordSlashPrefab == null) return;
             Quaternion rot = rotation != default ? rotation : Quaternion.Euler(0f, Random.Range(0f, 360f), 0f);
-            GameObject slash = Instantiate(swordSlashPrefab, position, rot);
-            slash.transform.localScale = Vector3.one * scale;
-            Destroy(slash, 1.0f);
+            if (ObjectPoolManager.Instance != null)
+            {
+                var slash = ObjectPoolManager.Instance.SpawnAutoRelease(swordSlashPrefab, position, rot, 1.0f);
+                if (slash != null) slash.transform.localScale = Vector3.one * scale;
+            }
+            else
+            {
+                GameObject slash = Instantiate(swordSlashPrefab, position, rot);
+                slash.transform.localScale = Vector3.one * scale;
+                Destroy(slash, 1.0f);
+            }
         }
 
         public GameObject AttachKitchenSteam(Transform parent, Vector3 localOffset = default)
         {
             if (smokeWhitePrefab == null || parent == null) return null;
-            GameObject steam = Instantiate(smokeWhitePrefab, parent.position + localOffset, Quaternion.identity, parent);
-            steam.transform.localPosition = localOffset;
-            steam.transform.localScale = Vector3.one * 0.65f;
+            GameObject steam = null;
+            if (ObjectPoolManager.Instance != null)
+            {
+                steam = ObjectPoolManager.Instance.Spawn(smokeWhitePrefab, parent.position + localOffset, Quaternion.identity, parent);
+            }
+            else
+            {
+                steam = Instantiate(smokeWhitePrefab, parent.position + localOffset, Quaternion.identity, parent);
+            }
+
+            if (steam != null)
+            {
+                steam.transform.localPosition = localOffset;
+                steam.transform.localScale = Vector3.one * 0.65f;
+            }
             return steam;
         }
 
@@ -412,9 +530,17 @@ namespace IdleFishing.VFX
         {
             if (heartPoofPrefab != null)
             {
-                GameObject heart = Instantiate(heartPoofPrefab, position, Quaternion.identity);
-                heart.transform.localScale = Vector3.one * scale;
-                Destroy(heart, 1.5f);
+                if (ObjectPoolManager.Instance != null)
+                {
+                    var heart = ObjectPoolManager.Instance.SpawnAutoRelease(heartPoofPrefab, position, Quaternion.identity, 1.5f);
+                    if (heart != null) heart.transform.localScale = Vector3.one * scale;
+                }
+                else
+                {
+                    GameObject heart = Instantiate(heartPoofPrefab, position, Quaternion.identity);
+                    heart.transform.localScale = Vector3.one * scale;
+                    Destroy(heart, 1.5f);
+                }
             }
             if (IdleFishing.Audio.AudioManager.Instance != null)
             {
@@ -427,9 +553,17 @@ namespace IdleFishing.VFX
         {
             if (confettiPrefab != null)
             {
-                GameObject confetti = Instantiate(confettiPrefab, position, Quaternion.identity);
-                confetti.transform.localScale = Vector3.one * scale;
-                Destroy(confetti, 2.8f);
+                if (ObjectPoolManager.Instance != null)
+                {
+                    var confetti = ObjectPoolManager.Instance.SpawnAutoRelease(confettiPrefab, position, Quaternion.identity, 2.8f);
+                    if (confetti != null) confetti.transform.localScale = Vector3.one * scale;
+                }
+                else
+                {
+                    GameObject confetti = Instantiate(confettiPrefab, position, Quaternion.identity);
+                    confetti.transform.localScale = Vector3.one * scale;
+                    Destroy(confetti, 2.8f);
+                }
             }
             if (IdleFishing.Audio.AudioManager.Instance != null)
             {
@@ -440,9 +574,30 @@ namespace IdleFishing.VFX
         public void SpawnLevelUp(Vector3 position, float scale = 1.0f)
         {
             if (levelUpPrefab == null) return;
-            GameObject levelUp = Instantiate(levelUpPrefab, position, Quaternion.identity);
-            levelUp.transform.localScale = Vector3.one * scale;
-            Destroy(levelUp, 2.0f);
+            if (ObjectPoolManager.Instance != null)
+            {
+                var levelUp = ObjectPoolManager.Instance.SpawnAutoRelease(levelUpPrefab, position, Quaternion.identity, 2.0f);
+                if (levelUp != null) levelUp.transform.localScale = Vector3.one * scale;
+            }
+            else
+            {
+                GameObject levelUp = Instantiate(levelUpPrefab, position, Quaternion.identity);
+                levelUp.transform.localScale = Vector3.one * scale;
+                Destroy(levelUp, 2.0f);
+            }
+        }
+
+        public void Despawn(GameObject vfxObject)
+        {
+            if (vfxObject == null) return;
+            if (ObjectPoolManager.Instance != null && vfxObject.GetComponent<PooledInstance>() != null)
+            {
+                ObjectPoolManager.Instance.Release(vfxObject);
+            }
+            else
+            {
+                Destroy(vfxObject);
+            }
         }
 
         public void SetFrenzyAura(bool active)

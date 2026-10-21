@@ -1,7 +1,9 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using IdleFishing.Core;
 
 namespace IdleFishing.UI
 {
@@ -10,12 +12,25 @@ namespace IdleFishing.UI
         WorkerAttack,
         PlayerTap,
         FishAttack,
-        GoldBonus
+        GoldBonus,
+        Crit
+    }
+
+    public class FloatingDamageItem
+    {
+        public GameObject CanvasObject;
+        public RectTransform CanvasRect;
+        public Canvas Canvas;
+        public TextMeshProUGUI Text;
     }
 
     public class FloatingDamageManager : MonoBehaviour
     {
         public static FloatingDamageManager Instance { get; private set; }
+
+        [SerializeField] private int initialPoolSize = 25;
+        private readonly Queue<FloatingDamageItem> pool = new Queue<FloatingDamageItem>();
+        private Transform poolRoot;
 
         private void Awake()
         {
@@ -25,21 +40,20 @@ namespace IdleFishing.UI
                 return;
             }
             Instance = this;
+
+            poolRoot = new GameObject("DamageText_Pool").transform;
+            poolRoot.SetParent(transform, false);
+
+            for (int i = 0; i < initialPoolSize; i++)
+            {
+                pool.Enqueue(CreateNewDamageItem());
+            }
         }
 
-        public void SpawnDamage(Vector3 worldPos, int amount, DamageStyle style, string customText = null)
+        private FloatingDamageItem CreateNewDamageItem()
         {
-            StartCoroutine(SpawnDamageRoutine(worldPos, amount, style, customText));
-        }
-
-        private IEnumerator SpawnDamageRoutine(Vector3 worldPos, int amount, DamageStyle style, string customText)
-        {
-            // Random jitter to prevent overlapping
-            Vector3 spawnPos = worldPos + new Vector3(Random.Range(-0.3f, 0.3f), 0.3f, Random.Range(-0.3f, 0.3f));
-
-            // World-Space Canvas hosting TextMeshProUGUI
             GameObject canvasObj = new GameObject("DamageTextCanvas");
-            canvasObj.transform.position = spawnPos;
+            canvasObj.transform.SetParent(poolRoot, false);
 
             Canvas canvas = canvasObj.AddComponent<Canvas>();
             canvas.renderMode = RenderMode.WorldSpace;
@@ -56,7 +70,58 @@ namespace IdleFishing.UI
             TextMeshProUGUI tmp = textObj.AddComponent<TextMeshProUGUI>();
             tmp.alignment = TextAlignmentOptions.Center;
             tmp.fontStyle = FontStyles.Bold;
+            tmp.ApplyFont(UIFontCategory.Numbers);
 
+            canvasObj.SetActive(false);
+
+            return new FloatingDamageItem
+            {
+                CanvasObject = canvasObj,
+                CanvasRect = canvasRt,
+                Canvas = canvas,
+                Text = tmp
+            };
+        }
+
+        private FloatingDamageItem GetItem()
+        {
+            while (pool.Count > 0)
+            {
+                var item = pool.Dequeue();
+                if (item != null && item.CanvasObject != null)
+                {
+                    item.CanvasObject.SetActive(true);
+                    return item;
+                }
+            }
+
+            var newItem = CreateNewDamageItem();
+            newItem.CanvasObject.SetActive(true);
+            return newItem;
+        }
+
+        private void ReturnItem(FloatingDamageItem item)
+        {
+            if (item == null || item.CanvasObject == null) return;
+            item.CanvasObject.SetActive(false);
+            item.CanvasObject.transform.SetParent(poolRoot, false);
+            pool.Enqueue(item);
+        }
+
+        public void SpawnDamage(Vector3 worldPos, int amount, DamageStyle style, string customText = null)
+        {
+            StartCoroutine(SpawnDamageRoutine(worldPos, amount, style, customText));
+        }
+
+        private IEnumerator SpawnDamageRoutine(Vector3 worldPos, int amount, DamageStyle style, string customText)
+        {
+            FloatingDamageItem item = GetItem();
+
+            // Random jitter to prevent overlapping
+            Vector3 spawnPos = worldPos + new Vector3(Random.Range(-0.3f, 0.3f), 0.3f, Random.Range(-0.3f, 0.3f));
+            item.CanvasObject.transform.position = spawnPos;
+
+            TextMeshProUGUI tmp = item.Text;
             Color baseColor;
             float targetScale = 1.0f;
             string textToDisplay;
@@ -66,30 +131,37 @@ namespace IdleFishing.UI
                 case DamageStyle.PlayerTap:
                     baseColor = new Color(1f, 0.88f, 0.2f); // Gold
                     targetScale = 1.35f;
-                    textToDisplay = customText ?? $"-{amount} CRIT!";
-                    tmp.fontSize = 32;
+                    textToDisplay = customText ?? $"-{NumberFormatter.Format(amount)} CRIT!";
+                    tmp.fontSize = 38;
                     break;
 
                 case DamageStyle.FishAttack:
                     baseColor = new Color(1f, 0.25f, 0.25f); // Red
                     targetScale = 1.0f;
-                    textToDisplay = customText ?? $"-{amount}";
-                    tmp.fontSize = 24;
+                    textToDisplay = customText ?? $"-{NumberFormatter.Format(amount)}";
+                    tmp.fontSize = 30;
                     break;
 
                 case DamageStyle.GoldBonus:
-                    baseColor = new Color(1f, 0.85f, 0.15f); // Golden Amber
+                    baseColor = new Color(1f, 0.90f, 0.20f); // Radiant Gold
                     targetScale = 1.45f;
-                    textToDisplay = customText ?? $"+{amount} G";
-                    tmp.fontSize = 32;
+                    textToDisplay = customText ?? $"+{NumberFormatter.Format(amount)} G";
+                    tmp.fontSize = 38;
+                    break;
+
+                case DamageStyle.Crit:
+                    baseColor = new Color(1f, 0.35f, 0.1f); // Vibrant Crimson / Orange Red Crit
+                    targetScale = 1.55f;
+                    textToDisplay = customText ?? $"-{NumberFormatter.Format(amount)} CRIT!";
+                    tmp.fontSize = 42;
                     break;
 
                 case DamageStyle.WorkerAttack:
                 default:
                     baseColor = new Color(1f, 1f, 1f); // White
                     targetScale = 1.0f;
-                    textToDisplay = customText ?? $"-{amount}";
-                    tmp.fontSize = 24;
+                    textToDisplay = customText ?? $"-{NumberFormatter.Format(amount)}";
+                    tmp.fontSize = 30;
                     break;
             }
 
@@ -102,50 +174,62 @@ namespace IdleFishing.UI
             Vector3 startPos = spawnPos;
             Vector3 endPos = spawnPos + Vector3.up * 1.5f;
 
-            canvasObj.transform.localScale = Vector3.zero;
+            item.CanvasObject.transform.localScale = Vector3.zero;
             Camera cam = Camera.main;
 
-            while (elapsed < duration)
+            try
             {
-                elapsed += Time.deltaTime;
-                float t = Mathf.Clamp01(elapsed / duration);
-
-                // Billboard face camera
-                if (cam != null)
+                while (elapsed < duration)
                 {
-                    canvasObj.transform.rotation = Quaternion.LookRotation(canvasObj.transform.position - cam.transform.position);
-                }
+                    elapsed += Time.deltaTime;
+                    float t = Mathf.Clamp01(elapsed / duration);
 
-                // Vertical drift
-                canvasObj.transform.position = Vector3.Lerp(startPos, endPos, Mathf.SmoothStep(0f, 1f, t));
+                    // Billboard face camera
+                    if (cam != null && item.CanvasObject != null)
+                    {
+                        item.CanvasObject.transform.rotation = Quaternion.LookRotation(item.CanvasObject.transform.position - cam.transform.position);
+                    }
 
-                // Pop scale
-                float scaleT;
-                if (t < 0.2f)
-                {
-                    scaleT = Mathf.Lerp(0f, targetScale * 1.25f, t / 0.2f);
-                }
-                else if (t < 0.35f)
-                {
-                    scaleT = Mathf.Lerp(targetScale * 1.25f, targetScale, (t - 0.2f) / 0.15f);
-                }
-                else
-                {
-                    scaleT = targetScale;
-                }
-                canvasObj.transform.localScale = Vector3.one * (0.012f * scaleT);
+                    // Vertical drift
+                    if (item.CanvasObject != null)
+                    {
+                        item.CanvasObject.transform.position = Vector3.Lerp(startPos, endPos, Mathf.SmoothStep(0f, 1f, t));
+                    }
 
-                // Fade alpha in last 40% of duration
-                if (t > 0.6f)
-                {
-                    float alpha = Mathf.Lerp(1f, 0f, (t - 0.6f) / 0.4f);
-                    tmp.color = new Color(baseColor.r, baseColor.g, baseColor.b, alpha);
-                }
+                    // Pop scale
+                    float scaleT;
+                    if (t < 0.2f)
+                    {
+                        scaleT = Mathf.Lerp(0f, targetScale * 1.25f, t / 0.2f);
+                    }
+                    else if (t < 0.35f)
+                    {
+                        scaleT = Mathf.Lerp(targetScale * 1.25f, targetScale, (t - 0.2f) / 0.15f);
+                    }
+                    else
+                    {
+                        scaleT = targetScale;
+                    }
 
-                yield return null;
+                    if (item.CanvasObject != null)
+                    {
+                        item.CanvasObject.transform.localScale = Vector3.one * (0.012f * scaleT);
+                    }
+
+                    // Fade alpha in last 40% of duration
+                    if (t > 0.6f && tmp != null)
+                    {
+                        float alpha = Mathf.Lerp(1f, 0f, (t - 0.6f) / 0.4f);
+                        tmp.color = new Color(baseColor.r, baseColor.g, baseColor.b, alpha);
+                    }
+
+                    yield return null;
+                }
             }
-
-            Destroy(canvasObj);
+            finally
+            {
+                ReturnItem(item);
+            }
         }
     }
 }

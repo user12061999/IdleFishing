@@ -20,6 +20,7 @@ namespace IdleFishing.Fishing
         [SerializeField] private GameObject unlockPadObj;
         [SerializeField] private TextMeshProUGUI padTitleText;
         [SerializeField] private TextMeshProUGUI padCostText;
+        [SerializeField] private TextMeshProUGUI padSubText;
 
         [Header("Runtime State")]
         [SerializeField] private bool isUnlocked = false;
@@ -35,6 +36,7 @@ namespace IdleFishing.Fishing
                 FishingPierManager.Instance.RegisterSlot(this);
             }
 
+            ConfigurePadLayout();
             RefreshSlotState(instant: true);
         }
 
@@ -63,7 +65,7 @@ namespace IdleFishing.Fishing
             UpdatePadVisuals();
         }
 
-        public void Setup(int index, string name, GameObject fisherman, GameObject stool, GameObject pad, TextMeshProUGUI titleText, TextMeshProUGUI costText)
+        public void Setup(int index, string name, GameObject fisherman, GameObject stool, GameObject pad, TextMeshProUGUI titleText, TextMeshProUGUI costText, TextMeshProUGUI subText = null)
         {
             slotIndex = index;
             slotName = name;
@@ -72,20 +74,67 @@ namespace IdleFishing.Fishing
             unlockPadObj = pad;
             padTitleText = titleText;
             padCostText = costText;
+            padSubText = subText;
+
+            ConfigurePadLayout();
+        }
+
+        private void ConfigurePadLayout()
+        {
+            if (padSubText == null && unlockPadObj != null)
+            {
+                var texts = unlockPadObj.GetComponentsInChildren<TextMeshProUGUI>(true);
+                if (texts.Length > 2) padSubText = texts[2];
+            }
+
+            ConfigureText(padTitleText, 10f, 17f, UIFontCategory.Header);
+            ConfigureText(padCostText, 14f, 22f, UIFontCategory.Button);
+            ConfigureText(padSubText, 9f, 13f, UIFontCategory.Default);
+
+            if (padTitleText != null && padCostText != null)
+            {
+                var titleRt = padTitleText.rectTransform;
+                var costRt = padCostText.rectTransform;
+                titleRt.anchoredPosition = new Vector2(0, 30);
+                titleRt.sizeDelta = new Vector2(190, 26);
+                costRt.anchoredPosition = new Vector2(0, 0);
+                costRt.sizeDelta = new Vector2(190, 28);
+
+                if (padSubText != null)
+                {
+                    var subRt = padSubText.rectTransform;
+                    subRt.anchoredPosition = new Vector2(0, -30);
+                    subRt.sizeDelta = new Vector2(190, 22);
+                }
+
+                if (titleRt.parent is RectTransform bgRt && bgRt.sizeDelta.y < 105)
+                {
+                    bgRt.sizeDelta = new Vector2(Mathf.Max(bgRt.sizeDelta.x, 200), 105);
+                }
+            }
+        }
+
+        private void ConfigureText(TextMeshProUGUI tmp, float minSize, float maxSize, UIFontCategory category)
+        {
+            if (tmp == null) return;
+            tmp.ApplyFont(category);
+            tmp.textWrappingMode = TextWrappingModes.NoWrap;
+            tmp.enableAutoSizing = true;
+            tmp.fontSizeMin = minSize;
+            tmp.fontSizeMax = maxSize;
         }
 
         public void RefreshSlotState(bool instant = false)
         {
-            int currentSlotsLvl = 0;
+            int unlockedSlots = 1;
             if (UpgradeManager.Instance != null)
             {
-                currentSlotsLvl = UpgradeManager.Instance.GetLevel(UpgradeType.FishermanSlots);
+                unlockedSlots = UpgradeManager.Instance.GetUnlockedFishermanSlots();
             }
 
             // Slot 0 is always unlocked from start.
-            // Slot 1 requires FishermanSlots >= 1.
-            // Slot 2 requires FishermanSlots >= 2.
-            bool shouldBeUnlocked = (slotIndex == 0) || (currentSlotsLvl >= slotIndex);
+            // Slots 1..4 unlock according to FishermanTeam milestones (Lv 2, 5, 9, 14)
+            bool shouldBeUnlocked = (slotIndex == 0) || (slotIndex < unlockedSlots);
 
             if (shouldBeUnlocked && !isUnlocked)
             {
@@ -97,11 +146,11 @@ namespace IdleFishing.Fishing
                 if (fishermanObj != null) fishermanObj.SetActive(false);
                 if (stoolObj != null) stoolObj.SetActive(false);
 
-                // Show pad only if previous slot is unlocked
-                bool isPreviousUnlocked = (slotIndex == 1) || (currentSlotsLvl >= slotIndex - 1);
+                // Show pad only for the next slot to unlock
+                bool isNextToUnlock = (slotIndex == unlockedSlots);
                 if (unlockPadObj != null)
                 {
-                    unlockPadObj.SetActive(isPreviousUnlocked);
+                    unlockPadObj.SetActive(isNextToUnlock);
                 }
                 UpdatePadVisuals();
             }
@@ -139,35 +188,45 @@ namespace IdleFishing.Fishing
             int cost = 0;
             if (UpgradeManager.Instance != null)
             {
-                cost = UpgradeManager.Instance.GetCost(UpgradeType.FishermanSlots);
+                cost = UpgradeManager.Instance.GetCost(UpgradeType.FishermanTeam);
             }
+
+            int reqLvl = 2;
+            if (slotIndex == 1) reqLvl = 2;
+            else if (slotIndex == 2) reqLvl = 5;
+            else if (slotIndex == 3) reqLvl = 9;
+            else if (slotIndex == 4) reqLvl = 14;
 
             if (padTitleText != null)
             {
-                padTitleText.text = $"[+] MUA {slotName.ToUpper()}";
+                padTitleText.text = $"[+] FISHERMAN #{slotIndex + 1}";
             }
+
+            int currentLvl = UpgradeManager.Instance != null ? UpgradeManager.Instance.GetLevel(UpgradeType.FishermanTeam) : 0;
+            bool canAfford = EconomyManager.Instance != null && EconomyManager.Instance.HasEnoughCoins(cost);
+            string colorTag = canAfford ? "<color=#00FF88>" : "<color=#FF6666>";
 
             if (padCostText != null)
             {
-                bool canAfford = EconomyManager.Instance != null && EconomyManager.Instance.HasEnoughCoins(cost);
-                string colorTag = canAfford ? "<color=#00FF88>" : "<color=#FF6666>";
-                padCostText.text = $"{colorTag}{cost:N0} G</color>";
+                padCostText.text = $"{colorTag}{NumberFormatter.Format(cost)} G</color>";
+            }
+
+            if (padSubText != null)
+            {
+                padSubText.text = $"Unlocks at Pier Lv.{reqLvl}";
+                padSubText.color = new Color(0.85f, 0.90f, 0.98f);
             }
         }
 
         public void TryPurchaseFromWorld()
         {
             if (isUnlocked) return;
-
             if (UpgradeManager.Instance == null) return;
 
-            int currentSlotsLvl = UpgradeManager.Instance.GetLevel(UpgradeType.FishermanSlots);
-            if (currentSlotsLvl != slotIndex - 1) return;
-
-            int cost = UpgradeManager.Instance.GetCost(UpgradeType.FishermanSlots);
+            int cost = UpgradeManager.Instance.GetCost(UpgradeType.FishermanTeam);
             if (EconomyManager.Instance != null && EconomyManager.Instance.HasEnoughCoins(cost))
             {
-                UpgradeManager.Instance.TryPurchaseUpgrade(UpgradeType.FishermanSlots);
+                UpgradeManager.Instance.TryPurchaseUpgrade(UpgradeType.FishermanTeam);
             }
             else
             {

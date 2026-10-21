@@ -18,6 +18,7 @@ namespace IdleFishing.Aquarium
 
         private void OnMouseDown()
         {
+            if (AquariumTankVisual.IsPointerOverUI()) return;
             if (AquariumPopupUI.Instance != null)
             {
                 AquariumPopupUI.Instance.Open();

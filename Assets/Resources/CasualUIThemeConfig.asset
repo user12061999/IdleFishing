@@ -1,0 +1,61 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ea635b5d60f6f4343a44cbb722cf5ec0, type: 3}
+  m_Name: CasualUIThemeConfig
+  m_EditorClassIdentifier: 
+  popupNavyBg: {fileID: 21300000, guid: eb3db5b0868bc4f348e3d3a1dfbf32a8, type: 3}
+  popupWhiteBg: {fileID: 21300000, guid: 1f20989540b1d4777be144c7f0e3e33b, type: 3}
+  titleFlagBlue: {fileID: 21300000, guid: 5be23c1877e9a40e28a1f3e28352d894, type: 3}
+  titleRibbonYellow: {fileID: 21300000, guid: 03a52e934f88f4a699b498a51573c186, type: 3}
+  titleRibbonBlue: {fileID: 21300000, guid: 5931a765ea31941c692754e88d36121f, type: 3}
+  titleRibbonGreen: {fileID: 21300000, guid: 4f004328d7c9547edae34787869f3e8a, type: 3}
+  popupLine: {fileID: 21300000, guid: 852e8aa9257ad44d3914c67e159ae8b2, type: 3}
+  popupTitleLine: {fileID: 21300000, guid: 228b09b7fa1c5455eab8432a85fac4ee, type: 3}
+  dimmedBg: {fileID: 21300000, guid: 5551461a712fd427aa2b059aac398cd4, type: 3}
+  cardRound12: {fileID: 21300000, guid: ae9f55855d9b54bcd943f6d9c50c6bab, type: 3}
+  cardRound20: {fileID: 21300000, guid: 0357d37ff2ce1443485aa680e89d82f0, type: 3}
+  borderFrameBlue: {fileID: 21300000, guid: be6d65483b1a64fe6962cf3e06fb9ded, type: 3}
+  itemFrameNavy: {fileID: 21300000, guid: 52bb615b446bc43a2974460d87ecef3d, type: 3}
+  resourceBarBg: {fileID: 21300000, guid: 3a057b166165546afb4bab7fbec93a29, type: 3}
+  btnGreen: {fileID: 21300000, guid: cb37917483ee24fea8fab306393441e5, type: 3}
+  btnBlue: {fileID: 21300000, guid: 6bbcba4e267be464998897741b81d508, type: 3}
+  btnYellow: {fileID: 21300000, guid: 804461bef59b141dba258fc997c8ca15, type: 3}
+  btnRed: {fileID: 21300000, guid: 681db73f19fb24efe843aad713eccb43, type: 3}
+  btnDark: {fileID: 21300000, guid: f87d9d25262734d879c2da72faf95bf2, type: 3}
+  btnGray: {fileID: 21300000, guid: 23d2f9d15f15a43c5bf2c57de1a27879, type: 3}
+  btnSquareGray: {fileID: 21300000, guid: 93c93e80f179c4cae911a48ab2fc913b, type: 3}
+  btnSquareWhite: {fileID: 21300000, guid: 4d10ef0304b5e45778652712aa250fc2, type: 3}
+  btnSquareNavy: {fileID: 21300000, guid: fb4ddd419e9fb4bcd8d3c4ded642e4f4, type: 3}
+  btnCircleNavy: {fileID: 21300000, guid: 742f52afe0a104f478d877db51a3321a, type: 3}
+  btnCircleWhite: {fileID: 21300000, guid: 04cd773d68781407a9b88958a474e347, type: 3}
+  btnTileBlue: {fileID: 21300000, guid: 43d850e9432604fbe9fc16c8c0fa806a, type: 3}
+  sliderBg: {fileID: 21300000, guid: 2d22f56b817e94a6e843ab175af687bc, type: 3}
+  sliderFillGreen: {fileID: 21300000, guid: 85d4c4e89ec894c7f8d5fffd9823e803, type: 3}
+  sliderFillBlue: {fileID: 21300000, guid: 3da068978045a400cb4954722a0dbe2e, type: 3}
+  sliderFillYellow: {fileID: 21300000, guid: 41f68bec7506344f19c4a2960cda7eb0, type: 3}
+  sliderFillRed: {fileID: 21300000, guid: 3171e19e560724a729e9cd9dd131ee36, type: 3}
+  iconGold: {fileID: 21300000, guid: 33effd6735e414dc7b70ded5e8bb47f8, type: 3}
+  iconGolds: {fileID: 21300000, guid: d159f826c54324a05ab2b01f6aa42163, type: 3}
+  iconClose: {fileID: 21300000, guid: 70f78e062098c4496b852abefff63acf, type: 3}
+  iconMap: {fileID: 21300000, guid: 1d90bae41405b44099e8cb1f68dcd4b3, type: 3}
+  iconCompass: {fileID: 21300000, guid: 03da1f65555584dada776816ceefe064, type: 3}
+  iconContract: {fileID: 21300000, guid: 7ea0e72c4ee464b46a1179e97bcdc765, type: 3}
+  iconFish: {fileID: 21300000, guid: ad645c8fe45e540ce915cc4da2c36cc5, type: 3}
+  iconAnchor: {fileID: 21300000, guid: 87f46eadfcb7f4fdd8d75c474593d202, type: 3}
+  iconAd: {fileID: 21300000, guid: 391584432233c4e0a864435a50a098c5, type: 3}
+  iconCrown: {fileID: 21300000, guid: 28fd0a3651a7643aca00d93bcc0e4105, type: 3}
+  iconCheck: {fileID: 21300000, guid: d5a535b5b97f54180a5138a4fc75f474, type: 3}
+  iconArrowUp: {fileID: 21300000, guid: 3c75f4c07aa134e018cd892a65b5b881, type: 3}
+  iconSound: {fileID: 21300000, guid: 901d64fc6ad9d44799c2ad0fd4f182d2, type: 3}
+  iconUpgradeFisherman: {fileID: 21300000, guid: ce973eb4e3b71f64c88831dbc006e918, type: 3}
+  iconUpgradeWrangler: {fileID: 21300000, guid: b62575f55b5997444a673974af95ffe2, type: 3}
+  iconUpgradeFishValue: {fileID: 21300000, guid: 730c6f8637fc9db43bd2ee5356a77fe6, type: 3}

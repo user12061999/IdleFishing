@@ -14,8 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   speciesId: arctic_tuna
   speciesName: Arctic Tuna
-  tier: 2
-  catchDifficulty: 2
+  tier: 3
+  catchDifficulty: 3.2
   spawnWeight: 70
   minWeightKg: 4
   maxWeightKg: 12

@@ -2,6 +2,7 @@ using UnityEngine;
 using TMPro;
 using IdleFishing.Core;
 using IdleFishing.Economy;
+using IdleFishing.UI;
 
 namespace IdleFishing.Logistics
 {
@@ -28,8 +29,82 @@ namespace IdleFishing.Logistics
             subText = sTxt;
             visualTransform = vis;
             billboardTransform = bill;
+
+            ConfigureBillboardLayout();
             CacheButtonCap();
             UpdateVisuals();
+        }
+
+        private void Awake()
+        {
+            if (gameObject.layer == LayerMask.NameToLayer("Ignore Raycast"))
+            {
+                gameObject.layer = LayerMask.NameToLayer("Default");
+            }
+            foreach (Transform child in transform)
+            {
+                if (child.gameObject.layer == LayerMask.NameToLayer("Ignore Raycast"))
+                {
+                    child.gameObject.layer = LayerMask.NameToLayer("Default");
+                }
+            }
+
+            var col = GetComponent<CapsuleCollider>();
+            if (col != null)
+            {
+                col.center = new Vector3(0f, 1.0f, 0f);
+                col.radius = Mathf.Max(col.radius, 1.35f);
+                col.height = Mathf.Max(col.height, 2.4f);
+            }
+
+            CacheButtonCap();
+            mainCamera = Camera.main;
+        }
+
+        private void Start()
+        {
+            ConfigureBillboardLayout();
+            CacheButtonCap();
+            UpdateVisuals();
+        }
+
+        private void ConfigureBillboardLayout()
+        {
+            ConfigureText(titleText, 10f, 16f, UIFontCategory.Header);
+            ConfigureText(costText, 14f, 20f, UIFontCategory.Button);
+            ConfigureText(subText, 9f, 13f, UIFontCategory.Default);
+
+            if (titleText != null && costText != null)
+            {
+                var titleRt = titleText.rectTransform;
+                var costRt = costText.rectTransform;
+                titleRt.anchoredPosition = new Vector2(0, 30);
+                titleRt.sizeDelta = new Vector2(190, 26);
+                costRt.anchoredPosition = new Vector2(0, 0);
+                costRt.sizeDelta = new Vector2(190, 28);
+
+                if (subText != null)
+                {
+                    var subRt = subText.rectTransform;
+                    subRt.anchoredPosition = new Vector2(0, -30);
+                    subRt.sizeDelta = new Vector2(190, 22);
+                }
+
+                if (titleRt.parent is RectTransform bgRt && bgRt.sizeDelta.y < 105)
+                {
+                    bgRt.sizeDelta = new Vector2(Mathf.Max(bgRt.sizeDelta.x, 200), 105);
+                }
+            }
+        }
+
+        private void ConfigureText(TextMeshProUGUI tmp, float minSize, float maxSize, UIFontCategory category)
+        {
+            if (tmp == null) return;
+            tmp.ApplyFont(category);
+            tmp.textWrappingMode = TextWrappingModes.NoWrap;
+            tmp.enableAutoSizing = true;
+            tmp.fontSizeMin = minSize;
+            tmp.fontSizeMax = maxSize;
         }
 
         private void CacheButtonCap()
@@ -108,22 +183,92 @@ namespace IdleFishing.Logistics
             {
                 if (titleText != null) titleText.text = "[+] HIRE TRANSPORTER";
                 string colorTag = canAfford ? "<color=#00FF88>" : "<color=#FF6666>";
-                if (costText != null) costText.text = $"{colorTag}{cost} G</color>";
+                if (costText != null) costText.text = $"{colorTag}{NumberFormatter.Format(cost)} G</color>";
                 if (subText != null) subText.text = $"Current: {count}/2 Vehicles";
+            }
+        }
+
+        private int lastClickFrame = -1;
+
+        private void Update()
+        {
+            if (Input.GetMouseButtonDown(0))
+            {
+                Camera cam = mainCamera != null ? mainCamera : Camera.main;
+                if (cam != null)
+                {
+                    Ray ray = cam.ScreenPointToRay(Input.mousePosition);
+                    if (Physics.Raycast(ray, out RaycastHit hit, 100f, ~0, QueryTriggerInteraction.Collide))
+                    {
+                        if (hit.transform == transform || hit.transform.IsChildOf(transform))
+                        {
+                            TriggerPurchase();
+                        }
+                    }
+                }
             }
         }
 
         private void OnMouseDown()
         {
-            if (LogisticsManager.Instance != null)
+            TriggerPurchase();
+        }
+
+        public void TriggerPurchase()
+        {
+            if (Time.frameCount == lastClickFrame) return;
+            lastClickFrame = Time.frameCount;
+
+            if (LogisticsManager.Instance == null) return;
+
+            int count = LogisticsManager.Instance.WorkerCount;
+            int max = 2;
+            int cost = 120;
+
+            if (count >= max)
             {
-                if (LogisticsManager.Instance.TryHireAdditionalTransporter())
+                if (FloatingDamageManager.Instance != null)
+                {
+                    FloatingDamageManager.Instance.SpawnDamage(
+                        transform.position + Vector3.up * 1.5f,
+                        0,
+                        DamageStyle.FishAttack,
+                        "FLEET FULL (2/2)!"
+                    );
+                }
+                if (gameObject.activeInHierarchy)
+                {
+                    StartCoroutine(ShakeRoutine());
+                }
+                return;
+            }
+
+            if (EconomyManager.Instance != null && EconomyManager.Instance.HasEnoughCoins(cost))
+            {
+                bool success = LogisticsManager.Instance.TryHireAdditionalTransporter();
+                if (success)
                 {
                     UpdateVisuals();
                     if (gameObject.activeInHierarchy)
                     {
                         StartCoroutine(PressButtonRoutine());
                     }
+                }
+            }
+            else
+            {
+                if (FloatingDamageManager.Instance != null)
+                {
+                    FloatingDamageManager.Instance.SpawnDamage(
+                        transform.position + Vector3.up * 1.5f,
+                        0,
+                        DamageStyle.FishAttack,
+                        "NOT ENOUGH GOLD!"
+                    );
+                }
+                if (gameObject.activeInHierarchy)
+                {
+                    StartCoroutine(ShakeRoutine());
                 }
             }
         }
@@ -166,6 +311,30 @@ namespace IdleFishing.Logistics
                     yield return null;
                 }
                 visualTransform.localScale = baseScale;
+            }
+            isPressing = false;
+        }
+
+        private System.Collections.IEnumerator ShakeRoutine()
+        {
+            isPressing = true;
+            if (buttonCapTransform != null)
+            {
+                buttonCapTransform.localPosition = capBaseLocalPos + new Vector3(0f, -0.025f, 0f);
+            }
+            Vector3 origPos = transform.position;
+            float elapsed = 0f;
+            while (elapsed < 0.2f)
+            {
+                elapsed += Time.deltaTime;
+                float offset = Mathf.Sin(elapsed * 50f) * 0.08f;
+                transform.position = origPos + Vector3.right * offset;
+                yield return null;
+            }
+            transform.position = origPos;
+            if (buttonCapTransform != null)
+            {
+                buttonCapTransform.localPosition = capBaseLocalPos;
             }
             isPressing = false;
         }

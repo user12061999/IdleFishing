@@ -34,5 +34,9 @@ namespace IdleFishing.Data
 
         [Header("World Upgrade Config")]
         public UpgradeConfig worldUpgradeConfig;
+
+        [Header("Audio Identity")]
+        public AudioClip customBgmClip;
+        public AudioClip customAmbienceClip;
     }
 }

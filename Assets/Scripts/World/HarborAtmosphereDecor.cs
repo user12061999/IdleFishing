@@ -189,10 +189,11 @@ namespace IdleFishing.World
         private static void SetObjectColor(GameObject obj, Color color)
         {
             var r = obj.GetComponent<Renderer>();
-            if (r != null && r.material != null)
+            var mat = Application.isPlaying ? r?.material : r?.sharedMaterial;
+            if (mat != null)
             {
-                if (r.material.HasProperty("_BaseColor")) r.material.SetColor("_BaseColor", color);
-                else if (r.material.HasProperty("_Color")) r.material.color = color;
+                if (mat.HasProperty("_BaseColor")) mat.SetColor("_BaseColor", color);
+                else if (mat.HasProperty("_Color")) mat.color = color;
             }
         }
 

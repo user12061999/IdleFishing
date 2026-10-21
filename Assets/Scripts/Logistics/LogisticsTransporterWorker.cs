@@ -52,10 +52,12 @@ namespace IdleFishing.Logistics
         private Vector3 initialCartLocalPos = Vector3.zero;
         private CrowdAvoidance crowdAgent;
         private Camera mainCamera;
+        private readonly List<CarriedFishPayload> carriedPayloads = new List<CarriedFishPayload>();
 
         public TransporterState CurrentState => currentState;
         public int MaxCarryCapacity => maxCarryCapacity;
         public Inventory.Inventory CartInventory => cartInventory;
+        public LogisticsRoute ActiveRoute => activeRoute;
 
         private void Awake()
         {
@@ -74,6 +76,14 @@ namespace IdleFishing.Logistics
             mainCamera = Camera.main;
 
             CreateOverheadBadge();
+
+            int ignoreRaycastLayer = LayerMask.NameToLayer("Ignore Raycast");
+            if (ignoreRaycastLayer < 0) ignoreRaycastLayer = 2;
+            var cols = GetComponentsInChildren<Collider>(true);
+            for (int i = 0; i < cols.Length; i++)
+            {
+                cols[i].gameObject.layer = ignoreRaycastLayer;
+            }
         }
 
         private void Start()
@@ -138,6 +148,7 @@ namespace IdleFishing.Logistics
             badgeText.alignment = TextAlignmentOptions.Center;
             badgeText.color = Color.white;
             badgeText.text = "[Rest]";
+            badgeText.ApplyFont(UIFontCategory.Button);
             RectTransform textRect = textObj.GetComponent<RectTransform>();
             textRect.sizeDelta = new Vector2(165, 38);
         }
@@ -149,25 +160,29 @@ namespace IdleFishing.Logistics
             switch (currentState)
             {
                 case TransporterState.Idle:
-                    badgeText.text = "<color=#94A3B8>[Rest]</color>";
+                    badgeText.text = "<color=#94A3B8>[Idle]</color>";
                     if (badgeBg != null) badgeBg.color = new Color(0.1f, 0.12f, 0.16f, 0.85f);
                     break;
 
                 case TransporterState.MovingToPickup:
-                    badgeText.text = "<color=#38BDF8>To Pier Storage</color>";
+                    badgeText.text = "<color=#38BDF8>Collecting</color>";
                     if (badgeBg != null) badgeBg.color = new Color(0.08f, 0.18f, 0.28f, 0.88f);
                     break;
 
                 case TransporterState.Loading:
-                    badgeText.text = "<color=#FDE047>Loading...</color>";
+                    badgeText.text = "<color=#FDE047>Hauling...</color>";
                     if (badgeBg != null) badgeBg.color = new Color(0.22f, 0.20f, 0.06f, 0.90f);
                     break;
 
                 case TransporterState.MovingToDropoff:
-                case TransporterState.Unloading:
                     int count = cartInventory != null ? cartInventory.TotalItemCount : 0;
-                    badgeText.text = $"<color=#38BDF8>Fresh Fish x{count}</color>";
-                    if (badgeBg != null) badgeBg.color = new Color(0.08f, 0.22f, 0.32f, 0.90f);
+                    badgeText.text = $"<color=#4ADE80>Delivering x{count}</color>";
+                    if (badgeBg != null) badgeBg.color = new Color(0.08f, 0.24f, 0.18f, 0.90f);
+                    break;
+
+                case TransporterState.Unloading:
+                    badgeText.text = "<color=#FACC15>Selling! +$</color>";
+                    if (badgeBg != null) badgeBg.color = new Color(0.24f, 0.18f, 0.06f, 0.92f);
                     break;
             }
         }
@@ -213,7 +228,34 @@ namespace IdleFishing.Logistics
         {
             while (true)
             {
-                // 1. IDLE: Check routes
+                // A. Nếu trên xe đẩy đã có cá, lập tức đem đi bán lấy tiền vàng (không cần chờ khách)
+                if (cartInventory != null && cartInventory.TotalItemCount > 0)
+                {
+                    LogisticsRoute dropoffRoute = (LogisticsManager.Instance != null)
+                        ? LogisticsManager.Instance.FindRouteForDropoff(cartInventory)
+                        : null;
+
+                    Vector3 sellPos = dropoffRoute != null ? dropoffRoute.dropoffPosition : new Vector3(0f, 0.5f, -4.5f);
+
+                    currentState = TransporterState.MovingToDropoff;
+                    UpdateBadgeVisuals();
+                    if (dropoffRoute != null && dropoffRoute.waypointsToDropoff != null && dropoffRoute.waypointsToDropoff.Count > 0)
+                    {
+                        for (int i = 0; i < dropoffRoute.waypointsToDropoff.Count; i++)
+                        {
+                            yield return MoveTowardsPosition(dropoffRoute.waypointsToDropoff[i]);
+                        }
+                    }
+                    yield return MoveTowardsPosition(sellPos);
+
+                    currentState = TransporterState.Unloading;
+                    UpdateBadgeVisuals();
+                    yield return PerformUnloadingRoutine(dropoffRoute);
+                    yield return YieldCache.WaitForSeconds(0.2f);
+                    continue;
+                }
+
+                // 1. IDLE: Kiểm tra xem có cá trong Kho Bến Cảng hoặc cá đã đánh hạ trên bến tàu không
                 currentState = TransporterState.Idle;
                 activeRoute = null;
                 UpdateBadgeVisuals();
@@ -225,47 +267,68 @@ namespace IdleFishing.Logistics
 
                 if (activeRoute == null)
                 {
-                    // If no goods to haul and not at rest spot, stroll back to rest area
+                    // Nếu chưa có cá để gom, lùi về điểm nghỉ chờ cá
                     if (Vector3.Distance(transform.position, restPosition) > 0.5f)
                     {
                         yield return MoveTowardsPosition(restPosition);
                     }
-                    yield return new WaitForSeconds(0.6f);
+                    yield return YieldCache.WaitForSeconds(0.3f);
                     continue;
                 }
 
-                // Reserve items at source so duplicate transporters don't crowd the same route
-                int toReserve = Mathf.Min(maxCarryCapacity, activeRoute.sourceInventory.GetCountOfType(activeRoute.itemType));
-                activeRoute.ReserveItems(toReserve);
-
-                // 2. MOVING TO PICKUP
-                currentState = TransporterState.MovingToPickup;
-                UpdateBadgeVisuals();
-                if (activeRoute.waypointsToPickup != null && activeRoute.waypointsToPickup.Count > 0)
+                // Đặt chỗ số lượng cá tại kho nguồn (Frenzy mở rộng sức chứa)
+                int currentCapacity = GetEffectiveCarryCapacity();
+                if (cartInventory != null && cartInventory.MaxCapacity != currentCapacity)
                 {
-                    for (int i = 0; i < activeRoute.waypointsToPickup.Count; i++)
+                    cartInventory.SetMaxCapacity(currentCapacity);
+                }
+                int availInSource = activeRoute.sourceInventory != null
+                    ? activeRoute.sourceInventory.GetCountOfType(activeRoute.itemType)
+                    : 0;
+                int toReserve = Mathf.Min(currentCapacity, availInSource);
+                if (toReserve > 0)
+                {
+                    activeRoute.ReserveItems(toReserve);
+                }
+
+                try
+                {
+                    // 2. MOVING TO PICKUP (Tự động đi gom cá ở Kho Bến Cảng & trên bến)
+                    currentState = TransporterState.MovingToPickup;
+                    UpdateBadgeVisuals();
+
+                    if (availInSource > 0)
                     {
-                        yield return MoveTowardsPosition(activeRoute.waypointsToPickup[i]);
+                        if (activeRoute.waypointsToPickup != null && activeRoute.waypointsToPickup.Count > 0)
+                        {
+                            for (int i = 0; i < activeRoute.waypointsToPickup.Count; i++)
+                            {
+                                yield return MoveTowardsPosition(activeRoute.waypointsToPickup[i]);
+                            }
+                        }
+                        yield return MoveTowardsPosition(activeRoute.pickupPosition);
+                    }
+
+                    // 3. LOADING GOODS INTO CART (Chất cá lên xe đẩy)
+                    currentState = TransporterState.Loading;
+                    UpdateBadgeVisuals();
+                    yield return PerformLoadingRoutine(activeRoute);
+                }
+                finally
+                {
+                    if (toReserve > 0)
+                    {
+                        activeRoute.ReleaseReservation(toReserve);
                     }
                 }
-                yield return MoveTowardsPosition(activeRoute.pickupPosition);
-
-                // 3. LOADING GOODS INTO CART
-                currentState = TransporterState.Loading;
-                UpdateBadgeVisuals();
-                yield return PerformLoadingRoutine(activeRoute);
-
-                // Release reservation now that loading has taken the items
-                activeRoute.ReleaseReservation(toReserve);
 
                 if (cartInventory == null || cartInventory.TotalItemCount == 0)
                 {
-                    // Nothing was loaded, brief cooldown and re-evaluate
-                    yield return new WaitForSeconds(0.2f);
+                    yield return YieldCache.WaitForSeconds(0.2f);
                     continue;
                 }
 
-                // 4. MOVING TO DROPOFF
+                // 4. MOVING TO DROPOFF (Đẩy xe đem cá đi bán)
                 currentState = TransporterState.MovingToDropoff;
                 UpdateBadgeVisuals();
                 if (activeRoute.waypointsToDropoff != null && activeRoute.waypointsToDropoff.Count > 0)
@@ -277,13 +340,23 @@ namespace IdleFishing.Logistics
                 }
                 yield return MoveTowardsPosition(activeRoute.dropoffPosition);
 
-                // 5. UNLOADING GOODS
+                // 5. UNLOADING / AUTO-SELLING (Bán cá thu tiền vàng trực tiếp)
                 currentState = TransporterState.Unloading;
                 UpdateBadgeVisuals();
                 yield return PerformUnloadingRoutine(activeRoute);
 
-                yield return new WaitForSeconds(0.25f);
+                yield return YieldCache.WaitForSeconds(0.2f);
             }
+        }
+
+        public int GetEffectiveCarryCapacity()
+        {
+            int cap = maxCarryCapacity;
+            if (FishingFrenzyManager.Instance != null && FishingFrenzyManager.Instance.IsFrenzyActive)
+            {
+                cap = Mathf.Max(cap * 2, cap + 3);
+            }
+            return cap;
         }
 
         private float GetEffectiveMoveSpeed()
@@ -297,6 +370,14 @@ namespace IdleFishing.Logistics
             {
                 mult *= IdleFishing.Market.ContractManager.Instance.GetGlobalStationSpeedMultiplier();
             }
+            if (IdleFishing.Economy.PrestigeManager.Instance != null)
+            {
+                mult *= IdleFishing.Economy.PrestigeManager.Instance.TransporterSpeedMultiplier;
+            }
+            if (FishingFrenzyManager.Instance != null && FishingFrenzyManager.Instance.IsFrenzyActive)
+            {
+                mult *= 1.85f;
+            }
             return moveSpeed * mult;
         }
 
@@ -305,8 +386,33 @@ namespace IdleFishing.Logistics
             float targetY = FishWranglerWorker.GetSurfaceY(targetPos);
             targetPos.y = targetY;
 
-            while (Vector3.Distance(new Vector3(transform.position.x, 0, transform.position.z), new Vector3(targetPos.x, 0, targetPos.z)) > 0.3f)
+            float moveTimeout = 9.0f; // Fail-safe timeout so worker never gets trapped forever
+            float moveElapsed = 0f;
+            Vector3 lastStuckPos = transform.position;
+            float stuckTimer = 0f;
+
+            while (Vector3.Distance(new Vector3(transform.position.x, 0, transform.position.z), new Vector3(targetPos.x, 0, targetPos.z)) > 0.35f)
             {
+                moveElapsed += Time.deltaTime;
+                if (moveElapsed >= moveTimeout)
+                {
+                    break;
+                }
+
+                if (Vector3.Distance(transform.position, lastStuckPos) < 0.04f)
+                {
+                    stuckTimer += Time.deltaTime;
+                    if (stuckTimer >= 2.5f) // Stationary blockage detection
+                    {
+                        break;
+                    }
+                }
+                else
+                {
+                    lastStuckPos = transform.position;
+                    stuckTimer = 0f;
+                }
+
                 Vector3 currentPos = transform.position;
                 Vector3 nextPos;
                 float effectiveSpeed = GetEffectiveMoveSpeed();
@@ -378,96 +484,296 @@ namespace IdleFishing.Logistics
 
         private IEnumerator PerformLoadingRoutine(LogisticsRoute route)
         {
-            if (route == null || route.sourceInventory == null || cartInventory == null) yield break;
+            if (cartInventory == null) yield break;
 
-            int toLoad = Mathf.Min(maxCarryCapacity - cartInventory.TotalItemCount, route.sourceInventory.TotalItemCount);
-            if (toLoad <= 0) yield break;
-
-            if (crowdAgent != null) crowdAgent.IsStationary = true;
-
-            // Load items one by one with a brisk cadence
-            int loadedCount = 0;
-            for (int i = 0; i < toLoad; i++)
+            // 1. Gom cá từ Kho Bến Cảng (Harbor_IntakeStorage) nếu có
+            if (route != null && route.sourceInventory != null && route.sourceInventory.TotalItemCount > 0)
             {
-                if (cartInventory.IsFull) break;
-
-                if (route.sourceInventory.TryGetFirstItemOfType(route.itemType, out ItemData foundItem))
+                int currentCap = GetEffectiveCarryCapacity();
+                if (cartInventory.MaxCapacity != currentCap)
                 {
-                    if (route.sourceInventory.TryRemove(foundItem, 1))
-                    {
-                        cartInventory.TryAdd(foundItem, 1, out _);
-                        loadedCount++;
-                        UpdateBadgeVisuals();
+                    cartInventory.SetMaxCapacity(currentCap);
+                }
+                int toLoad = Mathf.Min(currentCap - cartInventory.TotalItemCount, route.sourceInventory.TotalItemCount);
+                if (toLoad > 0)
+                {
+                    if (crowdAgent != null) crowdAgent.IsStationary = true;
+                    var meta = route.sourceInventory.GetComponent<IntakeStorageMetadata>();
 
-                        if (AudioManager.Instance != null)
+                    for (int i = 0; i < toLoad; i++)
+                    {
+                        if (cartInventory.IsFull) break;
+
+                        if (route.sourceInventory.TryGetFirstItemOfType(route.itemType, out ItemData foundItem))
                         {
-                            AudioManager.Instance.PlayUIPop(transform.position);
+                            if (route.sourceInventory.TryRemove(foundItem, 1))
+                            {
+                                cartInventory.TryAdd(foundItem, 1, out _);
+
+                                CarriedFishPayload payload;
+                                if (meta == null || !meta.TryRetrieveFish(out payload))
+                                {
+                                    payload = new CarriedFishPayload(foundItem, FishQualityData.RollRandomSize(), FishQualityData.RollRandomQuality());
+                                }
+                                carriedPayloads.Add(payload);
+
+                                UpdateBadgeVisuals();
+
+                                if (AudioManager.Instance != null)
+                                {
+                                    AudioManager.Instance.PlayUIPop(transform.position);
+                                }
+                                yield return YieldCache.WaitForSeconds(0.10f);
+                            }
                         }
-                        yield return new WaitForSeconds(0.12f);
                     }
+
+                    if (crowdAgent != null) crowdAgent.IsStationary = false;
                 }
             }
 
-            if (crowdAgent != null) crowdAgent.IsStationary = false;
-            yield return new WaitForSeconds(0.2f);
-        }
-
-        private IEnumerator PerformUnloadingRoutine(LogisticsRoute route)
-        {
-            if (route == null || route.targetInventory == null || cartInventory == null) yield break;
-
-            if (crowdAgent != null) crowdAgent.IsStationary = true;
-
-            // Transfer all matching items from cart to target
-            int unloadedCount = 0;
-            string lastDeliveredName = "";
-
-            while (cartInventory.TotalItemCount > 0)
+            // 2. Nếu xe đẩy vẫn còn chỗ trống và trên bến cảng có cá đã bị đánh hạ, tự động đi gom luôn lên xe
+            while (!cartInventory.IsFull && FishingPierManager.Instance != null)
             {
-                if (route.targetInventory.IsFull)
+                LiveFish defeatedFish = FishingPierManager.Instance.GetNearestDefeatedFish(transform.position);
+                if (defeatedFish == null || defeatedFish.WholeFishItem == null) break;
+
+                defeatedFish.MarkReservedForPickup(6.0f);
+                currentState = TransporterState.MovingToPickup;
+                UpdateBadgeVisuals();
+
+                Vector3 fishPos = defeatedFish.transform.position;
+                if (transform.position.z < 4.65f && fishPos.z >= 4.75f)
                 {
-                    // Target has filled up, wait briefly
-                    yield return new WaitForSeconds(0.5f);
-                    if (route.targetInventory.IsFull) break;
+                    yield return MoveTowardsPosition(new Vector3(-2.5f, 0.60f, 4.75f));
                 }
 
-                if (cartInventory.TryPopFirst(out ItemData item))
+                if (defeatedFish != null && !defeatedFish.IsPickedUp)
                 {
-                    if (route.targetInventory.TryAdd(item, 1, out _))
+                    yield return MoveTowardsPosition(defeatedFish.transform.position);
+                }
+
+                if (defeatedFish != null && !defeatedFish.IsPickedUp && defeatedFish.WholeFishItem != null)
+                {
+                    currentState = TransporterState.Loading;
+                    UpdateBadgeVisuals();
+
+                    if (cartInventory.TryAdd(defeatedFish.WholeFishItem, 1, out _))
                     {
-                        unloadedCount++;
-                        lastDeliveredName = item.ItemName;
-                        UpdateBadgeVisuals();
+                        carriedPayloads.Add(new CarriedFishPayload(defeatedFish.WholeFishItem, defeatedFish.SizeCategory, defeatedFish.QualityTier));
 
                         if (AudioManager.Instance != null)
                         {
                             AudioManager.Instance.PlayUIPop(transform.position);
                         }
-                        yield return new WaitForSeconds(0.12f);
+                        if (IdleFishing.VFX.VFXManager.Instance != null)
+                        {
+                            IdleFishing.VFX.VFXManager.Instance.SpawnDustPuff(defeatedFish.transform.position + Vector3.up * 0.25f, 0.4f);
+                        }
+                        Destroy(defeatedFish.gameObject);
+                        UpdateBadgeVisuals();
+                        yield return YieldCache.WaitForSeconds(0.12f);
                     }
                     else
                     {
-                        // Couldn't accept, put back in cart
-                        cartInventory.TryAdd(item, 1, out _);
+                        defeatedFish.ClearReservation();
                         break;
                     }
                 }
             }
 
-            // Visual floating delivery notification
-            if (unloadedCount > 0 && FloatingDamageManager.Instance != null)
+            // Nếu đang ở trên sàn gỗ bến câu, đi qua lối dốc xuống cảng trước khi đi bán
+            if (transform.position.z >= 4.75f)
             {
-                string tag = string.IsNullOrEmpty(lastDeliveredName) ? "Cargo" : lastDeliveredName;
-                FloatingDamageManager.Instance.SpawnDamage(
-                    transform.position + Vector3.up * 1.6f,
-                    0,
-                    DamageStyle.GoldBonus,
-                    $"+{unloadedCount} {tag}"
-                );
+                currentState = TransporterState.MovingToDropoff;
+                UpdateBadgeVisuals();
+                yield return MoveTowardsPosition(new Vector3(-2.5f, 0.60f, 4.4f));
             }
 
             if (crowdAgent != null) crowdAgent.IsStationary = false;
-            yield return new WaitForSeconds(0.2f);
+            yield return YieldCache.WaitForSeconds(0.15f);
+        }
+
+        public static int CalculateDirectSellPrice(ItemData item, out bool isHotTrend)
+        {
+            isHotTrend = false;
+            if (item == null) return 0;
+
+            float multiplier = 1.0f;
+
+            // Càng lên level cao thì giá trị hải sản càng cao (+25% mỗi cấp độ đảo)
+            if (IdleFishing.Core.WorldManager.Instance != null && IdleFishing.Core.WorldManager.Instance.CurrentWorld != null)
+            {
+                int order = IdleFishing.Core.WorldManager.Instance.CurrentWorld.worldOrder;
+                multiplier *= (1.0f + (order - 1) * 0.25f);
+            }
+
+            if (IdleFishing.Economy.UpgradeManager.Instance != null)
+            {
+                multiplier *= IdleFishing.Economy.UpgradeManager.Instance.GetValue(UpgradeType.MarketValueMultiplier);
+            }
+
+            if (IdleFishing.Market.MarketTrendManager.Instance != null)
+            {
+                multiplier *= IdleFishing.Market.MarketTrendManager.Instance.GetPriceMultiplier(item, out isHotTrend);
+            }
+
+            if (IdleFishing.Market.ContractManager.Instance != null)
+            {
+                multiplier *= IdleFishing.Market.ContractManager.Instance.GetGlobalPriceMultiplier();
+            }
+
+            if (IdleFishing.Aquarium.BestiaryManager.Instance != null)
+            {
+                multiplier *= IdleFishing.Aquarium.BestiaryManager.Instance.GetGlobalMarketPriceMultiplier();
+            }
+
+            if (IdleFishing.World.DayNightCycleManager.Instance != null)
+            {
+                multiplier *= IdleFishing.World.DayNightCycleManager.Instance.GetNightPriceMultiplier();
+            }
+
+            if (IdleFishing.Gimmicks.WorldGimmickManager.Instance != null)
+            {
+                multiplier *= IdleFishing.Gimmicks.WorldGimmickManager.Instance.GetGlobalPriceMultiplier();
+            }
+
+            if (FishingFrenzyManager.Instance != null && FishingFrenzyManager.Instance.IsFrenzyActive)
+            {
+                multiplier *= 2.0f;
+            }
+
+            return Mathf.Max(1, Mathf.RoundToInt(item.BasePrice * multiplier));
+        }
+
+        private IEnumerator PerformUnloadingRoutine(LogisticsRoute route)
+        {
+            if (cartInventory == null) yield break;
+
+            if (crowdAgent != null) crowdAgent.IsStationary = true;
+
+            int soldCount = 0;
+            int totalEarnings = 0;
+            bool hadHotTrendItem = false;
+            string topSpecialCatchTag = null;
+
+            // Nếu kệ cũ (targetInventory) còn sót cá tồn đọng, bán sạch luôn
+            if (route != null && route.targetInventory != null && route.targetInventory.TotalItemCount > 0)
+            {
+                while (route.targetInventory.TryPopFirst(out ItemData shelfItem))
+                {
+                    int p = CalculateDirectSellPrice(shelfItem, out bool hot);
+                    if (hot) hadHotTrendItem = true;
+                    if (IdleFishing.Economy.EconomyManager.Instance != null)
+                    {
+                        IdleFishing.Economy.EconomyManager.Instance.AddCoins(p);
+                    }
+                    GameEvents.TriggerItemSold(shelfItem, p);
+                    totalEarnings += p;
+                    soldCount++;
+                }
+            }
+
+            // Bán trực tiếp toàn bộ cá trên xe đẩy thành Tiền Vàng (có áp dụng hệ số Size & Quality)
+            while (cartInventory.TotalItemCount > 0)
+            {
+                if (cartInventory.TryPopFirst(out ItemData item))
+                {
+                    CarriedFishPayload payload = carriedPayloads.Count > 0
+                        ? carriedPayloads[0]
+                        : new CarriedFishPayload(item, FishSizeCategory.Standard, FishQualityTier.Regular);
+                    if (carriedPayloads.Count > 0) carriedPayloads.RemoveAt(0);
+
+                    float qMult = FishQualityData.GetQualityPriceMultiplier(payload.quality);
+                    float sMult = FishQualityData.GetSizePriceMultiplier(payload.size);
+
+                    int basePrice = CalculateDirectSellPrice(item, out bool isHot);
+                    if (isHot) hadHotTrendItem = true;
+
+                    int finalPrice = Mathf.RoundToInt(basePrice * qMult * sMult);
+
+                    if (payload.quality == FishQualityTier.Golden || payload.quality == FishQualityTier.Rainbow || payload.size == FishSizeCategory.Colossal)
+                    {
+                        topSpecialCatchTag = $"{FishQualityData.GetQualityPrefix(payload.quality, payload.size).Trim()}!";
+                    }
+
+                    if (IdleFishing.Economy.EconomyManager.Instance != null)
+                    {
+                        IdleFishing.Economy.EconomyManager.Instance.AddCoins(finalPrice);
+                    }
+                    GameEvents.TriggerItemSold(item, finalPrice);
+                    GameEvents.TriggerPayloadTransported(1);
+
+                    totalEarnings += finalPrice;
+                    soldCount++;
+                    UpdateBadgeVisuals();
+
+                    if (AudioManager.Instance != null)
+                    {
+                        AudioManager.Instance.PlayUIPop(transform.position);
+                    }
+                    yield return YieldCache.WaitForSeconds(0.10f);
+                }
+                else
+                {
+                    break;
+                }
+            }
+
+            carriedPayloads.Clear();
+
+            // Hiệu ứng Tiền Vàng bay về HUD & Popup số vàng rực rỡ
+            if (totalEarnings > 0)
+            {
+                bool isFrenzy = FishingFrenzyManager.Instance != null && FishingFrenzyManager.Instance.IsFrenzyActive;
+                int coinCount = isFrenzy ? 12 : (!string.IsNullOrEmpty(topSpecialCatchTag) ? 7 : Mathf.Clamp(soldCount + 1, 3, 5));
+
+                if (FlyingCoinManager.Instance != null)
+                {
+                    FlyingCoinManager.Instance.PlayFlyingCoins(transform.position + Vector3.up * 1.1f, coinCount);
+                }
+
+                if (FloatingDamageManager.Instance != null)
+                {
+                    FloatingDamageManager.Instance.SpawnDamage(
+                        transform.position + Vector3.up * 1.6f,
+                        totalEarnings,
+                        DamageStyle.GoldBonus,
+                        $"+{NumberFormatter.Format(totalEarnings)} G ({soldCount} Fish)"
+                    );
+
+                    if (isFrenzy)
+                    {
+                        FloatingDamageManager.Instance.SpawnDamage(
+                            transform.position + Vector3.up * 2.3f,
+                            0,
+                            DamageStyle.Crit,
+                            "[FRENZY] 2X GOLD JACKPOT!"
+                        );
+                    }
+                    else if (!string.IsNullOrEmpty(topSpecialCatchTag))
+                    {
+                        FloatingDamageManager.Instance.SpawnDamage(
+                            transform.position + Vector3.up * 2.3f,
+                            0,
+                            DamageStyle.Crit,
+                            $"{topSpecialCatchTag} JACKPOT!"
+                        );
+                    }
+                    else if (hadHotTrendItem)
+                    {
+                        FloatingDamageManager.Instance.SpawnDamage(
+                            transform.position + Vector3.up * 2.3f,
+                            0,
+                            DamageStyle.GoldBonus,
+                            "HOT TREND!"
+                        );
+                    }
+                }
+            }
+
+            if (crowdAgent != null) crowdAgent.IsStationary = false;
+            yield return YieldCache.WaitForSeconds(0.15f);
         }
     }
 }

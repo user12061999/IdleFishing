@@ -13,12 +13,12 @@ MonoBehaviour:
   m_Name: pufferfish_chain
   m_EditorClassIdentifier: 
   speciesId: pufferfish
-  speciesName: Pufferfish
-  tier: 3
-  catchDifficulty: 3.5
-  spawnWeight: 40
-  minWeightKg: 2.5
-  maxWeightKg: 6.8
+  speciesName: Sunlight Pufferfish
+  tier: 4
+  catchDifficulty: 4
+  spawnWeight: 45
+  minWeightKg: 3
+  maxWeightKg: 8.5
   isApexBoss: 0
   bossTitle: 
   wholeFish: {fileID: 11400000, guid: a8edbf8c7a3cc7145bee997db593c156, type: 2}

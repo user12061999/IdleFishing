@@ -14,7 +14,7 @@ namespace IdleFishing.Market
         public ItemType? targetItemType; // e.g. WholeFish, or null for all
         public float priceMultiplier; // e.g. 1.5f (+50%), 2.0f (+100%)
         public float durationSeconds; // e.g. 120s
-        public string iconBadge; // e.g. "🍣", "🔥", "🦴", "🐟"
+        public string iconBadge; // e.g. "[HOT]", "[FISH]", "[CRAB]"
 
         public MarketTrend(string id, string title, string desc, string speciesId, ItemType? itemType, float multiplier, float duration, string icon = "[HOT]")
         {

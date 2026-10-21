@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4ca1a89e251ef2045a28c480ab78f816, type: 3}
+  m_Name: flame_angelfish_whole
+  m_EditorClassIdentifier: 
+  itemId: flame_angelfish_whole
+  itemName: Flame Angelfish
+  itemType: 0
+  description: 'Fresh 3D fish: Flame Angelfish'
+  basePrice: 680
+  prefab: {fileID: 3468847671882273156, guid: cc23fc2c97342a54cbe962ab599698ca, type: 3}
+  icon: {fileID: 0}

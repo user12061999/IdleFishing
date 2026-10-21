@@ -1,0 +1,44 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8fb4bf1520bf6cd4592f26e0e019b0f7, type: 3}
+  m_Name: Stage_06
+  m_EditorClassIdentifier: 
+  stageId: stage_06
+  stageNumber: 6
+  worldId: world_1
+  stageInWorld: 6
+  stageTitle: Shark Rampage
+  mechanicDescription: 'World 1 Apex Boss: Apex Blacktip Reef Shark! Defeat boss
+    to unlock World 2 voyage.'
+  targetMinutes: 5
+  estimatedBaseGoldPerMin: 579
+  rewardGoldEquivalentMinutes: 1.25
+  grantFameOnFirstClear: 1
+  replayable: 0
+  goals:
+  - goalType: 7
+    targetCount: 1
+    targetId: reef_shark
+    targetLevel: 1
+    customDescription: Defeat Blacktip Reef Shark
+  - goalType: 2
+    targetCount: 15
+    targetId: 
+    targetLevel: 1
+    customDescription: Sell 15 Fish at Market
+  guaranteedFirstCatch: {fileID: 0}
+  bossToSpawn: {fileID: 11400000, guid: 68fc1a341dfb7d64793d899731290dd4, type: 2}
+  isWorldBossStage: 1
+  worldVoyageUnlock: world_2
+  featureUnlocks:
+  - world_2_voyage
+  - shark_trophy

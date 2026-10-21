@@ -15,7 +15,7 @@ MonoBehaviour:
   itemId: great_white_shark_whole
   itemName: Great White Leviathan
   itemType: 0
-  description: 
-  basePrice: 1950
+  description: 'Apex ocean boss fish: Great White Leviathan'
+  basePrice: 220000
   prefab: {fileID: 4822052015566173893, guid: cc7f05557daf48c48ae0cf78dfd7cc66, type: 3}
   icon: {fileID: 0}

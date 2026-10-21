@@ -26,16 +26,16 @@ MonoBehaviour:
   bossHealthMultiplier: 3.5
   bossDamageMultiplier: 1.5
   bossScaleMultiplier: 1.8
-  bossBaseBonusGold: 180
-  offlineBaseCoinsPerSecond: 0.4
+  bossBaseBonusGold: 150
+  offlineBaseCoinsPerSecond: 0.3
   offlineMinAwaySeconds: 30
   offlineMaxHours: 6
   fishermanBaseCastTime: 5.5
   maxPendingFishOnGround: 3
-  treasureChestSpawnChance: 0.08
+  treasureChestSpawnChance: 0.07
   treasureChestRequiredTaps: 5
-  treasureChestMinGold: 250
-  treasureChestMaxGold: 500
+  treasureChestMinGold: 180
+  treasureChestMaxGold: 350
   frenzyDuration: 20
   frenzyChargePerFish: 4
   frenzyChargePerDefeat: 6
@@ -43,3 +43,15 @@ MonoBehaviour:
   frenzyChargePerChest: 40
   frenzySpeedMultiplier: 2
   frenzyDamageMultiplier: 2
+  aquariumBaseCapacity: 8
+  aquariumCapacityUpgradeBaseCost: 150
+  aquariumCapacityUpgradeMultiplier: 1.9
+  aquariumCapacitySlotsPerUpgrade: 2
+  aquariumDecorUpgradeBaseCost: 300
+  aquariumDecorUpgradeMultiplier: 2.4
+  aquariumDecorMultiplierLevel2: 1.35
+  aquariumDecorMultiplierLevel3: 1.8
+  aquariumDecorMultiplierLevel4: 2.5
+  transporterCapacity: 6
+  transporterMoveSpeed: 3.5
+  customerSpawnInterval: 3

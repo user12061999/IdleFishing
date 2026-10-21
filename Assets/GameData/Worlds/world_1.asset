@@ -14,19 +14,22 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   worldId: world_1
   worldName: Temperate Bay
-  description: A lush temperate bay teeming with familiar salmon and cod.
+  description: Lush spring temperate waters teeming with salmon, cod, and bountiful
+    herring.
   worldOrder: 1
-  waterColor: {r: 0.15, g: 0.5, b: 0.7, a: 1}
+  waterColor: {r: 0.12, g: 0.5, b: 0.7, a: 1}
   groundColor: {r: 0.35, g: 0.55, b: 0.35, a: 1}
-  lightColor: {r: 1, g: 0.95, b: 0.85, a: 1}
+  lightColor: {r: 1, g: 0.96, b: 0.88, a: 1}
   lightIntensity: 1
   nativeSpecies:
-  - {fileID: 11400000, guid: 24f3ca18fae0a7b44b5c3e21571963cf, type: 2}
-  - {fileID: 11400000, guid: f291e5843cee93e4992f32a7a2fa1aad, type: 2}
   - {fileID: 11400000, guid: 1c0221bee78d1264bafbf9d4915a029b, type: 2}
+  - {fileID: 11400000, guid: d98505dbf09270d40996725454446618, type: 2}
+  - {fileID: 11400000, guid: f291e5843cee93e4992f32a7a2fa1aad, type: 2}
+  - {fileID: 11400000, guid: 24f3ca18fae0a7b44b5c3e21571963cf, type: 2}
   - {fileID: 11400000, guid: 68fc1a341dfb7d64793d899731290dd4, type: 2}
-  - {fileID: 11400000, guid: 5caa13c3bbae5d04298113479406e355, type: 2}
   startingCoins: 30
   unlockRequiredCoins: 0
   unlockRequiredUpgrades: 0
-  worldUpgradeConfig: {fileID: 11400000, guid: e4aecedf1de78bf49ab84255a3b46f7f, type: 2}
+  worldUpgradeConfig: {fileID: 11400000, guid: 0fdba41bcb9e97a488dac8ae5f8a1839, type: 2}
+  customBgmClip: {fileID: 8300000, guid: 2d20e70646462b8458eb4a4fa17b25b9, type: 3}
+  customAmbienceClip: {fileID: 8300000, guid: ef938231a52ae7440baa656e43e15d1b, type: 3}

@@ -249,22 +249,26 @@ namespace IdleFishing.World
             // 2. Street Lantern Emissive Glow
             foreach (var r in streetLanterns)
             {
-                if (r != null && r.material != null)
+                if (r != null)
                 {
-                    if (night)
+                    var mat = Application.isPlaying ? r.material : r.sharedMaterial;
+                    if (mat != null)
                     {
-                        r.material.EnableKeyword("_EMISSION");
-                        if (r.material.HasProperty("_EmissionColor"))
+                        if (night)
                         {
-                            r.material.SetColor("_EmissionColor", new Color(1f, 0.85f, 0.4f) * 2.2f);
+                            mat.EnableKeyword("_EMISSION");
+                            if (mat.HasProperty("_EmissionColor"))
+                            {
+                                mat.SetColor("_EmissionColor", new Color(1f, 0.85f, 0.4f) * 2.2f);
+                            }
                         }
-                    }
-                    else
-                    {
-                        r.material.DisableKeyword("_EMISSION");
-                        if (r.material.HasProperty("_EmissionColor"))
+                        else
                         {
-                            r.material.SetColor("_EmissionColor", Color.black);
+                            mat.DisableKeyword("_EMISSION");
+                            if (mat.HasProperty("_EmissionColor"))
+                            {
+                                mat.SetColor("_EmissionColor", Color.black);
+                            }
                         }
                     }
                 }
@@ -307,8 +311,13 @@ namespace IdleFishing.World
         // ==================== UI CLOCK WIDGET ====================
         private void CreateUIClockWidget()
         {
-            var canvas = FindFirstObjectByType<Canvas>();
+            var canvasGo = GameObject.Find("UI_Canvas");
+            var canvas = canvasGo != null ? canvasGo.GetComponent<Canvas>() : null;
             if (canvas == null) return;
+
+            // Check if existing clock exists
+            var existing = canvas.transform.Find("UI_DayNightClock");
+            if (existing != null) Destroy(existing.gameObject);
 
             GameObject clockRoot = new GameObject("UI_DayNightClock");
             clockRoot.transform.SetParent(canvas.transform, false);

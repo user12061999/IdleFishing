@@ -43,6 +43,116 @@ namespace IdleFishing.Fishing
             Instance = this;
         }
 
+        private void Start()
+        {
+            CleanPierPropsColliders();
+        }
+
+        private void CleanPierPropsColliders()
+        {
+            // Ignore Raycast on fisherman stools so clicks never hit wooden stools
+            int ignoreRaycastLayer = LayerMask.NameToLayer("Ignore Raycast");
+            if (ignoreRaycastLayer < 0) ignoreRaycastLayer = 2;
+            for (int i = 1; i <= 5; i++)
+            {
+                var stoolObj = GameObject.Find($"Fisherman_Stool_{i}");
+                if (stoolObj != null)
+                {
+                    stoolObj.layer = ignoreRaycastLayer;
+                    var c = stoolObj.GetComponent<Collider>();
+                    if (c != null) c.gameObject.layer = ignoreRaycastLayer;
+                }
+            }
+        }
+
+        private void Update()
+        {
+            HandleDirectClickRaycast();
+        }
+
+        private void HandleDirectClickRaycast()
+        {
+            if (Input.GetMouseButtonDown(0))
+            {
+                if (UnityEngine.EventSystems.EventSystem.current != null && UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject())
+                {
+                    return;
+                }
+
+                Camera cam = Camera.main;
+                if (cam == null) return;
+
+                Ray ray = cam.ScreenPointToRay(Input.mousePosition);
+                RaycastHit[] hits = Physics.RaycastAll(ray, 100f);
+
+                // 1. Direct hit check on Chests or Fish or Wranglers
+                for (int i = 0; i < hits.Length; i++)
+                {
+                    var hitCol = hits[i].collider;
+                    if (hitCol == null) continue;
+
+                    var chest = hitCol.GetComponentInParent<SunkenTreasureChest>();
+                    if (chest != null && !chest.IsOpened)
+                    {
+                        chest.Tap();
+                        return;
+                    }
+
+                    var fish = hitCol.GetComponentInParent<LiveFish>();
+                    if (fish != null && !fish.IsPickedUp)
+                    {
+                        fish.TapAttack();
+                        return;
+                    }
+
+                    var wrangler = hitCol.GetComponentInParent<FishWranglerWorker>();
+                    if (wrangler != null && wrangler.TargetFish != null && !wrangler.TargetFish.IsPickedUp)
+                    {
+                        wrangler.TargetFish.TapAttack();
+                        return;
+                    }
+                }
+
+                // 2. Proximity check on the ground/pier near click
+                for (int i = 0; i < hits.Length; i++)
+                {
+                    Vector3 hitPoint = hits[i].point;
+
+                    // Check active treasure chests
+                    var activeChests = FindObjectsOfType<SunkenTreasureChest>();
+                    for (int c = 0; c < activeChests.Length; c++)
+                    {
+                        if (activeChests[c] != null && !activeChests[c].IsOpened)
+                        {
+                            Vector3 chestPos = activeChests[c].transform.position;
+                            chestPos.y = hitPoint.y;
+                            if (Vector3.Distance(hitPoint, chestPos) <= 2.2f)
+                            {
+                                activeChests[c].Tap();
+                                return;
+                            }
+                        }
+                    }
+
+                    // Check living fish
+                    for (int f = 0; f < allLivingFish.Count; f++)
+                    {
+                        var lf = allLivingFish[f];
+                        if (lf != null && !lf.IsPickedUp)
+                        {
+                            Vector3 fPos = lf.transform.position;
+                            fPos.y = hitPoint.y;
+                            if (Vector3.Distance(hitPoint, fPos) <= 2.4f)
+                            {
+                                lf.TapAttack();
+                                return;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         public void RegisterSlot(FishingSlot slot)
         {
             if (!slots.Contains(slot))
@@ -113,6 +223,17 @@ namespace IdleFishing.Fishing
             return best;
         }
 
+        public bool HasAvailableDefeatedFish()
+        {
+            allDefeatedFish.RemoveAll(f => f == null || f.IsPickedUp);
+            for (int i = 0; i < allDefeatedFish.Count; i++)
+            {
+                LiveFish f = allDefeatedFish[i];
+                if (f != null && !f.IsPickedUp && !f.IsReservedForPickup) return true;
+            }
+            return false;
+        }
+
         public LiveFish GetNearestDefeatedFish(Vector3 fromPos, FishWranglerWorker requestingWorker = null)
         {
             allDefeatedFish.RemoveAll(f => f == null || f.IsPickedUp);
@@ -123,7 +244,7 @@ namespace IdleFishing.Fishing
             for (int i = 0; i < allDefeatedFish.Count; i++)
             {
                 LiveFish fish = allDefeatedFish[i];
-                if (fish == null || fish.IsPickedUp) continue;
+                if (fish == null || fish.IsPickedUp || fish.IsReservedForPickup) continue;
 
                 float dist = Vector3.Distance(fromPos, fish.transform.position);
                 if (dist < bestDist)
@@ -132,6 +253,7 @@ namespace IdleFishing.Fishing
                     best = fish;
                 }
             }
+
             return best;
         }
 
@@ -196,9 +318,30 @@ namespace IdleFishing.Fishing
 
                 if (!sentToAquarium)
                 {
-                    if (intakeStorage != null && fish.WholeFishItem != null)
+                    // Early Tutorial Direct Dockside Sale if no transporters exist yet
+                    if (IdleFishing.Logistics.LogisticsManager.Instance == null || IdleFishing.Logistics.LogisticsManager.Instance.WorkerCount == 0)
                     {
-                        intakeStorage.TryAdd(fish.WholeFishItem, 1, out _);
+                        int baseVal = fish.WholeFishItem != null ? fish.WholeFishItem.BasePrice : 15;
+                        float qMult = FishQualityData.GetQualityPriceMultiplier(fish.QualityTier);
+                        float sMult = FishQualityData.GetSizePriceMultiplier(fish.SizeCategory);
+                        int finalPrice = Mathf.Max(5, Mathf.RoundToInt(baseVal * qMult * sMult));
+
+                        if (EconomyManager.Instance != null)
+                        {
+                            EconomyManager.Instance.AddCoins(finalPrice);
+                        }
+                        GameEvents.TriggerItemSold(fish.WholeFishItem, finalPrice);
+                    }
+                    else if (intakeStorage != null && fish.WholeFishItem != null)
+                    {
+                        if (intakeStorage.TryAdd(fish.WholeFishItem, 1, out _))
+                        {
+                            var meta = intakeStorage.GetComponent<IdleFishing.Inventory.IntakeStorageMetadata>();
+                            if (meta != null)
+                            {
+                                meta.StoreFish(fish.WholeFishItem, fish.SizeCategory, fish.QualityTier);
+                            }
+                        }
                     }
 
                     if (FloatingDamageManager.Instance != null)

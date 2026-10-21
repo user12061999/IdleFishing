@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4ca1a89e251ef2045a28c480ab78f816, type: 3}
+  m_Name: rose_goby_whole
+  m_EditorClassIdentifier: 
+  itemId: rose_goby_whole
+  itemName: Pretty Rose Goby
+  itemType: 0
+  description: 'Fresh 3D fish: Pretty Rose Goby'
+  basePrice: 450
+  prefab: {fileID: 8972489866753106658, guid: 4e8e7bb0d6c0eff46a9c9c63cdb75c99, type: 3}
+  icon: {fileID: 0}

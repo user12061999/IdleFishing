@@ -36,7 +36,7 @@ namespace IdleFishing.Fishing
         [SerializeField] private float baseMoveSpeed = 3.8f;
         [SerializeField] private int baseAttackDamage = 16;
         [SerializeField] private float attackInterval = 0.6f;
-        [SerializeField] private float stoppingDistance = 1.3f;
+        [SerializeField] private float stoppingDistance = 1.6f;
 
         [Header("Runtime State")]
         [SerializeField] private WranglerState currentState = WranglerState.Idle;
@@ -78,7 +78,19 @@ namespace IdleFishing.Fishing
                 weaponOriginalLocalPos = weaponTransform.localPosition;
             }
             stickmanVisual = GetComponentInChildren<IdleFishing.Characters.StickmanCartoonVisual>();
+            SetCollidersToIgnoreRaycast();
             CacheRenderers();
+        }
+
+        private void SetCollidersToIgnoreRaycast()
+        {
+            int ignoreRaycastLayer = LayerMask.NameToLayer("Ignore Raycast");
+            if (ignoreRaycastLayer < 0) ignoreRaycastLayer = 2;
+            var cols = GetComponentsInChildren<Collider>(true);
+            for (int i = 0; i < cols.Length; i++)
+            {
+                cols[i].gameObject.layer = ignoreRaycastLayer;
+            }
         }
 
         private void CacheRenderers()
@@ -162,7 +174,11 @@ namespace IdleFishing.Fishing
             // Spawn floating health bar above worker head
             GameObject barObj = new GameObject("Wrangler_HealthBar");
             healthBar = barObj.AddComponent<FloatingHealthBarUI>();
-            healthBar.Setup(transform, "Fish Wrangler", new Vector3(0, 1.8f, 0), new Color(0.2f, 0.75f, 0.95f));
+            Transform headAnchor = (stickmanVisual != null && stickmanVisual.HeadSocket != null)
+                ? stickmanVisual.HeadSocket
+                : transform;
+            Vector3 barOffset = (headAnchor == transform) ? new Vector3(0, 2.55f, 0) : new Vector3(0, 1.05f, 0);
+            healthBar.Setup(headAnchor, "Fish Wrangler", barOffset, new Color(0.2f, 0.75f, 0.95f));
             healthBar.UpdateHealth(currentHealth, maxHealth);
         }
 
@@ -258,9 +274,13 @@ namespace IdleFishing.Fishing
                 candidate = fisherman.GetNearestLivingFish(transform.position);
             }
 
-            if (candidate != null && !candidate.IsPickedUp)
+            if (candidate != null && !candidate.IsPickedUp && !candidate.IsReservedForPickup)
             {
                 currentTargetFish = candidate;
+                if (candidate.IsDefeated)
+                {
+                    candidate.MarkReservedForPickup();
+                }
                 SetState(WranglerState.MovingToFish);
             }
             else if (restWaypoint != null && Vector3.Distance(transform.position, restWaypoint.position) > 0.5f)
@@ -280,13 +300,13 @@ namespace IdleFishing.Fishing
             // Wooden Fishing Pier deck surface
             if (worldPos.x >= -6.0f && worldPos.x <= 6.0f && worldPos.z >= 4.75f && worldPos.z <= 11.25f)
             {
-                return 0.60f;
+                return 0.62f;
             }
             // Ramp transition zone connecting harbor ground to pier deck
             if (worldPos.x >= -4.2f && worldPos.x <= -0.8f && worldPos.z >= 3.50f && worldPos.z < 4.75f)
             {
                 float t = Mathf.InverseLerp(3.50f, 4.75f, worldPos.z);
-                return Mathf.Lerp(0.05f, 0.60f, t);
+                return Mathf.Lerp(0.05f, 0.62f, t);
             }
             return 0.05f; // Harbor stone/ground surface
         }
@@ -295,6 +315,7 @@ namespace IdleFishing.Fishing
         {
             if (currentTargetFish == null || currentTargetFish.IsPickedUp)
             {
+                currentTargetFish = null;
                 SetState(WranglerState.Idle);
                 return;
             }
@@ -342,7 +363,7 @@ namespace IdleFishing.Fishing
 
             // If fish hopped away outside attack range, chase it!
             float distToFish = Vector3.Distance(transform.position, currentTargetFish.transform.position);
-            if (distToFish > stoppingDistance + 0.8f)
+            if (distToFish > stoppingDistance + 1.2f)
             {
                 SetState(WranglerState.MovingToFish);
                 return;
@@ -416,7 +437,7 @@ namespace IdleFishing.Fishing
             if (weaponTransform == null) yield break;
 
             weaponTransform.localPosition = weaponOriginalLocalPos + transform.forward * 0.45f + Vector3.down * 0.2f;
-            yield return new WaitForSeconds(0.12f);
+            yield return YieldCache.WaitForSeconds(0.12f);
             weaponTransform.localPosition = weaponOriginalLocalPos;
         }
 
@@ -470,7 +491,7 @@ namespace IdleFishing.Fishing
                 weaponTransform.localPosition = weaponOriginalLocalPos - Vector3.forward * 0.2f;
             }
 
-            yield return new WaitForSeconds(0.12f);
+            yield return YieldCache.WaitForSeconds(0.12f);
 
             // 3. Return to combat stance
             transform.rotation = origRot;
@@ -531,7 +552,9 @@ namespace IdleFishing.Fishing
             }
             if (IdleFishing.VFX.VFXManager.Instance != null)
             {
-                IdleFishing.VFX.VFXManager.Instance.SpawnStunStars(transform, knockoutDuration, new Vector3(0f, 1.2f, 0.4f));
+                Transform headT = (stickmanVisual != null && stickmanVisual.HeadSocket != null) ? stickmanVisual.HeadSocket : transform;
+                Vector3 stunOffset = (headT == transform) ? new Vector3(0f, 2.35f, 0f) : new Vector3(0f, 0.65f, 0f);
+                IdleFishing.VFX.VFXManager.Instance.SpawnStunStars(headT, knockoutDuration, stunOffset);
             }
 
             float elapsed = 0f;
@@ -570,13 +593,29 @@ namespace IdleFishing.Fishing
         {
             SetState(WranglerState.PickingUp);
             if (crowdAgent != null) crowdAgent.IsStationary = true;
-            yield return new WaitForSeconds(0.3f);
 
+            // Reserve immediately so no other worker picks up the same fish
             if (currentTargetFish != null)
+            {
+                currentTargetFish.MarkReservedForPickup();
+            }
+
+            yield return YieldCache.WaitForSeconds(0.3f);
+
+            if (currentTargetFish != null && !currentTargetFish.IsPickedUp)
             {
                 Transform pParent = carryPoint != null ? carryPoint : transform;
                 currentTargetFish.SetPickedUp(pParent);
                 isCarrying = true;
+            }
+            else
+            {
+                // Target fish was already claimed or destroyed
+                isCarrying = false;
+                currentTargetFish = null;
+                if (crowdAgent != null) crowdAgent.IsStationary = false;
+                SetState(WranglerState.Idle);
+                yield break;
             }
 
             if (crowdAgent != null) crowdAgent.IsStationary = false;
@@ -587,6 +626,8 @@ namespace IdleFishing.Fishing
         {
             if (intakeStorage == null || currentTargetFish == null)
             {
+                isCarrying = false;
+                currentTargetFish = null;
                 SetState(WranglerState.Idle);
                 return;
             }
@@ -619,7 +660,7 @@ namespace IdleFishing.Fishing
         {
             SetState(WranglerState.Unloading);
             if (crowdAgent != null) crowdAgent.IsStationary = true;
-            yield return new WaitForSeconds(0.3f);
+            yield return YieldCache.WaitForSeconds(0.3f);
 
             if (currentTargetFish != null && currentTargetFish.WholeFishItem != null)
             {
@@ -647,9 +688,33 @@ namespace IdleFishing.Fishing
                     }
                 }
 
-                if (!sentToAquarium && intakeStorage != null)
+                if (!sentToAquarium)
                 {
-                    intakeStorage.TryAdd(currentTargetFish.WholeFishItem, 1, out _);
+                    if (IdleFishing.Logistics.LogisticsManager.Instance == null || IdleFishing.Logistics.LogisticsManager.Instance.WorkerCount == 0)
+                    {
+                        // Direct dockside sale in early tutorial when no transporter exists yet
+                        int baseVal = currentTargetFish.WholeFishItem != null ? currentTargetFish.WholeFishItem.BasePrice : 15;
+                        float qMult = FishQualityData.GetQualityPriceMultiplier(currentTargetFish.QualityTier);
+                        float sMult = FishQualityData.GetSizePriceMultiplier(currentTargetFish.SizeCategory);
+                        int finalPrice = Mathf.Max(5, Mathf.RoundToInt(baseVal * qMult * sMult));
+
+                        if (IdleFishing.Economy.EconomyManager.Instance != null)
+                        {
+                            IdleFishing.Economy.EconomyManager.Instance.AddCoins(finalPrice);
+                        }
+                        GameEvents.TriggerItemSold(currentTargetFish.WholeFishItem, finalPrice);
+                    }
+                    else if (intakeStorage != null)
+                    {
+                        if (intakeStorage.TryAdd(currentTargetFish.WholeFishItem, 1, out _))
+                        {
+                            var meta = intakeStorage.GetComponent<IdleFishing.Inventory.IntakeStorageMetadata>();
+                            if (meta != null)
+                            {
+                                meta.StoreFish(currentTargetFish.WholeFishItem, currentTargetFish.SizeCategory, currentTargetFish.QualityTier);
+                            }
+                        }
+                    }
                 }
 
                 if (IdleFishing.VFX.VFXManager.Instance != null)
@@ -662,7 +727,7 @@ namespace IdleFishing.Fishing
             }
 
             isCarrying = false;
-            yield return new WaitForSeconds(0.2f);
+            yield return YieldCache.WaitForSeconds(0.2f);
 
             if (crowdAgent != null) crowdAgent.IsStationary = false;
             SetState(WranglerState.Idle);

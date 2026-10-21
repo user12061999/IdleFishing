@@ -59,6 +59,7 @@ namespace IdleFishing.Fishing
 
         public FishingLinePhase Phase => currentPhase;
         public Vector3 CurrentBobberPos => currentBobberPos;
+        public Transform RodTip => rodTip;
 
         private void Awake()
         {
@@ -573,10 +574,14 @@ namespace IdleFishing.Fishing
         private static void SetObjectColor(GameObject obj, Color color)
         {
             var r = obj.GetComponent<Renderer>();
-            if (r != null && r.material != null)
+            if (r != null)
             {
-                if (r.material.HasProperty("_BaseColor")) r.material.SetColor("_BaseColor", color);
-                else if (r.material.HasProperty("_Color")) r.material.color = color;
+                var mat = Application.isPlaying ? r.material : r.sharedMaterial;
+                if (mat != null)
+                {
+                    if (mat.HasProperty("_BaseColor")) mat.SetColor("_BaseColor", color);
+                    else if (mat.HasProperty("_Color")) mat.color = color;
+                }
             }
         }
 

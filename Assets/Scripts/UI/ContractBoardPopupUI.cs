@@ -214,7 +214,7 @@ namespace IdleFishing.UI
             card.titleText.text = c.contractTitle;
             card.descText.text = c.contractDesc;
 
-            card.rewardText.text = $"<color=#FFE600>+{c.rewardGold:N0} G</color>  |  <color=#58D68D>+{c.rewardFame} FAME</color>\n<color=#E74C3C>+{c.frenzyChargeBonus:0}% FRENZY</color>";
+            card.rewardText.text = $"<color=#FFE600>+{NumberFormatter.Format(c.rewardGold)} G</color>  |  <color=#58D68D>+{c.rewardFame} FAME</color>\n<color=#E74C3C>+{c.frenzyChargeBonus:0}% FRENZY</color>";
 
             UpdateSingleCardLiveState(card);
         }
@@ -241,7 +241,9 @@ namespace IdleFishing.UI
                 card.progressText.text = "<color=#2ECC71><b>COMPLETED</b></color>";
                 card.timerText.text = "Preparing new contract...";
                 card.deliverButton.interactable = false;
-                card.deliverBtnBg.color = new Color(0.3f, 0.35f, 0.4f, 0.8f);
+                card.deliverBtnBg.sprite = CasualUITheme.BtnDark ?? CasualUITheme.BtnGray;
+                card.deliverBtnBg.type = Image.Type.Sliced;
+                card.deliverBtnBg.color = new Color(0.6f, 0.6f, 0.6f, 0.7f);
                 card.deliverBtnText.text = "COMPLETE";
                 return;
             }
@@ -253,14 +255,18 @@ namespace IdleFishing.UI
             {
                 card.progressText.text = $"Required: <b>{itemName}</b>\nProgress: <color=#2ECC71><b>{available} / {c.requiredCount} (READY)</b></color>";
                 card.deliverButton.interactable = true;
-                card.deliverBtnBg.color = new Color(0.18f, 0.80f, 0.44f, 1f); // Vibrant Green
+                card.deliverBtnBg.sprite = CasualUITheme.BtnGreen;
+                card.deliverBtnBg.type = Image.Type.Sliced;
+                card.deliverBtnBg.color = Color.white;
                 card.deliverBtnText.text = "DELIVER NOW";
             }
             else
             {
                 card.progressText.text = $"Required: <b>{itemName}</b>\nProgress: <color=#F39C12><b>{available} / {c.requiredCount}</b></color>";
                 card.deliverButton.interactable = false;
-                card.deliverBtnBg.color = new Color(0.28f, 0.32f, 0.40f, 0.9f); // Dim navy
+                card.deliverBtnBg.sprite = CasualUITheme.BtnGray;
+                card.deliverBtnBg.type = Image.Type.Sliced;
+                card.deliverBtnBg.color = new Color(0.9f, 0.9f, 0.9f, 0.9f);
                 card.deliverBtnText.text = $"NEED {c.requiredCount - available} MORE";
             }
 
@@ -284,8 +290,8 @@ namespace IdleFishing.UI
             rootRect.sizeDelta = Vector2.zero;
 
             Image darkBg = popupRoot.AddComponent<Image>();
-            darkBg.sprite = whiteSp;
-            darkBg.color = new Color(0f, 0f, 0f, 0.80f);
+            darkBg.sprite = CasualUITheme.DimmedBg ?? whiteSp;
+            darkBg.color = (CasualUITheme.DimmedBg != null) ? Color.white : new Color(0f, 0f, 0f, 0.80f);
 
             // 2. Main Dialog Box
             GameObject dialogBox = new GameObject("DialogBox");
@@ -294,69 +300,70 @@ namespace IdleFishing.UI
             dRect.anchorMin = new Vector2(0.5f, 0.5f);
             dRect.anchorMax = new Vector2(0.5f, 0.5f);
             dRect.pivot = new Vector2(0.5f, 0.5f);
-            dRect.sizeDelta = new Vector2(860, 560);
+            dRect.sizeDelta = new Vector2(890, 640);
 
             // Dialog Border & BG
             Image dBg = dialogBox.AddComponent<Image>();
-            dBg.sprite = whiteSp;
-            dBg.color = new Color(0.10f, 0.13f, 0.19f, 0.98f); // Deep oceanic charcoal
+            CasualUITheme.StylePopupDialog(dBg);
 
-            // 3. Header Title Bar
-            GameObject headerObj = new GameObject("HeaderBar");
-            headerObj.transform.SetParent(dialogBox.transform, false);
-            RectTransform headerRt = headerObj.AddComponent<RectTransform>();
-            headerRt.anchorMin = new Vector2(0, 1);
-            headerRt.anchorMax = new Vector2(1, 1);
-            headerRt.pivot = new Vector2(0.5f, 1);
-            headerRt.anchoredPosition = new Vector2(0, 0);
-            headerRt.sizeDelta = new Vector2(0, 60);
-
-            Image headerBg = headerObj.AddComponent<Image>();
-            headerBg.sprite = whiteSp;
-            headerBg.color = new Color(0.06f, 0.08f, 0.13f, 1f);
+            // 3. Header Title Ribbon
+            GameObject ribbonObj = new GameObject("RibbonBanner");
+            ribbonObj.transform.SetParent(dialogBox.transform, false);
+            RectTransform rbRt = ribbonObj.AddComponent<RectTransform>();
+            rbRt.anchorMin = new Vector2(0.5f, 1f);
+            rbRt.anchorMax = new Vector2(0.5f, 1f);
+            rbRt.pivot = new Vector2(0.5f, 0.5f);
+            rbRt.anchoredPosition = new Vector2(0, -12);
+            rbRt.sizeDelta = new Vector2(580, 80);
+            Image rbImg = ribbonObj.AddComponent<Image>();
+            Sprite ribSp = CasualUITheme.TitleRibbonBlue ?? whiteSp;
+            rbImg.sprite = ribSp;
+            rbImg.type = (ribSp.border != Vector4.zero) ? Image.Type.Sliced : Image.Type.Simple;
+            rbImg.color = Color.white;
+            rbImg.raycastTarget = false;
 
             GameObject titleTxtObj = new GameObject("TitleText");
-            titleTxtObj.transform.SetParent(headerObj.transform, false);
+            titleTxtObj.transform.SetParent(ribbonObj.transform, false);
             var titleTxt = titleTxtObj.AddComponent<TextMeshProUGUI>();
             titleTxt.text = "HARBOR COMMERCE CONTRACTS";
-            titleTxt.fontSize = 24;
+            titleTxt.fontSize = 26;
             titleTxt.fontStyle = FontStyles.Bold;
-            titleTxt.alignment = TextAlignmentOptions.MidlineLeft;
-            titleTxt.color = new Color(1f, 0.88f, 0.4f);
+            titleTxt.alignment = TextAlignmentOptions.Center;
+            titleTxt.color = Color.white;
             titleTxt.raycastTarget = false;
+            titleTxt.textWrappingMode = TextWrappingModes.NoWrap;
+            titleTxt.ApplyFont(UIFontCategory.Header);
             RectTransform titleRt = titleTxtObj.GetComponent<RectTransform>();
             titleRt.anchorMin = Vector2.zero;
             titleRt.anchorMax = Vector2.one;
-            titleRt.anchoredPosition = new Vector2(25, 0);
+            titleRt.offsetMin = new Vector2(25, 6);
+            titleRt.offsetMax = new Vector2(-25, -4);
 
             // Close Button [X]
             GameObject closeBtnObj = new GameObject("CloseBtn");
-            closeBtnObj.transform.SetParent(headerObj.transform, false);
+            closeBtnObj.transform.SetParent(dialogBox.transform, false);
             RectTransform closeRt = closeBtnObj.AddComponent<RectTransform>();
-            closeRt.anchorMin = new Vector2(1, 0.5f);
-            closeRt.anchorMax = new Vector2(1, 0.5f);
-            closeRt.anchoredPosition = new Vector2(-30, 0);
-            closeRt.sizeDelta = new Vector2(40, 40);
+            closeRt.anchorMin = new Vector2(1, 1);
+            closeRt.anchorMax = new Vector2(1, 1);
+            closeRt.pivot = new Vector2(1, 1);
+            closeRt.anchoredPosition = new Vector2(-15, -15);
+            closeRt.sizeDelta = new Vector2(48, 48);
 
             Image closeBg = closeBtnObj.AddComponent<Image>();
-            closeBg.sprite = whiteSp;
-            closeBg.color = new Color(0.8f, 0.2f, 0.2f, 0.9f);
             Button closeBtn = closeBtnObj.AddComponent<Button>();
-            closeBtn.targetGraphic = closeBg;
+            CasualUITheme.StyleButton(closeBtn, closeBg, CasualBtnStyle.SquareGray);
             closeBtn.onClick.AddListener(Close);
 
-            GameObject closeTxtObj = new GameObject("Text");
-            closeTxtObj.transform.SetParent(closeBtnObj.transform, false);
-            var closeTxt = closeTxtObj.AddComponent<TextMeshProUGUI>();
-            closeTxt.text = "✕";
-            closeTxt.fontSize = 24;
-            closeTxt.fontStyle = FontStyles.Bold;
-            closeTxt.alignment = TextAlignmentOptions.Center;
-            closeTxt.color = Color.white;
-            closeTxt.raycastTarget = false;
-            RectTransform cTxtRt = closeTxtObj.GetComponent<RectTransform>();
-            cTxtRt.anchorMin = Vector2.zero;
-            cTxtRt.anchorMax = Vector2.one;
+            GameObject closeIconObj = new GameObject("Icon");
+            closeIconObj.transform.SetParent(closeBtnObj.transform, false);
+            var closeIconImg = closeIconObj.AddComponent<Image>();
+            closeIconImg.sprite = CasualUITheme.IconClose;
+            closeIconImg.preserveAspect = true;
+            closeIconImg.raycastTarget = false;
+            RectTransform ciRt = closeIconObj.GetComponent<RectTransform>();
+            ciRt.anchorMin = new Vector2(0.2f, 0.2f);
+            ciRt.anchorMax = new Vector2(0.8f, 0.8f);
+            ciRt.sizeDelta = Vector2.zero;
 
             // 4. Harbor Progression Bar Section
             GameObject progSection = new GameObject("HarborProgressionSection");
@@ -365,21 +372,21 @@ namespace IdleFishing.UI
             progRt.anchorMin = new Vector2(0, 1);
             progRt.anchorMax = new Vector2(1, 1);
             progRt.pivot = new Vector2(0.5f, 1);
-            progRt.anchoredPosition = new Vector2(0, -65);
-            progRt.sizeDelta = new Vector2(-40, 85);
+            progRt.anchoredPosition = new Vector2(0, -68);
+            progRt.sizeDelta = new Vector2(-40, 96);
 
             Image progBg = progSection.AddComponent<Image>();
-            progBg.sprite = whiteSp;
-            progBg.color = new Color(0.14f, 0.18f, 0.26f, 0.95f);
+            CasualUITheme.StyleCard(progBg, new Color(0.08f, 0.12f, 0.20f, 0.95f));
 
             // Level Title
             GameObject lvlTitleObj = new GameObject("LevelTitle");
             lvlTitleObj.transform.SetParent(progSection.transform, false);
             levelTitleText = lvlTitleObj.AddComponent<TextMeshProUGUI>();
-            levelTitleText.fontSize = 20;
+            levelTitleText.fontSize = 24;
             levelTitleText.fontStyle = FontStyles.Bold;
             levelTitleText.alignment = TextAlignmentOptions.MidlineLeft;
-            levelTitleText.color = Color.white;
+            levelTitleText.color = new Color(1f, 0.88f, 0.35f);
+            levelTitleText.ApplyFont(UIFontCategory.Header);
             RectTransform lvlRt = lvlTitleObj.GetComponent<RectTransform>();
             lvlRt.anchorMin = new Vector2(0, 0.6f);
             lvlRt.anchorMax = new Vector2(0.6f, 1f);
@@ -389,10 +396,11 @@ namespace IdleFishing.UI
             GameObject fameTxtObj = new GameObject("FameText");
             fameTxtObj.transform.SetParent(progSection.transform, false);
             fameProgressText = fameTxtObj.AddComponent<TextMeshProUGUI>();
-            fameProgressText.fontSize = 18;
+            fameProgressText.fontSize = 22;
             fameProgressText.fontStyle = FontStyles.Bold;
             fameProgressText.alignment = TextAlignmentOptions.MidlineRight;
             fameProgressText.color = new Color(0.8f, 0.9f, 1f);
+            fameProgressText.ApplyFont(UIFontCategory.Numbers);
             RectTransform fTxtRt = fameTxtObj.GetComponent<RectTransform>();
             fTxtRt.anchorMin = new Vector2(0.6f, 0.6f);
             fTxtRt.anchorMax = new Vector2(1f, 1f);
@@ -407,8 +415,9 @@ namespace IdleFishing.UI
             barBgRt.anchoredPosition = new Vector2(0, 0);
             barBgRt.sizeDelta = new Vector2(-30, 0);
             Image barBgImg = barBgObj.AddComponent<Image>();
-            barBgImg.sprite = whiteSp;
-            barBgImg.color = new Color(0.08f, 0.10f, 0.15f, 1f);
+            barBgImg.sprite = CasualUITheme.SliderBg ?? whiteSp;
+            barBgImg.type = Image.Type.Sliced;
+            barBgImg.color = Color.white;
 
             // Fame Progress Bar Fill
             GameObject barFillObj = new GameObject("FameBarFill");
@@ -418,18 +427,19 @@ namespace IdleFishing.UI
             barFillRt.anchorMax = Vector2.one;
             barFillRt.sizeDelta = Vector2.zero;
             fameFillImage = barFillObj.AddComponent<Image>();
-            fameFillImage.sprite = whiteSp;
+            fameFillImage.sprite = CasualUITheme.SliderFillGreen ?? whiteSp;
             fameFillImage.type = Image.Type.Filled;
             fameFillImage.fillMethod = Image.FillMethod.Horizontal;
-            fameFillImage.color = new Color(0.18f, 0.8f, 0.44f, 1f); // Green Fame
+            fameFillImage.color = Color.white;
 
             // Buff Summary Text
             GameObject buffTxtObj = new GameObject("BuffSummary");
             buffTxtObj.transform.SetParent(progSection.transform, false);
             buffSummaryText = buffTxtObj.AddComponent<TextMeshProUGUI>();
-            buffSummaryText.fontSize = 16;
+            buffSummaryText.fontSize = 20;
             buffSummaryText.alignment = TextAlignmentOptions.MidlineLeft;
-            buffSummaryText.color = new Color(0.85f, 0.85f, 0.85f);
+            buffSummaryText.color = new Color(0.85f, 0.88f, 0.95f);
+            buffSummaryText.ApplyFont(UIFontCategory.Default);
             RectTransform bTxtRt = buffTxtObj.GetComponent<RectTransform>();
             bTxtRt.anchorMin = new Vector2(0, 0);
             bTxtRt.anchorMax = new Vector2(1, 0.3f);
@@ -441,8 +451,8 @@ namespace IdleFishing.UI
             RectTransform ccRt = cardsContainer.AddComponent<RectTransform>();
             ccRt.anchorMin = new Vector2(0, 0);
             ccRt.anchorMax = new Vector2(1, 1);
-            ccRt.anchoredPosition = new Vector2(0, -65);
-            ccRt.sizeDelta = new Vector2(-40, -185);
+            ccRt.anchoredPosition = new Vector2(0, -78);
+            ccRt.sizeDelta = new Vector2(-40, -188);
 
             cardUIs.Clear();
             float cardWidth = 260;
@@ -457,6 +467,7 @@ namespace IdleFishing.UI
                 cardUIs.Add(card);
             }
 
+            UIFontConfig.Instance?.ApplyToHierarchy(popupRoot);
             popupRoot.SetActive(false);
         }
 
@@ -472,115 +483,118 @@ namespace IdleFishing.UI
             cRt.anchorMin = new Vector2(0.5f, 0.5f);
             cRt.anchorMax = new Vector2(0.5f, 0.5f);
             cRt.pivot = new Vector2(0.5f, 0.5f);
-            cRt.sizeDelta = new Vector2(260, 360);
+            cRt.sizeDelta = new Vector2(265, 420);
 
             Image cBg = cObj.AddComponent<Image>();
-            cBg.sprite = whiteSp;
-            cBg.color = new Color(0.14f, 0.18f, 0.25f, 0.98f);
+            CasualUITheme.StyleCard(cBg, new Color(0.08f, 0.12f, 0.20f, 0.95f));
 
-            // Client Header
+            // 1. Client Header (e.g. [MART] Fresh Mart Harbor)
             GameObject clientObj = new GameObject("ClientHeader");
             clientObj.transform.SetParent(cObj.transform, false);
             card.clientText = clientObj.AddComponent<TextMeshProUGUI>();
-            card.clientText.fontSize = 18;
+            card.clientText.fontSize = 16;
             card.clientText.fontStyle = FontStyles.Bold;
             card.clientText.alignment = TextAlignmentOptions.Center;
             card.clientText.color = new Color(1f, 0.85f, 0.35f);
+            card.clientText.textWrappingMode = TextWrappingModes.NoWrap;
+            card.clientText.ApplyFont(UIFontCategory.Header);
             RectTransform clRt = clientObj.GetComponent<RectTransform>();
             clRt.anchorMin = new Vector2(0, 1);
             clRt.anchorMax = new Vector2(1, 1);
             clRt.pivot = new Vector2(0.5f, 1);
             clRt.anchoredPosition = new Vector2(0, -12);
-            clRt.sizeDelta = new Vector2(-20, 30);
+            clRt.sizeDelta = new Vector2(-16, 26);
 
-            // Contract Title
+            // 2. Contract Title (e.g. Fresh Salmon Supply)
             GameObject titleObj = new GameObject("Title");
             titleObj.transform.SetParent(cObj.transform, false);
             card.titleText = titleObj.AddComponent<TextMeshProUGUI>();
-            card.titleText.fontSize = 18;
+            card.titleText.fontSize = 19;
             card.titleText.fontStyle = FontStyles.Bold;
             card.titleText.alignment = TextAlignmentOptions.Center;
             card.titleText.color = Color.white;
+            card.titleText.ApplyFont(UIFontCategory.Header);
             RectTransform tRt = titleObj.GetComponent<RectTransform>();
             tRt.anchorMin = new Vector2(0, 1);
             tRt.anchorMax = new Vector2(1, 1);
             tRt.pivot = new Vector2(0.5f, 1);
-            tRt.anchoredPosition = new Vector2(0, -44);
-            tRt.sizeDelta = new Vector2(-20, 35);
+            tRt.anchoredPosition = new Vector2(0, -42);
+            tRt.sizeDelta = new Vector2(-16, 44);
 
-            // Contract Description
+            // 3. Contract Description
             GameObject descObj = new GameObject("Desc");
             descObj.transform.SetParent(cObj.transform, false);
             card.descText = descObj.AddComponent<TextMeshProUGUI>();
-            card.descText.fontSize = 15;
+            card.descText.fontSize = 14;
             card.descText.alignment = TextAlignmentOptions.Center;
-            card.descText.color = new Color(0.75f, 0.8f, 0.9f);
+            card.descText.color = new Color(0.75f, 0.82f, 0.92f);
+            card.descText.ApplyFont(UIFontCategory.Default);
             RectTransform dRt = descObj.GetComponent<RectTransform>();
             dRt.anchorMin = new Vector2(0, 1);
             dRt.anchorMax = new Vector2(1, 1);
             dRt.pivot = new Vector2(0.5f, 1);
-            dRt.anchoredPosition = new Vector2(0, -80);
-            dRt.sizeDelta = new Vector2(-20, 45);
+            dRt.anchoredPosition = new Vector2(0, -90);
+            dRt.sizeDelta = new Vector2(-16, 50);
 
-            // Progress Text (Required & Available)
+            // 4. Progress Text (Required & Available)
             GameObject progObj = new GameObject("ProgressText");
             progObj.transform.SetParent(cObj.transform, false);
             card.progressText = progObj.AddComponent<TextMeshProUGUI>();
-            card.progressText.fontSize = 16;
+            card.progressText.fontSize = 17;
             card.progressText.alignment = TextAlignmentOptions.Center;
             card.progressText.color = Color.white;
+            card.progressText.ApplyFont(UIFontCategory.Default);
             RectTransform pRt = progObj.GetComponent<RectTransform>();
             pRt.anchorMin = new Vector2(0, 1);
             pRt.anchorMax = new Vector2(1, 1);
             pRt.pivot = new Vector2(0.5f, 1);
-            pRt.anchoredPosition = new Vector2(0, -135);
-            pRt.sizeDelta = new Vector2(-20, 50);
+            pRt.anchoredPosition = new Vector2(0, -146);
+            pRt.sizeDelta = new Vector2(-16, 56);
 
-            // Rewards Text
+            // 5. Rewards Text
             GameObject rewObj = new GameObject("RewardsText");
             rewObj.transform.SetParent(cObj.transform, false);
             card.rewardText = rewObj.AddComponent<TextMeshProUGUI>();
-            card.rewardText.fontSize = 16;
+            card.rewardText.fontSize = 18;
             card.rewardText.alignment = TextAlignmentOptions.Center;
             card.rewardText.color = Color.white;
+            card.rewardText.ApplyFont(UIFontCategory.Numbers);
             RectTransform rRt = rewObj.GetComponent<RectTransform>();
             rRt.anchorMin = new Vector2(0, 1);
             rRt.anchorMax = new Vector2(1, 1);
             rRt.pivot = new Vector2(0.5f, 1);
-            rRt.anchoredPosition = new Vector2(0, -195);
-            rRt.sizeDelta = new Vector2(-20, 50);
+            rRt.anchoredPosition = new Vector2(0, -208);
+            rRt.sizeDelta = new Vector2(-16, 56);
 
-            // Timer Text
+            // 6. Timer Text
             GameObject timerObj = new GameObject("TimerText");
             timerObj.transform.SetParent(cObj.transform, false);
             card.timerText = timerObj.AddComponent<TextMeshProUGUI>();
-            card.timerText.fontSize = 15;
+            card.timerText.fontSize = 17;
             card.timerText.fontStyle = FontStyles.Bold;
             card.timerText.alignment = TextAlignmentOptions.Center;
             card.timerText.color = new Color(0.9f, 0.75f, 0.4f);
+            card.timerText.ApplyFont(UIFontCategory.Default);
             RectTransform tmRt = timerObj.GetComponent<RectTransform>();
             tmRt.anchorMin = new Vector2(0, 1);
             tmRt.anchorMax = new Vector2(1, 1);
             tmRt.pivot = new Vector2(0.5f, 1);
-            tmRt.anchoredPosition = new Vector2(0, -252);
-            tmRt.sizeDelta = new Vector2(-20, 25);
+            tmRt.anchoredPosition = new Vector2(0, -272);
+            tmRt.sizeDelta = new Vector2(-16, 28);
 
-            // Deliver Button
+            // 7. Deliver Button
             GameObject btnObj = new GameObject("DeliverBtn");
             btnObj.transform.SetParent(cObj.transform, false);
             RectTransform bRt = btnObj.AddComponent<RectTransform>();
             bRt.anchorMin = new Vector2(0.5f, 0);
             bRt.anchorMax = new Vector2(0.5f, 0);
             bRt.pivot = new Vector2(0.5f, 0);
-            bRt.anchoredPosition = new Vector2(0, 16);
-            bRt.sizeDelta = new Vector2(230, 52);
+            bRt.anchoredPosition = new Vector2(0, 14);
+            bRt.sizeDelta = new Vector2(230, 54);
 
             card.deliverBtnBg = btnObj.AddComponent<Image>();
-            card.deliverBtnBg.sprite = whiteSp;
-            card.deliverBtnBg.color = new Color(0.18f, 0.80f, 0.44f);
-
             card.deliverButton = btnObj.AddComponent<Button>();
-            card.deliverButton.targetGraphic = card.deliverBtnBg;
+            CasualUITheme.StyleButton(card.deliverButton, card.deliverBtnBg, CasualBtnStyle.Green);
             card.deliverButton.onClick.AddListener(() =>
             {
                 if (card.boundContract != null && ContractManager.Instance != null)
@@ -593,11 +607,12 @@ namespace IdleFishing.UI
             btnTxtObj.transform.SetParent(btnObj.transform, false);
             card.deliverBtnText = btnTxtObj.AddComponent<TextMeshProUGUI>();
             card.deliverBtnText.text = "DELIVER";
-            card.deliverBtnText.fontSize = 18;
+            card.deliverBtnText.fontSize = 20;
             card.deliverBtnText.fontStyle = FontStyles.Bold;
             card.deliverBtnText.alignment = TextAlignmentOptions.Center;
             card.deliverBtnText.color = Color.white;
             card.deliverBtnText.raycastTarget = false;
+            card.deliverBtnText.ApplyFont(UIFontCategory.Button);
             RectTransform btRt = btnTxtObj.GetComponent<RectTransform>();
             btRt.anchorMin = Vector2.zero;
             btRt.anchorMax = Vector2.one;

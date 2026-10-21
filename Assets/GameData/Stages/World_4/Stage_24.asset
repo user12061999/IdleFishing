@@ -1,0 +1,44 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8fb4bf1520bf6cd4592f26e0e019b0f7, type: 3}
+  m_Name: Stage_24
+  m_EditorClassIdentifier: 
+  stageId: stage_24
+  stageNumber: 24
+  worldId: world_4
+  stageInWorld: 6
+  stageTitle: Glacier Behemoth
+  mechanicDescription: 'World 4 Apex Boss: Glacier Behemoth! Smash icy weakpoints
+    and unlock the voyage to the Desert Oasis.'
+  targetMinutes: 7
+  estimatedBaseGoldPerMin: 4633126
+  rewardGoldEquivalentMinutes: 1.25
+  grantFameOnFirstClear: 1
+  replayable: 0
+  goals:
+  - goalType: 7
+    targetCount: 1
+    targetId: great_white_shark
+    targetLevel: 1
+    customDescription: Defeat Glacier Behemoth
+  - goalType: 2
+    targetCount: 30
+    targetId: 
+    targetLevel: 1
+    customDescription: Sell 30 Fish at Market
+  guaranteedFirstCatch: {fileID: 0}
+  bossToSpawn: {fileID: 11400000, guid: 3b7179d9f5541054a9c70853ccf3b66d, type: 2}
+  isWorldBossStage: 1
+  worldVoyageUnlock: world_5
+  featureUnlocks:
+  - world_5_voyage
+  - narwhal_trophy

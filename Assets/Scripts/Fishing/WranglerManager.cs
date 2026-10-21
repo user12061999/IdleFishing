@@ -38,6 +38,16 @@ namespace IdleFishing.Fishing
                 return;
             }
             Instance = this;
+
+            if (hirePad != null)
+            {
+                hirePad.SetUpgradeType(UpgradeType.WranglerTeam);
+            }
+            else if (hirePadObj != null)
+            {
+                var pad = hirePadObj.GetComponent<InWorldPurchasePad>();
+                if (pad != null) pad.SetUpgradeType(UpgradeType.WranglerTeam);
+            }
         }
 
         private void Start()
@@ -57,7 +67,7 @@ namespace IdleFishing.Fishing
 
         private void OnUpgradePurchased(UpgradeType type, int level)
         {
-            if (type == UpgradeType.HireWrangler)
+            if (type == UpgradeType.WranglerTeam)
             {
                 RefreshWranglers(instant: false);
             }
@@ -69,6 +79,10 @@ namespace IdleFishing.Fishing
             restAreaCenter = restCenter;
             hirePadObj = padObj;
             hirePad = padScript;
+            if (hirePad != null)
+            {
+                hirePad.SetUpgradeType(UpgradeType.WranglerTeam);
+            }
             if (modelPrefab != null) wranglerModelPrefab = modelPrefab;
         }
 
@@ -85,7 +99,13 @@ namespace IdleFishing.Fishing
             int targetCount = 1;
             if (UpgradeManager.Instance != null)
             {
-                targetCount = Mathf.Clamp(UpgradeManager.Instance.GetLevel(UpgradeType.HireWrangler) + 1, 1, 4);
+                targetCount = UpgradeManager.Instance.GetUnlockedWranglerCount();
+            }
+
+            int nextReqLvl = UpgradeManager.Instance != null ? UpgradeManager.Instance.GetNextWranglerRequiredLevel() : -1;
+            if (hirePadObj != null)
+            {
+                hirePadObj.SetActive(nextReqLvl > 0);
             }
 
             // Spawn new wranglers dynamically if needed
@@ -125,9 +145,12 @@ namespace IdleFishing.Fishing
                 hirePadObj.SetActive(true);
                 if (hirePad != null)
                 {
-                    if (targetCount >= 4)
+                    bool isFull = targetCount >= 4;
+                    hirePad.SetForcedMax(isFull);
+
+                    if (isFull)
                     {
-                        hirePad.SetTitle("[V] MAX WRANGLERS REACHED");
+                        hirePad.SetTitle("[V] WRANGLERS FULL");
                         hirePad.SetSubtitle("4/4 Wranglers active");
                     }
                     else if (targetCount == 0)
@@ -140,6 +163,7 @@ namespace IdleFishing.Fishing
                         hirePad.SetTitle("[+] HIRE MORE WRANGLERS");
                         hirePad.SetSubtitle($"Current: {targetCount}/4 Wranglers");
                     }
+                    hirePad.SetUpgradeType(UpgradeType.WranglerTeam);
                     hirePad.UpdateVisuals();
                 }
             }
@@ -156,8 +180,15 @@ namespace IdleFishing.Fishing
             wranglerObj.transform.SetParent(transform);
             wranglerObj.transform.position = new Vector3(restPos.x, 0.60f, restPos.z);
             wranglerObj.transform.localScale = new Vector3(0.8f, 1.0f, 0.8f);
+            int ignoreRaycastLayer = LayerMask.NameToLayer("Ignore Raycast");
+            if (ignoreRaycastLayer < 0) ignoreRaycastLayer = 2;
+            wranglerObj.layer = ignoreRaycastLayer;
             var wrangCol = wranglerObj.GetComponent<CapsuleCollider>();
-            if (wrangCol != null) wrangCol.isTrigger = true;
+            if (wrangCol != null)
+            {
+                wrangCol.isTrigger = true;
+                wrangCol.gameObject.layer = ignoreRaycastLayer;
+            }
 
             // Visual Model
             GameObject modelPrefab = wranglerModelPrefab;

@@ -4,6 +4,7 @@ using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 using IdleFishing.Core;
 using IdleFishing.Data;
+using IdleFishing.Fishing;
 using IdleFishing.VFX;
 using IdleFishing.Audio;
 
@@ -26,145 +27,145 @@ namespace IdleFishing.World
         [Header("Water Material Asset")]
         [SerializeField] private Material waterMaterial;
 
-        [Header("=== 1. ĐƯỜNG BAO VIỀN BỌT NƯỚC (CONTOUR FOAM) ===")]
-        [Tooltip("Màu sắc và độ mờ đục của bọt nước (Alpha điều chỉnh độ đậm nhạt)")]
+        [Header("=== 1. CONTOUR FOAM ===")]
+        [Tooltip("Color and opacity of contour foam (Alpha adjusts density)")]
         [SerializeField] private Color foamColor = new Color(0.97f, 0.99f, 1.0f, 0.96f);
 
-        [Tooltip("Tổng độ dày vùng viền bọt ôm quanh khối đa giác 3D (meters)")]
+        [Tooltip("Total thickness of foam band around 3D geometries (meters)")]
         [Range(0.01f, 1.0f)]
         [SerializeField] private float contourFoamThickness = 0.22f;
 
-        [Tooltip("Độ rộng dải viền bọt trong cùng bám sát mép lưới vật thể 3D")]
+        [Tooltip("Width of inner foam line hugging 3D mesh boundaries")]
         [Range(0.005f, 0.4f)]
         [SerializeField] private float contourInnerLine = 0.075f;
 
-        [Tooltip("Khoảng cách viền bọt phụ bên ngoài so với mép vật thể")]
+        [Tooltip("Distance of outer secondary foam ring from object edge")]
         [Range(0.02f, 0.6f)]
         [SerializeField] private float contourOuterLine = 0.17f;
 
-        [Tooltip("Độ mảnh/dày của dải viền bọt phụ bên ngoài")]
+        [Tooltip("Thickness of secondary outer foam ring")]
         [Range(0.005f, 0.2f)]
         [SerializeField] private float contourOuterWidth = 0.045f;
 
-        [Tooltip("Độ gợn mép hữu cơ tự nhiên của đường viền bọt")]
+        [Tooltip("Organic edge distortion frequency for foam contour")]
         [Range(0.5f, 10.0f)]
         [SerializeField] private float contourNoiseScale = 2.4f;
 
-        [Tooltip("Biên độ uốn lượn lồi lõm của viền bọt")]
+        [Tooltip("Distortion amplitude of foam contour curves")]
         [Range(0.0f, 0.1f)]
         [SerializeField] private float contourNoiseStrength = 0.028f;
 
-        [Tooltip("Tốc độ xung nhịp gợn sóng của viền bọt phụ")]
+        [Tooltip("Pulse animation speed of outer foam ripple")]
         [Range(0.0f, 8.0f)]
         [SerializeField] private float contourPulseSpeed = 2.8f;
 
-        [Tooltip("Ngưỡng độ sâu tối thiểu Y để sinh bọt (vật thể sâu hơn mức này sẽ không có bọt)")]
+        [Tooltip("Cutoff depth threshold Y for foam generation (deeper objects emit no foam)")]
         [Range(-3.0f, 0.0f)]
         [SerializeField] private float contourCutoffDepth = -0.75f;
 
-        [Header("=== 2. MÀU SẮC & CHUYỂN MÀU ĐỘ SÂU (WATER COLORS & DEPTH) ===")]
-        [Tooltip("Màu nước nông gần bờ / rạn san hô")]
+        [Header("=== 2. WATER COLORS & DEPTH ===")]
+        [Tooltip("Shallow water color near shore / coral reef")]
         [SerializeField] private Color shallowColor = new Color(0.14f, 0.85f, 0.88f, 0.74f);
 
-        [Tooltip("Màu nước biển trung tầng")]
+        [Tooltip("Mid-depth water color")]
         [SerializeField] private Color baseColor = new Color(0.08f, 0.56f, 0.85f, 0.88f);
 
-        [Tooltip("Màu nước biển sâu xa khơi")]
+        [Tooltip("Deep ocean water color")]
         [SerializeField] private Color deepColor = new Color(0.04f, 0.26f, 0.56f, 0.96f);
 
-        [Tooltip("Sắc độ đường chân trời / góc xiên viền mặt nước (Fresnel)")]
+        [Tooltip("Fresnel horizon rim color at glancing angles")]
         [SerializeField] private Color horizonColor = new Color(0.18f, 0.65f, 0.92f, 1.0f);
 
-        [Tooltip("Khoảng cách chuyển màu độ sâu (càng nhỏ chuyển màu sang nước sâu càng nhanh)")]
+        [Tooltip("Depth gradient transition distance")]
         [Range(0.5f, 10.0f)]
         [SerializeField] private float depthMaxDistance = 2.4f;
 
-        [Header("=== 3. SÓNG NƯỚC & VERTEX NHẤP NHÔ (WAVE MOTION) ===")]
-        [Tooltip("Độ cao chuẩn của mặt biển (World Y)")]
+        [Header("=== 3. WAVE MOTION ===")]
+        [Tooltip("Base water height level (World Y)")]
         [SerializeField] private float baseWaterLevelY = 0.05f;
 
-        [Tooltip("Biên độ nhấp nhô của sóng (độ cao đỉnh sóng)")]
+        [Tooltip("Wave displacement amplitude (peak height)")]
         [Range(0.0f, 0.3f)]
         [SerializeField] private float waveAmplitude = 0.055f;
 
-        [Tooltip("Tần số sóng (mật độ cuộn sóng)")]
+        [Tooltip("Wave frequency (roll density)")]
         [Range(0.1f, 4.0f)]
         [SerializeField] private float waveFrequency = 0.85f;
 
-        [Tooltip("Tốc độ sóng cuộn trôi")]
+        [Tooltip("Wave scroll speed")]
         [Range(0.1f, 6.0f)]
         [SerializeField] private float waveSpeed = 1.65f;
 
-        [Tooltip("Tỷ lệ sóng thứ cấp tạo dao động tự nhiên")]
+        [Tooltip("Secondary harmonic wave scale for natural oscillation")]
         [Range(0.1f, 4.0f)]
         [SerializeField] private float secondaryWaveScale = 1.45f;
 
-        [Header("=== 4. DÒNG NƯỚC CHẢY (FLOW CURRENT) ===")]
-        [Tooltip("Hướng chảy chính của dòng nước (X, Z)")]
+        [Header("=== 4. FLOW CURRENT ===")]
+        [Tooltip("Primary current flow vector (X, Z)")]
         [SerializeField] private Vector2 flowDirection = new Vector2(0.97f, 0.23f);
 
-        [Tooltip("Tốc độ dòng chảy")]
+        [Tooltip("Current speed")]
         [Range(0.0f, 3.0f)]
         [SerializeField] private float flowSpeed = 0.55f;
 
-        [Tooltip("Cường độ vệt nước chảy bọt trắng")]
+        [Tooltip("Flow foam streak intensity")]
         [Range(0.0f, 1.0f)]
         [SerializeField] private float flowStreakIntensity = 0.52f;
 
-        [Tooltip("Kích thước vệt sợi dòng chảy")]
+        [Tooltip("Flow streak pattern scale")]
         [Range(0.05f, 2.0f)]
         [SerializeField] private float flowStreakScale = 0.35f;
 
-        [Tooltip("Tọa độ Z tâm luồng chảy xiết")]
+        [Tooltip("Z position center of rapid current band")]
         [SerializeField] private float flowBandCenterZ = 17.5f;
 
-        [Tooltip("Độ rộng luồng chảy xiết")]
+        [Tooltip("Width of rapid current band")]
         [SerializeField] private float flowBandWidth = 9.0f;
 
-        [Header("=== 5. KHÚC XẠ ÁNH SÁNG ĐÁY NƯỚC (VORONOI CAUSTICS) ===")]
-        [Tooltip("Màu sắc và độ sáng của mạng lưới quang học đáy nước")]
+        [Header("=== 5. VORONOI CAUSTICS ===")]
+        [Tooltip("Color and brightness of seabed optical caustics")]
         [SerializeField] private Color causticColor = new Color(0.58f, 0.96f, 1.0f, 0.32f);
 
-        [Tooltip("Kích thước ô lưới khúc xạ Voronoi")]
+        [Tooltip("Voronoi caustics pattern scale")]
         [Range(0.1f, 3.0f)]
         [SerializeField] private float causticScale = 0.65f;
 
-        [Tooltip("Tốc độ biến thiên tia khúc xạ")]
+        [Tooltip("Caustic animation speed")]
         [Range(0.1f, 3.0f)]
         [SerializeField] private float causticSpeed = 0.85f;
 
-        [Tooltip("Độ mảnh/sắc nét của viền tế bào quang học")]
+        [Tooltip("Sharpness threshold of caustic cell boundaries")]
         [Range(0.01f, 0.25f)]
         [SerializeField] private float causticThreshold = 0.055f;
 
-        [Tooltip("Độ mềm mại mép tia sáng")]
+        [Tooltip("Softness factor of caustic edges")]
         [Range(0.005f, 0.15f)]
         [SerializeField] private float causticSoftness = 0.025f;
 
-        [Header("=== 6. LẤP LÁNH ÁNH NẮNG & SÓNG BỜ (SPARKLES & SHORE) ===")]
-        [Tooltip("Màu phản chiếu tia nắng mặt trời (Specular)")]
+        [Header("=== 6. SPARKLES & SHORE ===")]
+        [Tooltip("Sunlight specular highlight color")]
         [SerializeField] private Color specularColor = new Color(1.0f, 0.98f, 0.88f, 1.0f);
 
-        [Tooltip("Độ tụ đốm sáng mặt trời")]
+        [Tooltip("Specular dot tightness")]
         [Range(0.8f, 0.999f)]
         [SerializeField] private float specularSize = 0.965f;
 
-        [Tooltip("Cường độ lấp lánh")]
+        [Tooltip("Sparkle intensity")]
         [Range(0.0f, 2.0f)]
         [SerializeField] private float sparkleIntensity = 0.85f;
 
-        [Tooltip("Tọa độ Z mép bờ cảng")]
+        [Tooltip("Shoreline pier Z position")]
         [SerializeField] private float shorelineZ = 10.15f;
 
-        [Tooltip("Độ dày vùng sóng vỗ bến cảng")]
+        [Tooltip("Shore wave foam width")]
         [Range(0.1f, 2.0f)]
         [SerializeField] private float shoreFoamWidth = 0.65f;
 
-        [Header("=== 7. ĐỘ PHÂN GIẢI LƯỚI NƯỚC (MESH RESOLUTION) ===")]
-        [Tooltip("Số ô lưới chia theo trục X")]
+        [Header("=== 7. MESH RESOLUTION ===")]
+        [Tooltip("Grid subdivision along X axis")]
         [SerializeField] private int gridResolutionX = 72;
 
-        [Tooltip("Số ô lưới chia theo trục Z")]
+        [Tooltip("Grid subdivision along Z axis")]
         [SerializeField] private int gridResolutionZ = 52;
 
         private struct ActiveRipple
@@ -204,11 +205,15 @@ namespace IdleFishing.World
             Instance = this;
             InitializeWaterSystem();
             GameEvents.WorldChanged += OnWorldChanged;
+            GameEvents.FrenzyStarted += OnFrenzyStarted;
+            GameEvents.FrenzyEnded += OnFrenzyEnded;
         }
 
         private void OnDisable()
         {
             GameEvents.WorldChanged -= OnWorldChanged;
+            GameEvents.FrenzyStarted -= OnFrenzyStarted;
+            GameEvents.FrenzyEnded -= OnFrenzyEnded;
         }
 
         public void InitializeWaterSystem()
@@ -350,6 +355,49 @@ namespace IdleFishing.World
             waterMaterial.SetVectorArray("_RippleParams", shaderRippleParams);
         }
 
+        private float originalWaveSpeed = 1.65f;
+        private float originalWaveAmplitude = 0.055f;
+        private float originalFlowSpeed = 0.55f;
+        private bool isFrenzySurge = false;
+
+        private void OnFrenzyStarted()
+        {
+            if (!isFrenzySurge)
+            {
+                originalWaveSpeed = waveSpeed;
+                originalWaveAmplitude = waveAmplitude;
+                originalFlowSpeed = flowSpeed;
+                isFrenzySurge = true;
+            }
+
+            waveSpeed = originalWaveSpeed * 1.75f;
+            waveAmplitude = originalWaveAmplitude * 1.4f;
+            flowSpeed = originalFlowSpeed * 1.8f;
+            SyncShaderParameters();
+
+            // Sóng bọt cuộn trào trước bến câu cá
+            RegisterRipple(new Vector3(-4.0f, 0f, 13.8f), 3.2f, 1.3f, 14.0f, 2.5f);
+            RegisterRipple(new Vector3(0.0f, 0f, 13.8f), 3.8f, 1.5f, 15.0f, 2.5f);
+            RegisterRipple(new Vector3(4.0f, 0f, 13.8f), 3.2f, 1.3f, 14.0f, 2.5f);
+
+            if (VFXManager.Instance != null)
+            {
+                VFXManager.Instance.SpawnCFXRWaterRipple(new Vector3(0f, baseWaterLevelY, 13.8f), 2.0f);
+            }
+        }
+
+        private void OnFrenzyEnded()
+        {
+            if (isFrenzySurge)
+            {
+                waveSpeed = originalWaveSpeed;
+                waveAmplitude = originalWaveAmplitude;
+                flowSpeed = originalFlowSpeed;
+                isFrenzySurge = false;
+                SyncShaderParameters();
+            }
+        }
+
         private void OnMouseDown()
         {
             if (!Application.isPlaying) return;
@@ -370,6 +418,10 @@ namespace IdleFishing.World
                 if (AudioManager.Instance != null)
                 {
                     AudioManager.Instance.PlayWaterPlop(hitPoint);
+                }
+                if (FishingFrenzyManager.Instance != null)
+                {
+                    FishingFrenzyManager.Instance.AddCharge(2.5f);
                 }
             }
         }
@@ -857,6 +909,21 @@ namespace IdleFishing.World
         // =========================================================
         // 6. WORLD THEME & DAY/NIGHT ADAPTATION
         // =========================================================
+        public void ApplyWaterProfile(
+            Color shallow, Color baseCol, Color deep, Color foam,
+            Color caustic, float maxDepth, float waveAmp)
+        {
+            shallowColor = shallow;
+            baseColor = baseCol;
+            deepColor = deep;
+            foamColor = foam;
+            causticColor = caustic;
+            depthMaxDistance = maxDepth;
+            waveAmplitude = waveAmp;
+            worldTintMultiplier = Color.white;
+            SyncShaderParameters();
+        }
+
         private void OnWorldChanged(WorldData world)
         {
             if (world == null) return;

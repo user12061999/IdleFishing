@@ -1,0 +1,42 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8fb4bf1520bf6cd4592f26e0e019b0f7, type: 3}
+  m_Name: Stage_08
+  m_EditorClassIdentifier: 
+  stageId: stage_08
+  stageNumber: 8
+  worldId: world_2
+  stageInWorld: 2
+  stageTitle: Puffer Panic
+  mechanicDescription: Pufferfish inflates when attacked! Time attacks or let wranglers handle the spikes.
+  targetMinutes: 3.0
+  estimatedBaseGoldPerMin: 3288
+  rewardGoldEquivalentMinutes: 0.35
+  grantFameOnFirstClear: 1
+  replayable: 0
+  goals:
+  - goalType: 1
+    targetCount: 3
+    targetId: pufferfish
+    targetLevel: 1
+    customDescription: Defeat 3 Pufferfish
+  - goalType: 0
+    targetCount: 8
+    targetId: 
+    targetLevel: 1
+    customDescription: Catch 8 Fish
+  guaranteedFirstCatch: {fileID: 11400000, guid: 81cc42838b4308e4f920b44c5baaf66e, type: 2}
+  bossToSpawn: {fileID: 0}
+  isWorldBossStage: 0
+  worldVoyageUnlock: 
+  featureUnlocks:
+  - puffer_defense

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using UnityEngine;
 using IdleFishing.Core;
 using IdleFishing.Economy;
@@ -137,7 +137,7 @@ namespace IdleFishing.World
                     transform.position + Vector3.up * 4.5f,
                     0,
                     DamageStyle.GoldBonus,
-                    $"[★] LIGHTHOUSE REACHED LV {currentLevel}! [★]"
+                    $"[[*]] LIGHTHOUSE REACHED LV {currentLevel}! [[*]]"
                 );
             }
 

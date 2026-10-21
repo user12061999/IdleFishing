@@ -43,28 +43,46 @@ namespace IdleFishing.UI
         {
             Sprite whiteSp = FloatingHealthBarUI.GetWhiteSprite();
 
-            // 1. Container at Top-Center (below coins HUD)
+            // 1. Container docked to LeftQuestEventDockUI
+            Transform parentContainer = (LeftQuestEventDockUI.Instance != null)
+                ? LeftQuestEventDockUI.Instance.ContentContainer
+                : transform;
+
             GameObject container = new GameObject("Frenzy_HUD_Container");
-            container.transform.SetParent(transform, false);
+            container.transform.SetParent(parentContainer, false);
             barContainerRect = container.AddComponent<RectTransform>();
-            barContainerRect.anchorMin = new Vector2(0.5f, 1f);
-            barContainerRect.anchorMax = new Vector2(0.5f, 1f);
-            barContainerRect.pivot = new Vector2(0.5f, 1f);
-            barContainerRect.anchoredPosition = new Vector2(0, -70);
-            barContainerRect.sizeDelta = new Vector2(360, 44);
+            barContainerRect.anchorMin = new Vector2(0f, 1f);
+            barContainerRect.anchorMax = new Vector2(0f, 1f);
+            barContainerRect.pivot = new Vector2(0f, 1f);
+            barContainerRect.anchoredPosition = Vector2.zero;
+            barContainerRect.sizeDelta = new Vector2(540f, 50f);
+
+            var le = container.AddComponent<LayoutElement>();
+            le.preferredWidth = 540f;
+            le.preferredHeight = 50f;
+            le.minHeight = 50f;
 
             // 2. Background
             bgImage = container.AddComponent<Image>();
-            bgImage.sprite = whiteSp;
-            bgImage.color = new Color(0.12f, 0.15f, 0.20f, 0.92f); // Dark Charcoal
+            if (CasualUITheme.SliderBg != null)
+            {
+                bgImage.sprite = CasualUITheme.SliderBg;
+                bgImage.type = Image.Type.Sliced;
+                bgImage.color = new Color(0.08f, 0.12f, 0.18f, 0.95f); // Dark Slate Navy
+            }
+            else
+            {
+                bgImage.sprite = whiteSp;
+                bgImage.color = new Color(0.08f, 0.12f, 0.18f, 0.95f);
+            }
             bgImage.raycastTarget = false;
 
             // 3. Fill Bar
             GameObject fillObj = new GameObject("Frenzy_Fill");
             fillObj.transform.SetParent(container.transform, false);
             fillImage = fillObj.AddComponent<Image>();
-            fillImage.sprite = whiteSp;
-            fillImage.color = normalChargeColor;
+            fillImage.sprite = CasualUITheme.SliderFillYellow != null ? CasualUITheme.SliderFillYellow : whiteSp;
+            fillImage.color = Color.white;
             fillImage.type = Image.Type.Filled;
             fillImage.fillMethod = Image.FillMethod.Horizontal;
             fillImage.fillOrigin = (int)Image.OriginHorizontal.Left;
@@ -82,17 +100,23 @@ namespace IdleFishing.UI
             txtObj.transform.SetParent(container.transform, false);
             statusText = txtObj.AddComponent<TextMeshProUGUI>();
             statusText.text = "FRENZY: 0%";
-            statusText.fontSize = 20;
+            statusText.fontSize = 18;
             statusText.fontStyle = FontStyles.Bold;
             statusText.alignment = TextAlignmentOptions.Center;
             statusText.color = Color.white;
+            statusText.textWrappingMode = TextWrappingModes.NoWrap;
             statusText.raycastTarget = false;
+            statusText.ApplyFont(UIFontCategory.Button);
 
             RectTransform txtRect = txtObj.GetComponent<RectTransform>();
             txtRect.anchorMin = Vector2.zero;
             txtRect.anchorMax = Vector2.one;
+            txtRect.pivot = new Vector2(0.5f, 0.5f);
             txtRect.offsetMin = Vector2.zero;
             txtRect.offsetMax = Vector2.zero;
+            txtRect.anchoredPosition = Vector2.zero;
+
+            container.SetActive(false);
         }
 
         private void OnChargeChanged(float charge)
@@ -104,7 +128,8 @@ namespace IdleFishing.UI
         {
             if (fillImage != null)
             {
-                fillImage.color = frenzyActiveColor;
+                if (CasualUITheme.SliderFillRed != null) fillImage.sprite = CasualUITheme.SliderFillRed;
+                fillImage.color = Color.white;
             }
         }
 
@@ -112,7 +137,8 @@ namespace IdleFishing.UI
         {
             if (fillImage != null)
             {
-                fillImage.color = normalChargeColor;
+                if (CasualUITheme.SliderFillYellow != null) fillImage.sprite = CasualUITheme.SliderFillYellow;
+                fillImage.color = Color.white;
             }
             targetFill = 0f;
         }
@@ -121,6 +147,16 @@ namespace IdleFishing.UI
         {
             var frenzyMgr = FishingFrenzyManager.Instance;
             if (frenzyMgr == null) return;
+
+            if (barContainerRect != null)
+            {
+                bool shouldShow = frenzyMgr.IsFrenzyActive || frenzyMgr.CurrentCharge > 0.1f;
+                if (barContainerRect.gameObject.activeSelf != shouldShow)
+                {
+                    barContainerRect.gameObject.SetActive(shouldShow);
+                }
+                if (!shouldShow) return;
+            }
 
             if (frenzyMgr.IsFrenzyActive)
             {
@@ -132,21 +168,23 @@ namespace IdleFishing.UI
                 if (fillImage != null)
                 {
                     fillImage.fillAmount = currentFill;
-                    // Pulsing fire effect
-                    float pulse = 0.85f + Mathf.PingPong(Time.time * 3f, 0.25f);
-                    fillImage.color = new Color(1.0f, 0.3f * pulse, 0.1f);
+                    if (CasualUITheme.SliderFillRed != null)
+                    {
+                        fillImage.sprite = CasualUITheme.SliderFillRed;
+                        fillImage.color = Color.white;
+                    }
+                    else
+                    {
+                        float pulse = 0.85f + Mathf.PingPong(Time.time * 3f, 0.25f);
+                        fillImage.color = new Color(1.0f, 0.3f * pulse, 0.1f);
+                    }
                 }
 
                 if (statusText != null)
                 {
-                    statusText.text = $"FRENZY: {remain:0.0}s";
-                }
-
-                // Shake container slightly
-                if (barContainerRect != null)
-                {
+                    statusText.text = $"[FRENZY 2X] {remain:0.0}s";
                     float shake = Mathf.Sin(Time.time * 25f) * 1.5f;
-                    barContainerRect.anchoredPosition = new Vector2(shake, -70);
+                    statusText.rectTransform.anchoredPosition = new Vector2(shake, 0f);
                 }
             }
             else
@@ -155,18 +193,25 @@ namespace IdleFishing.UI
                 if (fillImage != null)
                 {
                     fillImage.fillAmount = currentFill;
-                    fillImage.color = normalChargeColor;
+                    if (CasualUITheme.SliderFillYellow != null)
+                    {
+                        fillImage.sprite = CasualUITheme.SliderFillYellow;
+                        fillImage.color = Color.white;
+                    }
+                    else
+                    {
+                        fillImage.color = normalChargeColor;
+                    }
                 }
 
                 if (statusText != null)
                 {
                     int pct = Mathf.RoundToInt(frenzyMgr.CurrentCharge);
-                    statusText.text = $"FRENZY: {pct}%";
-                }
-
-                if (barContainerRect != null)
-                {
-                    barContainerRect.anchoredPosition = new Vector2(0, -70);
+                    statusText.text = (pct == 0) ? "FRENZY (TAP TO CHARGE)" : $"FRENZY: {pct}%";
+                    if (statusText.rectTransform.anchoredPosition != Vector2.zero)
+                    {
+                        statusText.rectTransform.anchoredPosition = Vector2.zero;
+                    }
                 }
             }
         }

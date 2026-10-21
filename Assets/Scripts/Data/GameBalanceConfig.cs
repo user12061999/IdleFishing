@@ -107,5 +107,43 @@ namespace IdleFishing.Data
 
         [Tooltip("Attack & tap damage multiplier during Frenzy")]
         public float frenzyDamageMultiplier = 2.5f;
+
+        [Header("--- AQUARIUM BALANCING ---")]
+        [Tooltip("Initial base captive fish capacity")]
+        public int aquariumBaseCapacity = 8;
+
+        [Tooltip("Base cost to upgrade aquarium capacity")]
+        public int aquariumCapacityUpgradeBaseCost = 150;
+
+        [Tooltip("Cost multiplier per capacity upgrade")]
+        public float aquariumCapacityUpgradeMultiplier = 1.9f;
+
+        [Tooltip("Number of slots added per capacity upgrade")]
+        public int aquariumCapacitySlotsPerUpgrade = 2;
+
+        [Tooltip("Base cost to upgrade aquarium decoration")]
+        public int aquariumDecorUpgradeBaseCost = 300;
+
+        [Tooltip("Cost multiplier per decor upgrade")]
+        public float aquariumDecorUpgradeMultiplier = 2.4f;
+
+        [Tooltip("Ticket income multiplier for Decor Level 2")]
+        public float aquariumDecorMultiplierLevel2 = 1.35f;
+
+        [Tooltip("Ticket income multiplier for Decor Level 3")]
+        public float aquariumDecorMultiplierLevel3 = 1.80f;
+
+        [Tooltip("Ticket income multiplier for Decor Level 4")]
+        public float aquariumDecorMultiplierLevel4 = 2.50f;
+
+        [Header("--- LOGISTICS & MARKET ---")]
+        [Tooltip("Transporter crate capacity")]
+        public int transporterCapacity = 6;
+
+        [Tooltip("Transporter movement speed")]
+        public float transporterMoveSpeed = 3.5f;
+
+        [Tooltip("Customer base spawn interval in seconds")]
+        public float customerSpawnInterval = 3.0f;
     }
 }

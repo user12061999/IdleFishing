@@ -16,7 +16,7 @@ MonoBehaviour:
   speciesName: Spotted Eagle Ray
   tier: 3
   catchDifficulty: 2.8
-  spawnWeight: 15
+  spawnWeight: 16
   minWeightKg: 25
   maxWeightKg: 65
   isApexBoss: 1

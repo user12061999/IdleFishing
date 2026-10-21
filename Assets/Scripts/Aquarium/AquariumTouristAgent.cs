@@ -75,7 +75,7 @@ namespace IdleFishing.Aquarium
                     transform.position + Vector3.up * 1.8f,
                     0,
                     DamageStyle.GoldBonus,
-                    "+TIP! ♥"
+                    "+TIP!"
                 );
             }
 
@@ -96,58 +96,23 @@ namespace IdleFishing.Aquarium
 
             yield return new WaitForSeconds(viewingTime * 0.6f);
 
-            // 3b. Chance to visit Seaside Cafe for a refreshing drink
-            if (IdleFishing.World.SeasideCafeController.Instance != null &&
-                IdleFishing.World.SeasideCafeController.Instance.IsOpen &&
-                Random.value < 0.65f)
-            {
-                if (IdleFishing.World.SeasideCafeController.Instance.TryGetAvailableSeat(out Transform cafeSeat))
-                {
-                    Vector3 seatPos = cafeSeat.position;
-                    while (Vector3.Distance(new Vector3(transform.position.x, 0, transform.position.z), new Vector3(seatPos.x, 0, seatPos.z)) > 0.35f)
-                    {
-                        Vector3 target = new Vector3(seatPos.x, transform.position.y, seatPos.z);
-                        Vector3 nextPos = crowdAgent != null
-                            ? crowdAgent.CalculateStep(target, walkSpeed, Time.deltaTime)
-                            : Vector3.MoveTowards(transform.position, target, walkSpeed * Time.deltaTime);
-
-                        Vector3 dir = (nextPos - transform.position).normalized;
-                        dir.y = 0;
-                        if (dir.sqrMagnitude > 0.001f)
-                        {
-                            transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(dir), Time.deltaTime * 10f);
-                        }
-                        transform.position = nextPos;
-                        yield return null;
-                    }
-
-                    // Relax and sip drink
-                    yield return new WaitForSeconds(1.6f);
-                    IdleFishing.World.SeasideCafeController.Instance.CustomerBuyDrink(transform.position);
-                    IdleFishing.World.SeasideCafeController.Instance.ReleaseSeat(cafeSeat);
-                }
-            }
-
             // 4. Walk to exit
-            if (exitPoint != null)
+            Vector3 exitPos = exitPoint != null ? exitPoint.position : new Vector3(4.0f, 0.05f, -2.5f);
+            while (Vector3.Distance(new Vector3(transform.position.x, 0, transform.position.z), new Vector3(exitPos.x, 0, exitPos.z)) > 0.4f)
             {
-                Vector3 exitPos = exitPoint.position;
-                while (Vector3.Distance(new Vector3(transform.position.x, 0, transform.position.z), new Vector3(exitPos.x, 0, exitPos.z)) > 0.4f)
-                {
-                    Vector3 target = new Vector3(exitPos.x, transform.position.y, exitPos.z);
-                    Vector3 nextPos = crowdAgent != null
-                        ? crowdAgent.CalculateStep(target, walkSpeed, Time.deltaTime)
-                        : Vector3.MoveTowards(transform.position, target, walkSpeed * Time.deltaTime);
+                Vector3 target = new Vector3(exitPos.x, transform.position.y, exitPos.z);
+                Vector3 nextPos = crowdAgent != null
+                    ? crowdAgent.CalculateStep(target, walkSpeed, Time.deltaTime)
+                    : Vector3.MoveTowards(transform.position, target, walkSpeed * Time.deltaTime);
 
-                    Vector3 dir = (nextPos - transform.position).normalized;
-                    dir.y = 0;
-                    if (dir.sqrMagnitude > 0.001f)
-                    {
-                        transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(dir), Time.deltaTime * 10f);
-                    }
-                    transform.position = nextPos;
-                    yield return null;
+                Vector3 dir = (nextPos - transform.position).normalized;
+                dir.y = 0;
+                if (dir.sqrMagnitude > 0.001f)
+                {
+                    transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(dir), Time.deltaTime * 10f);
                 }
+                transform.position = nextPos;
+                yield return null;
             }
 
             Destroy(gameObject);

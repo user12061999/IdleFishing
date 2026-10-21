@@ -11,27 +11,27 @@ namespace IdleFishing.CameraControl
         public static MobilePortraitCameraController Instance { get; private set; }
 
         [Header("Default Portrait Framing (9:16)")]
-        [SerializeField] private Vector3 defaultPosition = new Vector3(0f, 29f, -18.5f);
-        [SerializeField] private Vector3 defaultEulerAngles = new Vector3(55.5f, 0f, 0f);
-        [SerializeField] private float baseFOV = 50f;
+        [SerializeField] private Vector3 defaultPosition = new Vector3(0f, 25.0f, -11.5f);
+        [SerializeField] private Vector3 defaultEulerAngles = new Vector3(49.0f, 0f, 0f);
+        [SerializeField] private float baseFOV = 42.0f;
         [SerializeField] private float referenceAspect = 9f / 16f; // 0.5625
 
         [Header("Pan Limits (2D Ground Exploration)")]
-        [SerializeField] private float minPanX = -13.5f; // Sang trái (Cổng Thế Giới, Bàn Phi-lê)
-        [SerializeField] private float maxPanX = 13.5f;  // Sang phải (Thủy Cung Hoàng Gia)
-        [SerializeField] private float minPanZ = -30.5f; // Xuống dưới (Quầy Kệ & Phố Khách Hàng)
-        [SerializeField] private float maxPanZ = -6.5f;  // Lên trên (Cầu Cảng & Đại Dương)
-        [SerializeField] private float panSensitivity = 0.024f;
+        [SerializeField] private float minPanX = -4.5f;  // Giới hạn sang trái (Lighthouse, Bàn Chế Biến / Kho Nhận)
+        [SerializeField] private float maxPanX = 4.5f;   // Giới hạn sang phải (Thủy Cung Hoàng Gia, Thuyền Du Ngoạn)
+        [SerializeField] private float minPanZ = -17.5f; // Giới hạn xuống dưới (Quầy Thu Mua & Bảng Hợp Đồng)
+        [SerializeField] private float maxPanZ = -7.5f;  // Giới hạn lên trên (Vùng Biển Đại Dương Sâu & Đảo Ngoài Khơi)
+        [SerializeField] private float panSensitivity = 0.022f;
         [SerializeField] private float smoothDampTime = 0.08f;
         [SerializeField] private float inertiaDecay = 7.5f;
 
         [Header("Zoom Limits & Sensitivity")]
         [SerializeField] private float minFOV = 22.0f; // Phóng to cận cảnh siêu nét
-        [SerializeField] private float maxFOV = 62.0f; // Thu nhỏ toàn cảnh bến cảng
+        [SerializeField] private float maxFOV = 48.0f; // Thu nhỏ toàn cảnh đại dương và bến cảng
         [SerializeField] private float wheelZoomSpeed = 4.5f;
         [SerializeField] private float pinchZoomSpeed = 0.07f;
         [SerializeField] private float keyZoomSpeed = 28.0f;
-        [SerializeField] private float keyPanSpeed = 18.0f;
+        [SerializeField] private float keyPanSpeed = 16.0f;
 
         [Header("Toggles & Settings")]
         [SerializeField] private bool allowPan = true;

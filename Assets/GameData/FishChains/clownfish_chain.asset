@@ -13,10 +13,10 @@ MonoBehaviour:
   m_Name: clownfish_chain
   m_EditorClassIdentifier: 
   speciesId: clownfish
-  speciesName: Clownfish
+  speciesName: Darwin Clownfish
   tier: 2
-  catchDifficulty: 2.8
-  spawnWeight: 60
+  catchDifficulty: 1.8
+  spawnWeight: 90
   minWeightKg: 1.2
   maxWeightKg: 3.5
   isApexBoss: 0

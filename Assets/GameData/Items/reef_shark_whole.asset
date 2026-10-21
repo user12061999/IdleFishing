@@ -15,7 +15,7 @@ MonoBehaviour:
   itemId: reef_shark_whole
   itemName: Blacktip Reef Shark
   itemType: 0
-  description: 
-  basePrice: 480
+  description: 'Apex ocean boss fish: Blacktip Reef Shark'
+  basePrice: 200
   prefab: {fileID: 6772514301823263546, guid: aabe6b9be0b6faa42a6ca6f101a9800e, type: 3}
   icon: {fileID: 0}

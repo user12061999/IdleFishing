@@ -13,18 +13,23 @@ MonoBehaviour:
   m_Name: world_2
   m_EditorClassIdentifier: 
   worldId: world_2
-  worldName: Arctic Isle
-  description: A frigid arctic sea, home to Arctic Tuna and giant Snow Crabs.
+  worldName: Tropical Coral Atoll
+  description: Vibrant tropical coral reefs, golden sunlit sands, and exotic colorful
+    marine life.
   worldOrder: 2
-  waterColor: {r: 0.28, g: 0.68, b: 0.82, a: 1}
-  groundColor: {r: 0.85, g: 0.9, b: 0.95, a: 1}
-  lightColor: {r: 0.9, g: 0.95, b: 1, a: 1}
+  waterColor: {r: 0.05, g: 0.75, b: 0.82, a: 1}
+  groundColor: {r: 0.85, g: 0.78, b: 0.48, a: 1}
+  lightColor: {r: 1, g: 0.98, b: 0.82, a: 1}
   lightIntensity: 1
   nativeSpecies:
-  - {fileID: 11400000, guid: 69b7f7643bc3cae49a967aef336b0034, type: 2}
-  - {fileID: 11400000, guid: 5d841e201be8fc1489e950dbe194f3e6, type: 2}
-  - {fileID: 11400000, guid: 12146d274fbe400408b64ec0a1f40d5e, type: 2}
-  startingCoins: 150
-  unlockRequiredCoins: 8000
-  unlockRequiredUpgrades: 25
-  worldUpgradeConfig: {fileID: 11400000, guid: e4aecedf1de78bf49ab84255a3b46f7f, type: 2}
+  - {fileID: 11400000, guid: 72571ee23cfab2b40a78a04739b35b61, type: 2}
+  - {fileID: 11400000, guid: e219485f7facd074f98ab5e21cc4c358, type: 2}
+  - {fileID: 11400000, guid: 43a20050a1d9d0e499ce087b4970f830, type: 2}
+  - {fileID: 11400000, guid: 5f73d8e9813ef1943acdb8c5aed49515, type: 2}
+  - {fileID: 11400000, guid: 5caa13c3bbae5d04298113479406e355, type: 2}
+  startingCoins: 100
+  unlockRequiredCoins: 14000
+  unlockRequiredUpgrades: 15
+  worldUpgradeConfig: {fileID: 11400000, guid: e5c7d3df7570d774d8d357c284e21058, type: 2}
+  customBgmClip: {fileID: 8300000, guid: 423d06031575dc64f9564c8f9ef409a1, type: 3}
+  customAmbienceClip: {fileID: 8300000, guid: 42f13b9b0c2dee74b82eaa2ecac765e1, type: 3}

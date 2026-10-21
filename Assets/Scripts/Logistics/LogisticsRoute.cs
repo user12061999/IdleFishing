@@ -31,13 +31,51 @@ namespace IdleFishing.Logistics
         [System.NonSerialized]
         public int reservedItemCount = 0; // Số lượng hàng các xe khác đã đặt chỗ để lấy
 
+        public void SanitizeReservation()
+        {
+            int actual = (sourceInventory != null) ? sourceInventory.GetCountOfType(itemType) : 0;
+            if (actual == 0)
+            {
+                reservedItemCount = 0;
+                return;
+            }
+
+            // Đồng bộ hoá dựa trên các Worker còn sống đang thực sự tiếp cận tuyến đường này
+            int liveReserved = 0;
+            if (LogisticsManager.Instance != null && LogisticsManager.Instance.ActiveWorkers != null)
+            {
+                var workers = LogisticsManager.Instance.ActiveWorkers;
+                for (int i = 0; i < workers.Count; i++)
+                {
+                    var w = workers[i];
+                    if (w != null && w.ActiveRoute == this &&
+                        (w.CurrentState == TransporterState.MovingToPickup || w.CurrentState == TransporterState.Loading))
+                    {
+                        liveReserved += w.MaxCarryCapacity;
+                    }
+                }
+            }
+
+            reservedItemCount = Mathf.Min(liveReserved, actual);
+        }
+
         public bool CanExecute()
         {
-            if (sourceInventory == null || targetInventory == null) return false;
-            if (targetInventory.IsFull) return false;
+            if (sourceInventory != null)
+            {
+                SanitizeReservation();
+                int count = sourceInventory.GetCountOfType(itemType);
+                if (count > reservedItemCount) return true;
+            }
 
-            int count = sourceInventory.GetCountOfType(itemType);
-            return count > reservedItemCount;
+            // Transporter cũng tự động đi gom cá đã bị đánh hạ trên bến cảng nếu có
+            if (IdleFishing.Fishing.FishingPierManager.Instance != null &&
+                IdleFishing.Fishing.FishingPierManager.Instance.HasAvailableDefeatedFish())
+            {
+                return true;
+            }
+
+            return false;
         }
 
         public RouteUrgencyLevel GetDynamicUrgency()
@@ -80,6 +118,7 @@ namespace IdleFishing.Logistics
         public void ReleaseReservation(int count)
         {
             reservedItemCount = Mathf.Max(0, reservedItemCount - count);
+            SanitizeReservation();
         }
     }
 }

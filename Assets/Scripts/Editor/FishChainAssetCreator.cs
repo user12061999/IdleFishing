@@ -487,8 +487,8 @@ namespace IdleFishing.Editor
                 name: displayName,
                 type: ItemType.WholeFish,
                 price: wholePrice,
-                icon: null,
                 prefab: wholePrefab,
+                icon: null,
                 desc: isApexBoss ? $"Apex ocean boss fish: {displayName}" : $"Fresh 3D fish: {displayName}"
             );
             EditorUtility.SetDirty(wholeItem);
@@ -533,12 +533,9 @@ namespace IdleFishing.Editor
 
             var entries = new[]
             {
-                new { type = UpgradeType.FishermanSlots, title = "Expand Fishermen", desc = "Unlock additional fishing slots on the pier (Max 5 fishermen)", baseCost = 100, mult = 2.50f, baseVal = 1.0f, valPerLvl = 1.0f, maxLvl = 4 },
-                new { type = UpgradeType.FishermanSpeed, title = "Fishing Technique", desc = "Fishermen reel in fish faster, increasing catch rate", baseCost = 50, mult = 1.55f, baseVal = 1.0f, valPerLvl = 0.15f, maxLvl = 10 },
-                new { type = UpgradeType.HireWrangler, title = "Hire Fish Wranglers", desc = "Hire wranglers to battle and carry fish (Max 4 wranglers)", baseCost = 100, mult = 2.20f, baseVal = 0.0f, valPerLvl = 1.0f, maxLvl = 4 },
-                new { type = UpgradeType.WranglerPower, title = "Wrangler Gear", desc = "Boost wrangler power, health, speed & tap damage", baseCost = 70, mult = 1.55f, baseVal = 1.0f, valPerLvl = 0.25f, maxLvl = 10 },
-                new { type = UpgradeType.KitchenSpeed, title = "Express Logistics", desc = "Increase transporter cart speed and delivery rate", baseCost = 80, mult = 1.55f, baseVal = 1.0f, valPerLvl = 0.20f, maxLvl = 10 },
-                new { type = UpgradeType.MarketValueMultiplier, title = "Seafood Brand", desc = "Increase wholesale value and gold earned at the market stall", baseCost = 120, mult = 1.65f, baseVal = 1.0f, valPerLvl = 0.15f, maxLvl = 10 }
+                new { type = UpgradeType.FishermanTeam, title = "Fisherman Crew", desc = "Increases fishing speed and unlocks additional pier fishing rods", baseCost = 40, mult = 1.45f, baseVal = 1.0f, valPerLvl = 0.15f, maxLvl = 50 },
+                new { type = UpgradeType.WranglerTeam, title = "Wrangler Crew", desc = "Increases power, haul speed, and recruits additional dock wranglers", baseCost = 60, mult = 1.48f, baseVal = 1.0f, valPerLvl = 0.20f, maxLvl = 50 },
+                new { type = UpgradeType.FishValue, title = "Fish Market Value", desc = "Directly increases the sale price and gold earned from all caught fish", baseCost = 80, mult = 1.52f, baseVal = 1.0f, valPerLvl = 0.25f, maxLvl = 50 }
             };
 
             listProp.arraySize = entries.Length;
@@ -617,7 +614,7 @@ namespace IdleFishing.Editor
             CreateSingleWorld(
                 id: "world_1",
                 name: "Temperate Bay",
-                desc: "Vịnh biển ôn đới mùa xuân xanh tươi với cá hồi, cá tuyết và cá trích trù phú.",
+                desc: "Lush spring temperate waters teeming with salmon, cod, and bountiful herring.",
                 order: 1,
                 waterCol: new Color(0.12f, 0.50f, 0.70f),
                 groundCol: new Color(0.35f, 0.55f, 0.35f),
@@ -633,7 +630,7 @@ namespace IdleFishing.Editor
             CreateSingleWorld(
                 id: "world_2",
                 name: "Tropical Coral Atoll",
-                desc: "Quần đảo san hô nhiệt đới mùa hè rực rỡ, bãi cát vàng óng và rạn san hô đa sắc.",
+                desc: "Vibrant tropical coral reefs, golden sunlit sands, and exotic colorful marine life.",
                 order: 2,
                 waterCol: new Color(0.05f, 0.75f, 0.82f),
                 groundCol: new Color(0.85f, 0.78f, 0.48f),
@@ -649,7 +646,7 @@ namespace IdleFishing.Editor
             CreateSingleWorld(
                 id: "world_3",
                 name: "Golden Autumn Cove",
-                desc: "Vịnh đá rừng phong mùa thu lãng mạn, lá đỏ cam rực rỡ và các loài giáp xác quý hiếm.",
+                desc: "Autumn foliage cove with scarlet maple leaves, calm waters, and rare crustaceans.",
                 order: 3,
                 waterCol: new Color(0.08f, 0.38f, 0.58f),
                 groundCol: new Color(0.68f, 0.50f, 0.28f),
@@ -665,7 +662,7 @@ namespace IdleFishing.Editor
             CreateSingleWorld(
                 id: "world_4",
                 name: "Arctic Frost Haven",
-                desc: "Vịnh băng tuyết vĩnh cửu Bắc Cực, nơi cư ngụ của cá ngừ đại dương và cua tuyết khổng lồ.",
+                desc: "Eternal glacial arctic bay home to deep oceanic tuna, king crabs, and ice beasts.",
                 order: 4,
                 waterCol: new Color(0.04f, 0.28f, 0.48f),
                 groundCol: new Color(0.88f, 0.92f, 0.98f),
@@ -681,7 +678,7 @@ namespace IdleFishing.Editor
             CreateSingleWorld(
                 id: "world_5",
                 name: "Sunken Oasis Desert",
-                desc: "Ốc đảo sa mạc Ai Cập thần thoại, tàn tích hoàng kim và vùng nước sâu nơi ngự trị của Đại Bạch Thần Thú.",
+                desc: "Mythic desert oasis with golden sunlit ruins and deep sacred waters harboring legendary leviathans.",
                 order: 5,
                 waterCol: new Color(0.10f, 0.65f, 0.60f),
                 groundCol: new Color(0.92f, 0.75f, 0.42f),

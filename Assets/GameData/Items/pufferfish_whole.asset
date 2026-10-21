@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: pufferfish_whole
   m_EditorClassIdentifier: 
   itemId: pufferfish_whole
-  itemName: Pufferfish
+  itemName: Sunlight Pufferfish
   itemType: 0
-  description: 
-  basePrice: 580
+  description: 'Fresh 3D fish: Sunlight Pufferfish'
+  basePrice: 24000
   prefab: {fileID: 6533800365972444643, guid: ec54b5bb0f37c384b91e5aa2573540ca, type: 3}
   icon: {fileID: 0}

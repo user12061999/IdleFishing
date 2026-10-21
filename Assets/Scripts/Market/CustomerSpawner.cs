@@ -22,15 +22,22 @@ namespace IdleFishing.Market
 
         private void Start()
         {
-            StartCoroutine(SpawnLoop());
-            StartCoroutine(TouristSpawnLoop());
+            // Đã bỏ cơ chế chợ chờ khách — Transporter tự động đi gom cá và đem đi bán trực tiếp
+            var existingCustomers = FindObjectsByType<CustomerNPC>(FindObjectsSortMode.None);
+            for (int i = 0; i < existingCustomers.Length; i++)
+            {
+                if (existingCustomers[i] != null)
+                {
+                    Destroy(existingCustomers[i].gameObject);
+                }
+            }
         }
 
         private IEnumerator TouristSpawnLoop()
         {
             while (true)
             {
-                yield return new WaitForSeconds(Random.Range(7f, 12f));
+                yield return IdleFishing.Core.YieldCache.WaitForSeconds(Random.Range(7f, 12f));
 
                 if (IdleFishing.Aquarium.AquariumManager.Instance != null && 
                     IdleFishing.Aquarium.AquariumManager.Instance.CurrentFishCount > 0 &&
@@ -98,32 +105,70 @@ namespace IdleFishing.Market
             return total;
         }
 
+        private void EnsureShelvesPopulated()
+        {
+            shelves.RemoveAll(s => s == null);
+            if (shelves.Count == 0)
+            {
+                var found = FindObjectsByType<DisplayShelf>(FindObjectsSortMode.None);
+                if (found != null && found.Length > 0)
+                {
+                    shelves.AddRange(found);
+                }
+            }
+        }
+
         private IEnumerator SpawnLoop()
         {
             while (true)
             {
+                EnsureShelvesPopulated();
+
                 int totalStock = GetTotalStockOnShelves();
                 float currentInterval = spawnInterval;
-                int dynamicMaxCustomers = maxActiveCustomers;
+                int dynamicMaxCustomers = Mathf.Max(6, maxActiveCustomers);
 
-                // Dynamic rush hour when goods accumulate to prevent shelf blocking
-                if (totalStock > 16)
+                // Lưu lượng khách tăng mạnh khi hàng tồn nhiều, giữ nhịp chợ không bao giờ tắt
+                if (totalStock >= 14)
                 {
-                    currentInterval = 1.8f;
+                    currentInterval = 1.2f;
+                    dynamicMaxCustomers = maxActiveCustomers + 3;
+                }
+                else if (totalStock >= 8)
+                {
+                    currentInterval = 1.6f;
                     dynamicMaxCustomers = maxActiveCustomers + 2;
                 }
-                else if (totalStock > 8)
+                else if (totalStock >= 1)
                 {
-                    currentInterval = 2.4f;
+                    currentInterval = 2.0f;
                     dynamicMaxCustomers = maxActiveCustomers + 1;
                 }
+                else
+                {
+                    currentInterval = 2.8f;
+                    dynamicMaxCustomers = 3;
+                }
 
-                yield return new WaitForSeconds(currentInterval);
+                yield return IdleFishing.Core.YieldCache.WaitForSeconds(currentInterval);
 
-                // Clean up nulls
-                activeCustomers.RemoveAll(c => c == null);
+                // Clean up nulls & stale stuck customers
+                for (int i = activeCustomers.Count - 1; i >= 0; i--)
+                {
+                    var c = activeCustomers[i];
+                    if (c == null || !c.gameObject.activeInHierarchy)
+                    {
+                        activeCustomers.RemoveAt(i);
+                        continue;
+                    }
+                    if (c.LifeTime > 18.0f)
+                    {
+                        Destroy(c.gameObject);
+                        activeCustomers.RemoveAt(i);
+                    }
+                }
 
-                if (activeCustomers.Count < dynamicMaxCustomers && HasAnyStockOnShelves())
+                if (activeCustomers.Count < dynamicMaxCustomers && (HasAnyStockOnShelves() || totalStock > 0))
                 {
                     SpawnCustomer();
                 }
@@ -141,13 +186,13 @@ namespace IdleFishing.Market
 
         private void SpawnCustomer()
         {
+            EnsureShelvesPopulated();
             if (spawnPoint == null || shelves.Count == 0) return;
 
-            // Find a shelf that has goods
+            // Find a shelf that has goods, fallback to first available shelf
             List<DisplayShelf> available = shelves.FindAll(s => s != null && s.HasGoods);
-            if (available.Count == 0) return;
-
-            DisplayShelf chosen = available[Random.Range(0, available.Count)];
+            DisplayShelf chosen = (available.Count > 0) ? available[Random.Range(0, available.Count)] : shelves[0];
+            if (chosen == null) return;
 
             Vector3 spawnPos = spawnPoint.position + new Vector3(Random.Range(-0.35f, 0.35f), 0, Random.Range(-0.15f, 0.15f));
             GameObject customerObj;

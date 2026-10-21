@@ -13,19 +13,23 @@ MonoBehaviour:
   m_Name: world_3
   m_EditorClassIdentifier: 
   worldId: world_3
-  worldName: Tropical Archipelago
-  description: A vibrant coral reef featuring swift Clownfish and prized Pufferfish.
+  worldName: Golden Autumn Cove
+  description: Autumn foliage cove with scarlet maple leaves, calm waters, and rare
+    crustaceans.
   worldOrder: 3
-  waterColor: {r: 0.1, g: 0.72, b: 0.62, a: 1}
-  groundColor: {r: 0.86, g: 0.78, b: 0.48, a: 1}
-  lightColor: {r: 1, g: 0.98, b: 0.88, a: 1}
+  waterColor: {r: 0.08, g: 0.38, b: 0.58, a: 1}
+  groundColor: {r: 0.68, g: 0.5, b: 0.28, a: 1}
+  lightColor: {r: 1, g: 0.82, b: 0.6, a: 1}
   lightIntensity: 1
   nativeSpecies:
-  - {fileID: 11400000, guid: 72571ee23cfab2b40a78a04739b35b61, type: 2}
-  - {fileID: 11400000, guid: 81cc42838b4308e4f920b44c5baaf66e, type: 2}
+  - {fileID: 11400000, guid: 067063ee4477df941ac009ddfd5ffb7f, type: 2}
+  - {fileID: 11400000, guid: 6d726ff3c81b65443921ad7b37fb9564, type: 2}
+  - {fileID: 11400000, guid: e3e6d072ecd1ee24fae8fc99de75c00a, type: 2}
+  - {fileID: 11400000, guid: 6e67fcedfa045704fbef0f78eeb4802f, type: 2}
   - {fileID: 11400000, guid: fa365fee03a380b4d9efa1803752a068, type: 2}
-  - {fileID: 11400000, guid: 3b7179d9f5541054a9c70853ccf3b66d, type: 2}
-  startingCoins: 300
-  unlockRequiredCoins: 35000
-  unlockRequiredUpgrades: 45
-  worldUpgradeConfig: {fileID: 11400000, guid: e4aecedf1de78bf49ab84255a3b46f7f, type: 2}
+  startingCoins: 400
+  unlockRequiredCoins: 330000
+  unlockRequiredUpgrades: 24
+  worldUpgradeConfig: {fileID: 11400000, guid: 9fc2599626af761479fd9ef812cc5afc, type: 2}
+  customBgmClip: {fileID: 8300000, guid: d6cd7872f2519024988436ff108e0415, type: 3}
+  customAmbienceClip: {fileID: 8300000, guid: e3a6b40cf441c6344a0ae9c8b5739046, type: 3}

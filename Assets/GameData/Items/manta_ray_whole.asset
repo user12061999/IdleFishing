@@ -15,7 +15,7 @@ MonoBehaviour:
   itemId: manta_ray_whole
   itemName: Emperor Manta Ray
   itemType: 0
-  description: 
-  basePrice: 1350
+  description: 'Apex ocean boss fish: Emperor Manta Ray'
+  basePrice: 5500
   prefab: {fileID: 8828073684077452087, guid: 7cdd53a8f7ab99942a97d730b5ec7dcb, type: 3}
   icon: {fileID: 0}

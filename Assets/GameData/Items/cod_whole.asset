@@ -15,7 +15,7 @@ MonoBehaviour:
   itemId: cod_whole
   itemName: Fresh Cod
   itemType: 0
-  description: 
-  basePrice: 45
+  description: 'Fresh 3D fish: Fresh Cod'
+  basePrice: 35
   prefab: {fileID: 8895038234518263127, guid: 088027623e6e8e54ea703421ac0f1a9d, type: 3}
   icon: {fileID: 0}

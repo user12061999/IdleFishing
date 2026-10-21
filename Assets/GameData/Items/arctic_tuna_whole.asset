@@ -15,7 +15,7 @@ MonoBehaviour:
   itemId: arctic_tuna_whole
   itemName: Arctic Tuna
   itemType: 0
-  description: 
-  basePrice: 190
+  description: 'Fresh 3D fish: Arctic Tuna'
+  basePrice: 2500
   prefab: {fileID: 8694588550904314738, guid: e3c327dc6121a504d9a39ba979e3207b, type: 3}
   icon: {fileID: 0}

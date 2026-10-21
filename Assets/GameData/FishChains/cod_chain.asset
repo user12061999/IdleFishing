@@ -16,7 +16,7 @@ MonoBehaviour:
   speciesName: Fresh Cod
   tier: 1
   catchDifficulty: 1.1
-  spawnWeight: 60
+  spawnWeight: 80
   minWeightKg: 1.5
   maxWeightKg: 4.2
   isApexBoss: 0

@@ -33,6 +33,41 @@ namespace IdleFishing.World
 
         private void Awake()
         {
+            if (gameObject.layer == LayerMask.NameToLayer("Ignore Raycast"))
+            {
+                gameObject.layer = LayerMask.NameToLayer("Default");
+            }
+            foreach (Transform child in transform)
+            {
+                if (child.gameObject.layer == LayerMask.NameToLayer("Ignore Raycast"))
+                {
+                    child.gameObject.layer = LayerMask.NameToLayer("Default");
+                }
+            }
+
+            // Self-healing upgradeType mapping for 3 streamlined core pillars:
+            // 0 = FishermanTeam, 1 = WranglerTeam, 2 = FishValue
+            if (gameObject.name.Contains("Wrangler") || (padTitle != null && padTitle.ToUpper().Contains("WRANGLER")))
+            {
+                upgradeType = UpgradeType.WranglerTeam;
+            }
+            else if ((int)upgradeType == 3)
+            {
+                upgradeType = UpgradeType.WranglerTeam;
+            }
+            else if ((int)upgradeType >= 4)
+            {
+                upgradeType = UpgradeType.FishValue;
+            }
+
+            var col = GetComponent<CapsuleCollider>();
+            if (col != null)
+            {
+                col.center = new Vector3(0f, 1.0f, 0f);
+                col.radius = Mathf.Max(col.radius, 1.35f);
+                col.height = Mathf.Max(col.height, 2.4f);
+            }
+
             CacheButtonCap();
             mainCamera = Camera.main;
         }
@@ -82,6 +117,7 @@ namespace IdleFishing.World
 
         private void Start()
         {
+            ConfigureBillboardLayout();
             CacheButtonCap();
             UpdateVisuals();
         }
@@ -110,13 +146,68 @@ namespace IdleFishing.World
             costText = costTxt;
             subText = subTxt;
             visualTransform = visual;
+
+            ConfigureBillboardLayout();
             CacheButtonCap();
             UpdateVisuals();
+        }
+
+        private void ConfigureBillboardLayout()
+        {
+            ConfigureText(titleText, 14f, 22f, UIFontCategory.Header);
+            ConfigureText(costText, 18f, 28f, UIFontCategory.Button);
+            ConfigureText(subText, 12f, 16f, UIFontCategory.Default);
+
+            if (titleText != null && costText != null)
+            {
+                var titleRt = titleText.rectTransform;
+                var costRt = costText.rectTransform;
+                titleRt.anchoredPosition = new Vector2(0, 36);
+                titleRt.sizeDelta = new Vector2(230, 32);
+                costRt.anchoredPosition = new Vector2(0, 0);
+                costRt.sizeDelta = new Vector2(230, 36);
+
+                if (subText != null)
+                {
+                    var subRt = subText.rectTransform;
+                    subRt.anchoredPosition = new Vector2(0, -36);
+                    subRt.sizeDelta = new Vector2(230, 26);
+                }
+
+                if (titleRt.parent is RectTransform bgRt && bgRt.sizeDelta.y < 125)
+                {
+                    bgRt.sizeDelta = new Vector2(Mathf.Max(bgRt.sizeDelta.x, 240), 125);
+                }
+            }
+        }
+
+        private void ConfigureText(TextMeshProUGUI tmp, float minSize, float maxSize, UIFontCategory category)
+        {
+            if (tmp == null) return;
+            tmp.ApplyFont(category);
+            tmp.textWrappingMode = TextWrappingModes.NoWrap;
+            tmp.enableAutoSizing = true;
+            tmp.fontSizeMin = minSize;
+            tmp.fontSizeMax = maxSize;
         }
 
         public void SetTitle(string newTitle)
         {
             padTitle = newTitle;
+            UpdateVisuals();
+        }
+
+        public void SetUpgradeType(UpgradeType newType)
+        {
+            upgradeType = newType;
+            UpdateVisuals();
+        }
+
+        private bool isForcedMax = false;
+
+        public void SetForcedMax(bool forcedMax)
+        {
+            isForcedMax = forcedMax;
             UpdateVisuals();
         }
 
@@ -148,7 +239,7 @@ namespace IdleFishing.World
 
             int currentLvl = UpgradeManager.Instance.GetLevel(upgradeType);
             int maxLvl = UpgradeManager.Instance.CurrentConfig != null ? UpgradeManager.Instance.CurrentConfig.GetEntry(upgradeType)?.maxLevel ?? 999 : 999;
-            bool isMax = maxLvl < 999 && currentLvl >= maxLvl;
+            bool isMax = isForcedMax || (maxLvl < 999 && currentLvl >= maxLvl);
             int cost = UpgradeManager.Instance.GetCost(upgradeType);
             bool canAfford = EconomyManager.Instance != null && EconomyManager.Instance.HasEnoughCoins(cost);
             canCurrentlyAfford = canAfford && !isMax;
@@ -167,7 +258,7 @@ namespace IdleFishing.World
                 else
                 {
                     string colorTag = canAfford ? "<color=#00FF88>" : "<color=#FF6666>";
-                    costText.text = $"{colorTag}{cost:N0} G</color>";
+                    costText.text = $"{colorTag}{NumberFormatter.Format(cost)} G</color>";
                 }
             }
 
@@ -177,9 +268,41 @@ namespace IdleFishing.World
             }
         }
 
+        private int lastClickFrame = -1;
+
+        private void Update()
+        {
+            if (Input.GetMouseButtonDown(0))
+            {
+                if (IdleFishing.Aquarium.AquariumTankVisual.IsPointerOverUI()) return;
+
+                Camera cam = mainCamera != null ? mainCamera : Camera.main;
+                if (cam != null)
+                {
+                    Ray ray = cam.ScreenPointToRay(Input.mousePosition);
+                    if (Physics.Raycast(ray, out RaycastHit hit, 100f, ~0, QueryTriggerInteraction.Collide))
+                    {
+                        if (hit.transform == transform || hit.transform.IsChildOf(transform))
+                        {
+                            TriggerPurchase();
+                        }
+                    }
+                }
+            }
+        }
+
         private void OnMouseDown()
         {
-            if (UpgradeManager.Instance == null) return;
+            if (IdleFishing.Aquarium.AquariumTankVisual.IsPointerOverUI()) return;
+            TriggerPurchase();
+        }
+
+        public void TriggerPurchase()
+        {
+            if (Time.frameCount == lastClickFrame) return;
+            lastClickFrame = Time.frameCount;
+
+            if (isForcedMax || UpgradeManager.Instance == null) return;
 
             int cost = UpgradeManager.Instance.GetCost(upgradeType);
             if (EconomyManager.Instance != null && EconomyManager.Instance.HasEnoughCoins(cost))

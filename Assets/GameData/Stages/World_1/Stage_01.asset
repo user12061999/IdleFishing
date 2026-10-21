@@ -1,0 +1,49 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8fb4bf1520bf6cd4592f26e0e019b0f7, type: 3}
+  m_Name: Stage_01
+  m_EditorClassIdentifier: 
+  stageId: stage_01
+  stageNumber: 1
+  worldId: world_1
+  stageInWorld: 1
+  stageTitle: First Catch
+  mechanicDescription: Tutorial fishing -> fish hops onto pier -> tap/wrangler whack
+    -> sell for gold.
+  targetMinutes: 1
+  estimatedBaseGoldPerMin: 120
+  rewardGoldEquivalentMinutes: 0.35
+  grantFameOnFirstClear: 1
+  replayable: 0
+  goals:
+  - goalType: 0
+    targetCount: 1
+    targetId: herring
+    targetLevel: 1
+    customDescription: Catch 1 Herring
+  - goalType: 1
+    targetCount: 1
+    targetId: 
+    targetLevel: 1
+    customDescription: Defeat 1 Fish on Pier
+  - goalType: 2
+    targetCount: 1
+    targetId: 
+    targetLevel: 1
+    customDescription: Sell 1 Fish
+  guaranteedFirstCatch: {fileID: 11400000, guid: 1c0221bee78d1264bafbf9d4915a029b, type: 2}
+  bossToSpawn: {fileID: 0}
+  isWorldBossStage: 0
+  worldVoyageUnlock: 
+  featureUnlocks:
+  - core_fishing
+  - tutorial_auto_wrangler

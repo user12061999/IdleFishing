@@ -15,7 +15,7 @@ MonoBehaviour:
   itemId: thresher_shark_whole
   itemName: Arctic Thresher Shark
   itemType: 0
-  description: 
-  basePrice: 950
+  description: 'Apex ocean boss fish: Arctic Thresher Shark'
+  basePrice: 32000
   prefab: {fileID: 5256812720501018336, guid: 02ee7d0243081a646870d8e39e07bf34, type: 3}
   icon: {fileID: 0}

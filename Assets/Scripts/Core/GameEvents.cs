@@ -2,6 +2,8 @@ using System;
 using UnityEngine;
 using IdleFishing.Data;
 using IdleFishing.Market;
+using IdleFishing.Fishing;
+using IdleFishing.Progression;
 
 namespace IdleFishing.Core
 {
@@ -100,5 +102,39 @@ namespace IdleFishing.Core
         // Prestige & Harbor Medals
         public static event Action<int> PrestigeCompleted; // medalsGained
         public static void TriggerPrestigeCompleted(int medalsGained) => PrestigeCompleted?.Invoke(medalsGained);
+
+        // Quests & FTUE Milestones
+        public static event Action<QuestStep, int, int> QuestProgressChanged; // quest, current, target
+        public static void TriggerQuestProgressChanged(QuestStep quest, int current, int target) => QuestProgressChanged?.Invoke(quest, current, target);
+
+        public static event Action<QuestStep> QuestCompleted;
+        public static void TriggerQuestCompleted(QuestStep quest) => QuestCompleted?.Invoke(quest);
+
+        public static event Action<QuestStep, int> QuestClaimed; // quest, rewardCoins
+        public static void TriggerQuestClaimed(QuestStep quest, int rewardCoins) => QuestClaimed?.Invoke(quest, rewardCoins);
+
+        public static event Action<QuestStep> ActiveQuestChanged;
+        public static void TriggerActiveQuestChanged(QuestStep newQuest) => ActiveQuestChanged?.Invoke(newQuest);
+
+        // Fish Defeated on Deck
+        public static event Action<FishChainData, LiveFish> FishDefeated;
+        public static void TriggerFishDefeated(FishChainData species, LiveFish liveFish) => FishDefeated?.Invoke(species, liveFish);
+
+        // Worker & Logistics Operations
+        public static event Action<string, int> WorkerHired; // role ("wrangler", "transporter"), newCount
+        public static void TriggerWorkerHired(string role, int newCount) => WorkerHired?.Invoke(role, newCount);
+
+        public static event Action<int> PayloadTransported; // payload count
+        public static void TriggerPayloadTransported(int count) => PayloadTransported?.Invoke(count);
+
+        // 30-Stage Progression
+        public static event Action<StageData> StageStarted;
+        public static void TriggerStageStarted(StageData stage) => StageStarted?.Invoke(stage);
+
+        public static event Action<StageData, int, int, int> StageGoalProgressChanged; // stage, goalIndex, current, target
+        public static void TriggerStageGoalProgressChanged(StageData stage, int goalIndex, int current, int target) => StageGoalProgressChanged?.Invoke(stage, goalIndex, current, target);
+
+        public static event Action<StageData> StageCompleted;
+        public static void TriggerStageCompleted(StageData stage) => StageCompleted?.Invoke(stage);
     }
 }

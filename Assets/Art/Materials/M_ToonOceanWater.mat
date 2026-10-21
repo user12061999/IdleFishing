@@ -14,7 +14,7 @@ Material:
   m_ValidKeywords: []
   m_InvalidKeywords: []
   m_LightmapFlags: 4
-  m_EnableInstancingVariants: 0
+  m_EnableInstancingVariants: 1
   m_DoubleSidedGI: 0
   m_CustomRenderQueue: -1
   stringTagMap: {}
@@ -30,18 +30,18 @@ Material:
     - _CausticSpeed: 0.85
     - _CausticThreshold: 0.055
     - _ContourCutoffDepth: -0.75
-    - _ContourFoamThickness: 0.162
-    - _ContourInnerLine: 0.186
+    - _ContourFoamThickness: 0.22
+    - _ContourInnerLine: 0.075
     - _ContourNoiseScale: 2.4
     - _ContourNoiseStrength: 0.028
     - _ContourOuterLine: 0.17
     - _ContourOuterWidth: 0.045
     - _ContourPulseSpeed: 2.8
-    - _DepthMaxDistance: 2.4
+    - _DepthMaxDistance: 2.6
     - _FlowBandCenterZ: 17.5
     - _FlowBandWidth: 9
-    - _FlowSpeed: 0.33
-    - _FlowStreakIntensity: 0.48
+    - _FlowSpeed: 0.55
+    - _FlowStreakIntensity: 0.52
     - _FlowStreakScale: 0.35
     - _FoamDepthThreshold: 0.24
     - _FoamNoiseScale: 1.6
@@ -51,17 +51,17 @@ Material:
     - _ShorelineZ: 10.15
     - _SparkleIntensity: 0.85
     - _SpecularSize: 0.965
-    - _WaveAmplitude: 0.055
+    - _WaveAmplitude: 0.052
     - _WaveFrequency: 0.85
     - _WaveSpeed: 1.65
     m_Colors:
-    - _BaseColor: {r: 0.07, g: 0.52, b: 0.82, a: 0.85}
-    - _CausticColor: {r: 0.58, g: 0.96, b: 1, a: 0.32}
-    - _DeepColor: {r: 0.04, g: 0.28, b: 0.58, a: 0.95}
-    - _FlowDirection: {r: 0.9821552, g: 0.18807228, b: 0, a: 0}
-    - _FoamColor: {r: 0.97, g: 0.99, b: 1, a: 0.96}
+    - _BaseColor: {r: 0.1, g: 0.5, b: 0.78, a: 0.88}
+    - _CausticColor: {r: 0.6, g: 0.9, b: 1, a: 0.28}
+    - _DeepColor: {r: 0.05, g: 0.25, b: 0.52, a: 0.96}
+    - _FlowDirection: {r: 0.9730211, g: 0.23071633, b: 0, a: 0}
+    - _FoamColor: {r: 0.98, g: 0.99, b: 1, a: 0.96}
     - _HorizonColor: {r: 0.18, g: 0.65, b: 0.92, a: 1}
-    - _ShallowColor: {r: 0.12, g: 0.78, b: 0.86, a: 0.7}
+    - _ShallowColor: {r: 0.22, g: 0.72, b: 0.9, a: 0.75}
     - _SpecularColor: {r: 1, g: 0.98, b: 0.88, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1

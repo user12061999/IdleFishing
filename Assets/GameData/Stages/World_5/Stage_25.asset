@@ -1,0 +1,44 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8fb4bf1520bf6cd4592f26e0e019b0f7, type: 3}
+  m_Name: Stage_25
+  m_EditorClassIdentifier: 
+  stageId: stage_25
+  stageNumber: 25
+  worldId: world_5
+  stageInWorld: 1
+  stageTitle: Sands of the Sea
+  mechanicDescription: Arrive at Sunken Oasis Desert! Sacred turquoise waters amidst
+    sunlit ruins harbor mythic fish.
+  targetMinutes: 4
+  estimatedBaseGoldPerMin: 19200000
+  rewardGoldEquivalentMinutes: 0.35
+  grantFameOnFirstClear: 1
+  replayable: 0
+  goals:
+  - goalType: 0
+    targetCount: 12
+    targetId: 
+    targetLevel: 1
+    customDescription: Catch 12 Oasis Fish
+  - goalType: 2
+    targetCount: 15
+    targetId: 
+    targetLevel: 1
+    customDescription: Sell 15 Fish at Market
+  guaranteedFirstCatch: {fileID: 11400000, guid: d7bfe04304bca584382dddf45c43dfcd, type: 2}
+  bossToSpawn: {fileID: 0}
+  isWorldBossStage: 0
+  worldVoyageUnlock: 
+  featureUnlocks:
+  - oasis_haven
+  - desert_fishery

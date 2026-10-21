@@ -16,7 +16,7 @@ MonoBehaviour:
   speciesName: Fresh Salmon
   tier: 2
   catchDifficulty: 1.6
-  spawnWeight: 25
+  spawnWeight: 45
   minWeightKg: 2.5
   maxWeightKg: 6.5
   isApexBoss: 0

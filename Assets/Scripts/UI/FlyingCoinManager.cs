@@ -1,6 +1,8 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using IdleFishing.Core;
 
 namespace IdleFishing.UI
 {
@@ -14,6 +16,9 @@ namespace IdleFishing.UI
 
         private RectTransform fxContainer;
         private Sprite coinSprite;
+
+        private readonly Queue<RectTransform> coinPool = new Queue<RectTransform>();
+        private const int INITIAL_POOL_SIZE = 30;
 
         private void Awake()
         {
@@ -38,6 +43,54 @@ namespace IdleFishing.UI
             fxContainer.sizeDelta = Vector2.zero;
 
             coinSprite = GetCoinSprite();
+            InitializePool();
+        }
+
+        private void InitializePool()
+        {
+            for (int i = 0; i < INITIAL_POOL_SIZE; i++)
+            {
+                coinPool.Enqueue(CreateNewCoin());
+            }
+        }
+
+        private RectTransform CreateNewCoin()
+        {
+            GameObject coinObj = new GameObject("FlyCoin");
+            coinObj.transform.SetParent(fxContainer, false);
+            RectTransform rt = coinObj.AddComponent<RectTransform>();
+            rt.sizeDelta = new Vector2(28, 28);
+
+            Image img = coinObj.AddComponent<Image>();
+            img.sprite = coinSprite;
+            img.color = Color.white;
+            img.raycastTarget = false;
+
+            coinObj.SetActive(false);
+            return rt;
+        }
+
+        private RectTransform GetCoin()
+        {
+            while (coinPool.Count > 0)
+            {
+                var rt = coinPool.Dequeue();
+                if (rt != null && rt.gameObject != null)
+                {
+                    rt.gameObject.SetActive(true);
+                    return rt;
+                }
+            }
+            var newCoin = CreateNewCoin();
+            newCoin.gameObject.SetActive(true);
+            return newCoin;
+        }
+
+        private void ReturnCoin(RectTransform rt)
+        {
+            if (rt == null || rt.gameObject == null) return;
+            rt.gameObject.SetActive(false);
+            coinPool.Enqueue(rt);
         }
 
         private static Sprite cachedCoinSprite;
@@ -119,6 +172,38 @@ namespace IdleFishing.UI
             StartCoroutine(SpawnFlyingCoinsRoutine(worldOrigin, count));
         }
 
+        public void PlayFlyingCoinsFromUI(RectTransform sourceRect, int count = 6)
+        {
+            if (canvas == null || sourceRect == null) return;
+            StartCoroutine(SpawnFlyingCoinsFromUIRoutine(sourceRect, count));
+        }
+
+        private IEnumerator SpawnFlyingCoinsFromUIRoutine(RectTransform sourceRect, int count)
+        {
+            Camera cam = (canvas != null && canvas.renderMode == RenderMode.ScreenSpaceOverlay) ? null : Camera.main;
+            Vector3 screenPos = RectTransformUtility.WorldToScreenPoint(cam, sourceRect.position);
+
+            Vector2 canvasStartPos;
+            RectTransformUtility.ScreenPointToLocalPointInRectangle(fxContainer, screenPos, cam, out canvasStartPos);
+
+            Vector2 targetCanvasPos = Vector2.zero;
+            if (targetCoinsIcon != null)
+            {
+                Vector3 targetScreenPos = RectTransformUtility.WorldToScreenPoint(cam, targetCoinsIcon.position);
+                RectTransformUtility.ScreenPointToLocalPointInRectangle(fxContainer, targetScreenPos, cam, out targetCanvasPos);
+            }
+            else
+            {
+                targetCanvasPos = new Vector2(-canvas.pixelRect.width * 0.35f, canvas.pixelRect.height * 0.42f);
+            }
+
+            for (int i = 0; i < count; i++)
+            {
+                StartCoroutine(AnimateSingleCoin(canvasStartPos, targetCanvasPos, i * 0.05f));
+            }
+            yield break;
+        }
+
         private IEnumerator SpawnFlyingCoinsRoutine(Vector3 worldOrigin, int count)
         {
             Camera cam = Camera.main;
@@ -152,20 +237,12 @@ namespace IdleFishing.UI
         {
             if (delay > 0)
             {
-                yield return new WaitForSeconds(delay);
+                yield return YieldCache.WaitForSeconds(delay);
             }
 
-            // Create coin UI image
-            GameObject coinObj = new GameObject("FlyCoin");
-            coinObj.transform.SetParent(fxContainer, false);
-            RectTransform rt = coinObj.AddComponent<RectTransform>();
-            rt.sizeDelta = new Vector2(28, 28);
+            RectTransform rt = GetCoin();
             rt.anchoredPosition = startPos;
-
-            Image img = coinObj.AddComponent<Image>();
-            img.sprite = coinSprite;
-            img.color = Color.white; // Full vibrant colors from sprite
-            img.raycastTarget = false;
+            rt.localScale = Vector3.one;
 
             // Randomize curved arc control point
             float arcOffset = Random.Range(-120f, 120f);
@@ -174,32 +251,37 @@ namespace IdleFishing.UI
             float duration = 0.65f;
             float elapsed = 0f;
 
-            while (elapsed < duration)
+            try
             {
-                elapsed += Time.deltaTime;
-                float t = Mathf.Clamp01(elapsed / duration);
-
-                // Quadratic Bezier curve
-                float u = 1f - t;
-                Vector2 currentPos = (u * u * startPos) + (2f * u * t * midPoint) + (t * t * endPos);
-                rt.anchoredPosition = currentPos;
-
-                // Scale pop then zoom into icon
-                float scale = 1f;
-                if (t < 0.25f)
+                while (elapsed < duration)
                 {
-                    scale = Mathf.Lerp(0.3f, 1.25f, t / 0.25f);
-                }
-                else if (t > 0.8f)
-                {
-                    scale = Mathf.Lerp(1.25f, 0.6f, (t - 0.8f) / 0.2f);
-                }
-                rt.localScale = Vector3.one * scale;
+                    elapsed += Time.deltaTime;
+                    float t = Mathf.Clamp01(elapsed / duration);
 
-                yield return null;
+                    // Quadratic Bezier curve
+                    float u = 1f - t;
+                    Vector2 currentPos = (u * u * startPos) + (2f * u * t * midPoint) + (t * t * endPos);
+                    if (rt != null) rt.anchoredPosition = currentPos;
+
+                    // Scale pop then zoom into icon
+                    float scale = 1f;
+                    if (t < 0.25f)
+                    {
+                        scale = Mathf.Lerp(0.3f, 1.25f, t / 0.25f);
+                    }
+                    else if (t > 0.8f)
+                    {
+                        scale = Mathf.Lerp(1.25f, 0.6f, (t - 0.8f) / 0.2f);
+                    }
+                    if (rt != null) rt.localScale = Vector3.one * scale;
+
+                    yield return null;
+                }
             }
-
-            Destroy(coinObj);
+            finally
+            {
+                ReturnCoin(rt);
+            }
 
             // Trigger punch animation on Coins HUD
             if (GameHUD.Instance != null)

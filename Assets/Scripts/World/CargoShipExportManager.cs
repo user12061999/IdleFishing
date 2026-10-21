@@ -210,6 +210,7 @@ namespace IdleFishing.World
             titleText.fontStyle = FontStyles.Bold;
             titleText.alignment = TextAlignmentOptions.Center;
             titleText.color = new Color(1f, 0.85f, 0.3f);
+            titleText.ApplyFont(UIFontCategory.Header);
             RectTransform tRect = titleObj.GetComponent<RectTransform>();
             tRect.anchoredPosition = new Vector2(0, 34);
             tRect.sizeDelta = new Vector2(240, 24);
@@ -222,6 +223,7 @@ namespace IdleFishing.World
             statusText.fontStyle = FontStyles.Bold;
             statusText.alignment = TextAlignmentOptions.Center;
             statusText.color = Color.white;
+            statusText.ApplyFont(UIFontCategory.Default);
             RectTransform sRect = statusObj.GetComponent<RectTransform>();
             sRect.anchoredPosition = new Vector2(0, 10);
             sRect.sizeDelta = new Vector2(240, 22);
@@ -234,6 +236,7 @@ namespace IdleFishing.World
             timerText.fontStyle = FontStyles.Bold;
             timerText.alignment = TextAlignmentOptions.Center;
             timerText.color = new Color(0.95f, 0.45f, 0.45f);
+            timerText.ApplyFont(UIFontCategory.Numbers);
             RectTransform timRect = timerObj.GetComponent<RectTransform>();
             timRect.anchoredPosition = new Vector2(0, -12);
             timRect.sizeDelta = new Vector2(240, 20);
@@ -246,6 +249,7 @@ namespace IdleFishing.World
             rewardText.fontStyle = FontStyles.Bold;
             rewardText.alignment = TextAlignmentOptions.Center;
             rewardText.color = new Color(0.25f, 1f, 0.65f);
+            rewardText.ApplyFont(UIFontCategory.Button);
             RectTransform rRect = rewardObj.GetComponent<RectTransform>();
             rRect.anchoredPosition = new Vector2(0, -32);
             rRect.sizeDelta = new Vector2(240, 22);
@@ -287,13 +291,13 @@ namespace IdleFishing.World
                         }
                         if (rewardText != null)
                         {
-                            rewardText.text = $"Reward: <color=#FDE047>+{currentContract.goldReward:N0} GOLD</color>";
+                            rewardText.text = $"Reward: <color=#FDE047>+{NumberFormatter.Format(currentContract.goldReward)} GOLD</color>";
                         }
                     }
                     break;
 
                 case CargoShipState.ContractFulfilled:
-                    if (titleText != null) titleText.text = "<color=#34D399>★ CONTRACT COMPLETED! ★</color>";
+                    if (titleText != null) titleText.text = "<color=#34D399>[*] CONTRACT COMPLETED! [*]</color>";
                     if (statusText != null) statusText.text = "All fresh fish loaded onto ship!";
                     if (timerText != null) timerText.text = "<color=#FBBF24>HUGE REWARD CLAIMED!</color>";
                     if (rewardText != null) rewardText.text = "Ship preparing to depart...";
@@ -355,7 +359,11 @@ namespace IdleFishing.World
             currentContract.requiredCount = Random.Range(7, 13);
             currentContract.currentCount = 0;
 
-            currentContract.goldReward = 2000 + (completedContractsCount * 450);
+            int worldOrder = (WorldManager.Instance != null && WorldManager.Instance.CurrentWorld != null) 
+                ? WorldManager.Instance.CurrentWorld.worldOrder 
+                : 1;
+            int baseReward = 2000 + (completedContractsCount * 450);
+            currentContract.goldReward = Mathf.RoundToInt(baseReward * (1.0f + (worldOrder - 1) * 2.5f));
             currentContract.totalDuration = contractTimeLimit;
             currentContract.remainingTime = contractTimeLimit;
         }
@@ -484,7 +492,7 @@ namespace IdleFishing.World
                     transform.position + Vector3.up * 3.2f,
                     reward,
                     DamageStyle.GoldBonus,
-                    $"★ EXPORT COMPLETE! +{reward:N0} G ★"
+                    $"[*] EXPORT COMPLETE! +{NumberFormatter.Format(reward)} G [*]"
                 );
             }
 
@@ -515,7 +523,7 @@ namespace IdleFishing.World
                         transform.position + Vector3.up * 2.5f,
                         partialReward,
                         DamageStyle.GoldBonus,
-                        $"SHIP DEPARTED: EARNED +{partialReward:N0} G"
+                        $"SHIP DEPARTED: EARNED +{NumberFormatter.Format(partialReward)} G"
                     );
                 }
             }

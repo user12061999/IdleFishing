@@ -22,7 +22,18 @@ namespace IdleFishing.Fishing
         public bool IsFrenzyActive => isFrenzyActive;
         public float RemainingFrenzyTime => remainingFrenzyTime;
 
-        public float FrenzyDuration => balanceConfig != null ? balanceConfig.frenzyDuration : 20.0f;
+        public float FrenzyDuration
+        {
+            get
+            {
+                float baseDur = balanceConfig != null ? balanceConfig.frenzyDuration : 20.0f;
+                if (IdleFishing.Economy.PrestigeManager.Instance != null)
+                {
+                    baseDur *= IdleFishing.Economy.PrestigeManager.Instance.RelicFrenzyDurationMultiplier;
+                }
+                return baseDur;
+            }
+        }
         public float SpeedMultiplier => isFrenzyActive ? (balanceConfig != null ? balanceConfig.frenzySpeedMultiplier : 2.5f) : 1.0f;
         public float DamageMultiplier => isFrenzyActive ? (balanceConfig != null ? balanceConfig.frenzyDamageMultiplier : 2.5f) : 1.0f;
 
@@ -64,6 +75,10 @@ namespace IdleFishing.Fishing
             }
 
             float charge = balanceConfig != null ? balanceConfig.frenzyChargePerFish : 4.0f;
+            if (IdleFishing.Economy.PrestigeManager.Instance != null)
+            {
+                charge *= IdleFishing.Economy.PrestigeManager.Instance.RelicFrenzyChargeMultiplier;
+            }
             AddCharge(charge);
         }
 
@@ -76,6 +91,35 @@ namespace IdleFishing.Fishing
 
             float charge = balanceConfig != null ? balanceConfig.frenzyChargePerChest : 40.0f;
             AddCharge(charge);
+        }
+
+        private void Update()
+        {
+            if (Input.GetMouseButtonDown(0))
+            {
+                if (UnityEngine.EventSystems.EventSystem.current == null || !UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject())
+                {
+                    OnScreenTap();
+                }
+            }
+        }
+
+        private void OnScreenTap()
+        {
+            if (isFrenzyActive)
+            {
+                // Tapping liên tục khi đang Frenzy kéo dài thêm một chút thời gian bão cá
+                remainingFrenzyTime = Mathf.Min(remainingFrenzyTime + 0.15f, FrenzyDuration);
+                if (IdleFishing.CameraControl.MobilePortraitCameraController.Instance != null)
+                {
+                    IdleFishing.CameraControl.MobilePortraitCameraController.Instance.TriggerShake(0.08f, 0.06f);
+                }
+            }
+            else
+            {
+                // Tapping trên màn hình tích 2% năng lượng Frenzy
+                AddCharge(2.0f);
+            }
         }
 
         public void AddCharge(float amount)
@@ -111,7 +155,28 @@ namespace IdleFishing.Fishing
                 IdleFishing.CameraControl.MobilePortraitCameraController.Instance.TriggerPunchFOV(-3.0f);
             }
 
-            Debug.Log("[FishingFrenzyManager] 🔥 FISHING FRENZY ACTIVATED FOR 20S! 🔥");
+            if (IdleFishing.Audio.AudioManager.Instance != null)
+            {
+                IdleFishing.Audio.AudioManager.Instance.PlayChestOpen();
+            }
+
+            if (IdleFishing.VFX.VFXManager.Instance != null)
+            {
+                IdleFishing.VFX.VFXManager.Instance.SpawnConfetti(new Vector3(0f, 2.5f, 7.5f), 2.5f);
+                IdleFishing.VFX.VFXManager.Instance.SpawnGoldBurst(new Vector3(0f, 2.0f, 7.5f), 40);
+            }
+
+            if (IdleFishing.UI.FloatingDamageManager.Instance != null)
+            {
+                IdleFishing.UI.FloatingDamageManager.Instance.SpawnDamage(
+                    new Vector3(0f, 2.8f, 7.5f),
+                    0,
+                    IdleFishing.UI.DamageStyle.GoldBonus,
+                    "[FRENZY] FISHING FRENZY ACTIVATED! 2X SPEED & 2X GOLD!"
+                );
+            }
+
+            Debug.Log("[FishingFrenzyManager] [FRENZY] FISHING FRENZY ACTIVATED FOR 20S!");
 
             while (remainingFrenzyTime > 0)
             {

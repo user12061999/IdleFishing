@@ -20,11 +20,17 @@ namespace IdleFishing.Characters
     /// multi-joint spine/limb follow-through, role-specific state animations, and
     /// serialized bind-pose protection against edit/play rotation compounding.
     /// </summary>
+    [ExecuteAlways]
     public class StickmanCartoonVisual : MonoBehaviour
     {
         [Header("Role & Posture")]
         [SerializeField] private StickmanRole role = StickmanRole.CustomerOrTourist;
         [SerializeField] private bool autoDetectMovement = true;
+
+        [Header("Proportions & Chubby Styling")]
+        [SerializeField] private bool applyChubbyProportions = true;
+        [SerializeField] private Vector3 chubbyRootScale = new Vector3(1.36f, 1.10f, 1.26f);
+        [SerializeField] private Vector3 chubbyHeadScale = new Vector3(1.12f, 1.12f, 1.12f);
 
         [Header("Procedural Walk Tuning")]
         [SerializeField] private float walkFrequency = 9.2f;
@@ -54,6 +60,28 @@ namespace IdleFishing.Characters
         [SerializeField, HideInInspector] private Transform rightUpLeg, leftUpLeg;
         [SerializeField, HideInInspector] private Transform rightLeg, leftLeg;
         [SerializeField, HideInInspector] private Transform rightFoot, leftFoot;
+        [SerializeField, HideInInspector] private Transform rIndex1, rMiddle1, rRing1, rPinky1, rThumb1, rThumb2;
+        [SerializeField, HideInInspector] private Transform lIndex1, lMiddle1, lRing1, lPinky1, lThumb1, lThumb2;
+
+        // Immutable Canonical FBX Bind Pose constants (ground truth for all Stickman characters)
+        private static readonly Quaternion CanonicalHipsRot = Quaternion.Euler(90f, 0f, 0f);
+        private static readonly Vector3 CanonicalHipsPos = new Vector3(-0.002f, 0.003f, 0.648f);
+        private static readonly Quaternion CanonicalSpineRot = Quaternion.Euler(358.309f, 0f, 0f);
+        private static readonly Quaternion CanonicalSpine1Rot = Quaternion.identity;
+        private static readonly Quaternion CanonicalNeckRot = Quaternion.Euler(1.691f, 0f, 0f);
+        private static readonly Quaternion CanonicalHeadRot = Quaternion.identity;
+        private static readonly Quaternion CanonicalRightUpLegRot = Quaternion.Euler(0.635f, 0.003f, 180.269f);
+        private static readonly Quaternion CanonicalLeftUpLegRot = Quaternion.Euler(0.544f, -0.003f, 179.731f);
+        private static readonly Quaternion CanonicalRightLegRot = Quaternion.Euler(356.629f, 0f, 0f);
+        private static readonly Quaternion CanonicalLeftLegRot = Quaternion.Euler(356.648f, 0f, 0f);
+        private static readonly Quaternion CanonicalRightFootRot = Quaternion.Euler(54.085f, 344.638f, 356.085f);
+        private static readonly Quaternion CanonicalLeftFootRot = Quaternion.Euler(54.384f, 15.211f, 3.913f);
+        private static readonly Quaternion CanonicalRightArmRot = Quaternion.Euler(345.314f, 1.801f, 0.731f);
+        private static readonly Quaternion CanonicalLeftArmRot = Quaternion.Euler(345.314f, 358.230f, 0.669f);
+        private static readonly Quaternion CanonicalRightForeArmRot = Quaternion.Euler(0.000f, 0.000f, 4.893f);
+        private static readonly Quaternion CanonicalLeftForeArmRot = Quaternion.Euler(0.000f, 0.000f, 354.462f);
+        private static readonly Quaternion CanonicalRightHandRot = Quaternion.Euler(353.416f, 358.305f, 358.192f);
+        private static readonly Quaternion CanonicalLeftHandRot = Quaternion.Euler(355.167f, 1.682f, 2.730f);
 
         // Immutable serialized bind-pose transforms (prevents compounding rotation bug)
         [SerializeField, HideInInspector] private bool hasBindPose = false;
@@ -141,7 +169,7 @@ namespace IdleFishing.Characters
 
         private void CacheBones(bool forceCaptureBindPose)
         {
-            if (hips == null || rightArm == null || leftArm == null || rightUpLeg == null)
+            if (hips == null || rightArm == null || leftArm == null || rightUpLeg == null || rIndex1 == null)
             {
                 var all = GetComponentsInChildren<Transform>(true);
                 for (int i = 0; i < all.Length; i++)
@@ -166,38 +194,46 @@ namespace IdleFishing.Characters
                         case "LeftLeg": leftLeg = t; break;
                         case "RightFoot": rightFoot = t; break;
                         case "LeftFoot": leftFoot = t; break;
+                        case "RightHandIndex1": rIndex1 = t; break;
+                        case "RightHandMiddle1": rMiddle1 = t; break;
+                        case "RightHandRing1": rRing1 = t; break;
+                        case "RightHandPinky1": rPinky1 = t; break;
+                        case "RightHandThumb1": rThumb1 = t; break;
+                        case "RightHandThumb2": rThumb2 = t; break;
+                        case "LeftHandIndex1": lIndex1 = t; break;
+                        case "LeftHandMiddle1": lMiddle1 = t; break;
+                        case "LeftHandRing1": lRing1 = t; break;
+                        case "LeftHandPinky1": lPinky1 = t; break;
+                        case "LeftHandThumb1": lThumb1 = t; break;
+                        case "LeftHandThumb2": lThumb2 = t; break;
                     }
                 }
             }
 
-            if (!hasBindPose || forceCaptureBindPose)
-            {
-                if (hips != null) { initHips = hips.localRotation; initHipsPos = hips.localPosition; }
-                if (spine != null) initSpine = spine.localRotation;
-                if (spine1 != null) initSpine1 = spine1.localRotation;
-                if (neck != null) initNeck = neck.localRotation;
-                if (head != null) initHead = head.localRotation;
-                if (rightArm != null) initRightArm = rightArm.localRotation;
-                if (leftArm != null) initLeftArm = leftArm.localRotation;
-                if (rightForeArm != null) initRightForeArm = rightForeArm.localRotation;
-                if (leftForeArm != null) initLeftForeArm = leftForeArm.localRotation;
-                if (rightHand != null) initRightHand = rightHand.localRotation;
-                if (leftHand != null) initLeftHand = leftHand.localRotation;
-                if (rightUpLeg != null) initRightUpLeg = rightUpLeg.localRotation;
-                if (leftUpLeg != null) initLeftUpLeg = leftUpLeg.localRotation;
-                if (rightLeg != null) initRightLeg = rightLeg.localRotation;
-                if (leftLeg != null) initLeftLeg = leftLeg.localRotation;
-                if (rightFoot != null) initRightFoot = rightFoot.localRotation;
-                if (leftFoot != null) initLeftFoot = leftFoot.localRotation;
-                if (visualRoot != null && visualRoot.localScale.sqrMagnitude > 0.01f)
-                {
-                    initVisualScale = visualRoot.localScale;
-                }
-                hasBindPose = true;
-            }
+            // Always bind to canonical FBX bind-pose constants so runtime/edit-mode posing can NEVER compound
+            initHips = CanonicalHipsRot;
+            initHipsPos = CanonicalHipsPos;
+            initSpine = CanonicalSpineRot;
+            initSpine1 = CanonicalSpine1Rot;
+            initNeck = CanonicalNeckRot;
+            initHead = CanonicalHeadRot;
+            initRightArm = CanonicalRightArmRot;
+            initLeftArm = CanonicalLeftArmRot;
+            initRightForeArm = CanonicalRightForeArmRot;
+            initLeftForeArm = CanonicalLeftForeArmRot;
+            initRightHand = CanonicalRightHandRot;
+            initLeftHand = CanonicalLeftHandRot;
+            initRightUpLeg = CanonicalRightUpLegRot;
+            initLeftUpLeg = CanonicalLeftUpLegRot;
+            initRightLeg = CanonicalRightLegRot;
+            initLeftLeg = CanonicalLeftLegRot;
+            initRightFoot = CanonicalRightFootRot;
+            initLeftFoot = CanonicalLeftFootRot;
+            initVisualScale = chubbyRootScale;
+            hasBindPose = true;
 
             // Ensure equipment sockets exist with world-aligned orientation when right hand is held forward
-            if (rightHand != null && rightHandSocket == null)
+            if (rightHand != null)
             {
                 var s = rightHand.Find("Socket_RightHand");
                 if (s == null)
@@ -206,7 +242,7 @@ namespace IdleFishing.Characters
                     g.transform.SetParent(rightHand, false);
                     s = g.transform;
                 }
-                s.localPosition = new Vector3(0f, 0.08f, 0f);
+                s.localPosition = new Vector3(-0.01f, 0.09f, -0.02f);
                 s.localRotation = Quaternion.Euler(291.7f, 256.1f, 174.3f);
                 rightHandSocket = s;
             }
@@ -228,45 +264,158 @@ namespace IdleFishing.Characters
             }
         }
 
+        private float CurrentAnimTime
+        {
+            get
+            {
+#if UNITY_EDITOR
+                if (!Application.isPlaying)
+                {
+                    return (float)UnityEditor.EditorApplication.timeSinceStartup + idlePhaseOffset;
+                }
+#endif
+                return Time.time + idlePhaseOffset;
+            }
+        }
+
+        private void ApplyChubbyBones()
+        {
+            if (!applyChubbyProportions) return;
+
+            if (hips != null) hips.localScale = Vector3.one;
+            if (spine != null) spine.localScale = Vector3.one;
+            if (spine1 != null) spine1.localScale = Vector3.one;
+            if (neck != null) neck.localScale = Vector3.one;
+            if (head != null) head.localScale = chubbyHeadScale;
+        }
+
         /// <summary>
         /// Restores all cached bones back to their canonical bind-pose local transforms.
         /// </summary>
         public void ResetToBindPose()
         {
-            if (!hasBindPose) return;
+            initHips = CanonicalHipsRot;
+            initHipsPos = CanonicalHipsPos;
+            initSpine = CanonicalSpineRot;
+            initSpine1 = CanonicalSpine1Rot;
+            initNeck = CanonicalNeckRot;
+            initHead = CanonicalHeadRot;
+            initRightArm = CanonicalRightArmRot;
+            initLeftArm = CanonicalLeftArmRot;
+            initRightForeArm = CanonicalRightForeArmRot;
+            initLeftForeArm = CanonicalLeftForeArmRot;
+            initRightHand = CanonicalRightHandRot;
+            initLeftHand = CanonicalLeftHandRot;
+            initRightUpLeg = CanonicalRightUpLegRot;
+            initLeftUpLeg = CanonicalLeftUpLegRot;
+            initRightLeg = CanonicalRightLegRot;
+            initLeftLeg = CanonicalLeftLegRot;
+            initRightFoot = CanonicalRightFootRot;
+            initLeftFoot = CanonicalLeftFootRot;
+            hasBindPose = true;
 
             if (hips != null)
             {
-                hips.localPosition = initHipsPos;
-                hips.localRotation = initHips;
+                hips.localPosition = CanonicalHipsPos;
+                hips.localRotation = CanonicalHipsRot;
             }
-            if (spine != null) spine.localRotation = initSpine;
-            if (spine1 != null) spine1.localRotation = initSpine1;
-            if (neck != null) neck.localRotation = initNeck;
-            if (head != null) head.localRotation = initHead;
-            if (rightArm != null) rightArm.localRotation = initRightArm;
-            if (leftArm != null) leftArm.localRotation = initLeftArm;
-            if (rightForeArm != null) rightForeArm.localRotation = initRightForeArm;
-            if (leftForeArm != null) leftForeArm.localRotation = initLeftForeArm;
-            if (rightHand != null) rightHand.localRotation = initRightHand;
-            if (leftHand != null) leftHand.localRotation = initLeftHand;
-            if (rightUpLeg != null) rightUpLeg.localRotation = initRightUpLeg;
-            if (leftUpLeg != null) leftUpLeg.localRotation = initLeftUpLeg;
-            if (rightLeg != null) rightLeg.localRotation = initRightLeg;
-            if (leftLeg != null) leftLeg.localRotation = initLeftLeg;
-            if (rightFoot != null) rightFoot.localRotation = initRightFoot;
-            if (leftFoot != null) leftFoot.localRotation = initLeftFoot;
-            if (visualRoot != null) visualRoot.localScale = initVisualScale;
+            if (spine != null) spine.localRotation = CanonicalSpineRot;
+            if (spine1 != null) spine1.localRotation = CanonicalSpine1Rot;
+            if (neck != null) neck.localRotation = CanonicalNeckRot;
+            if (head != null) head.localRotation = CanonicalHeadRot;
+            if (rightArm != null) rightArm.localRotation = CanonicalRightArmRot;
+            if (leftArm != null) leftArm.localRotation = CanonicalLeftArmRot;
+            if (rightForeArm != null) rightForeArm.localRotation = CanonicalRightForeArmRot;
+            if (leftForeArm != null) leftForeArm.localRotation = CanonicalLeftForeArmRot;
+            if (rightHand != null) rightHand.localRotation = CanonicalRightHandRot;
+            if (leftHand != null) leftHand.localRotation = CanonicalLeftHandRot;
+            if (rightUpLeg != null) rightUpLeg.localRotation = CanonicalRightUpLegRot;
+            if (leftUpLeg != null) leftUpLeg.localRotation = CanonicalLeftUpLegRot;
+            if (rightLeg != null) rightLeg.localRotation = CanonicalRightLegRot;
+            if (leftLeg != null) leftLeg.localRotation = CanonicalLeftLegRot;
+            if (rightFoot != null) rightFoot.localRotation = CanonicalRightFootRot;
+            if (leftFoot != null) leftFoot.localRotation = CanonicalLeftFootRot;
+            if (visualRoot != null) visualRoot.localScale = applyChubbyProportions ? chubbyRootScale : initVisualScale;
+            ApplyChubbyBones();
+            ResetFingersToBindPose();
+        }
+
+        private void CurlFinger(Transform f1, float a1, float a2, float a3)
+        {
+            if (f1 == null) return;
+            f1.localRotation = Quaternion.Euler(a1, 0f, 0f);
+            if (f1.childCount > 0)
+            {
+                Transform f2 = f1.GetChild(0);
+                f2.localRotation = Quaternion.Euler(a2, 0f, 0f);
+                if (f2.childCount > 0)
+                {
+                    Transform f3 = f2.GetChild(0);
+                    f3.localRotation = Quaternion.Euler(a3, 0f, 0f);
+                }
+            }
+        }
+
+        private void ApplySittingFishermanFingers()
+        {
+            // Right hand firmly grips the fishing rod handle
+            CurlFinger(rIndex1, 65f, 60f, 45f);
+            CurlFinger(rMiddle1, 65f, 60f, 45f);
+            CurlFinger(rRing1, 65f, 60f, 45f);
+            CurlFinger(rPinky1, 65f, 60f, 45f);
+            if (rThumb1 != null)
+            {
+                rThumb1.localRotation = Quaternion.Euler(20f, 35f, 40f);
+                if (rThumb2 != null) rThumb2.localRotation = Quaternion.Euler(30f, 0f, 0f);
+            }
+
+            // Left hand rests comfortably on left thigh with naturally relaxed curved fingers
+            CurlFinger(lIndex1, 30f, 35f, 20f);
+            CurlFinger(lMiddle1, 30f, 35f, 20f);
+            CurlFinger(lRing1, 30f, 35f, 20f);
+            CurlFinger(lPinky1, 30f, 35f, 20f);
+            if (lThumb1 != null)
+            {
+                lThumb1.localRotation = Quaternion.Euler(15f, -20f, -25f);
+                if (lThumb2 != null) lThumb2.localRotation = Quaternion.Euler(20f, 0f, 0f);
+            }
+        }
+
+        private void ResetFingersToBindPose()
+        {
+            CurlFinger(rIndex1, 6.23f, 0f, 0f);
+            CurlFinger(rMiddle1, 0f, 0f, 0f);
+            CurlFinger(rRing1, 2.44f, 0f, 0f);
+            CurlFinger(rPinky1, 1.74f, 0f, 0f);
+            if (rThumb1 != null)
+            {
+                rThumb1.localRotation = Quaternion.Euler(19.32f, 10.19f, 28.52f);
+                if (rThumb2 != null) rThumb2.localRotation = Quaternion.identity;
+            }
+
+            CurlFinger(lIndex1, 4.75f, 0f, 0f);
+            CurlFinger(lMiddle1, 0f, 0f, 0f);
+            CurlFinger(lRing1, 1.71f, 0f, 0f);
+            CurlFinger(lPinky1, 2.01f, 0f, 0f);
+            if (lThumb1 != null)
+            {
+                lThumb1.localRotation = Quaternion.Euler(19.40f, -12f, -32.6f);
+                if (lThumb2 != null) lThumb2.localRotation = Quaternion.identity;
+            }
         }
 
         private void LateUpdate()
         {
-            if (!Application.isPlaying) return;
-
-            float dt = Time.deltaTime;
+            float dt = Application.isPlaying ? Time.deltaTime : 0.02f;
             if (dt <= 0.00001f) return;
 
-            if (autoDetectMovement && role != StickmanRole.SittingFisherman)
+            if (!isInitialized || hips == null)
+            {
+                Initialize(false);
+                if (hips == null) return;
+            }
+
+            if (Application.isPlaying && autoDetectMovement && role != StickmanRole.SittingFisherman)
             {
                 Vector3 curPos = transform.position;
                 Vector3 delta = curPos - lastWorldPos;
@@ -293,7 +442,7 @@ namespace IdleFishing.Characters
             }
 
             // Update smooth locomotion blend & walk cycle
-            float targetBlend = Mathf.Clamp01((currentSpeed - 0.08f) / 1.8f);
+            float targetBlend = Application.isPlaying ? Mathf.Clamp01((currentSpeed - 0.08f) / 1.8f) : 0f;
             locomotionBlend = Mathf.MoveTowards(locomotionBlend, targetBlend, dt * 7.5f);
 
             if (locomotionBlend > 0.01f)
@@ -325,7 +474,7 @@ namespace IdleFishing.Characters
                 fishingLineVisual = fishermanWorker.GetComponent<FishingLineVisual>();
             }
 
-            float t = Time.time + idlePhaseOffset;
+            float t = CurrentAnimTime;
             FishingLinePhase linePhase = fishingLineVisual != null ? fishingLineVisual.Phase : FishingLinePhase.Drifting;
 
             if (linePhase == FishingLinePhase.CastingOut)
@@ -337,123 +486,151 @@ namespace IdleFishing.Characters
                 castSubTimer = 0f;
             }
 
-            // 1. Seated Hips & Legs (dangling comfortably off the pier edge facing +Z)
-            float kickFreq = (linePhase == FishingLinePhase.Strike || linePhase == FishingLinePhase.ReelingIn) ? 9.5f : 2.1f;
-            float kickAmp = (linePhase == FishingLinePhase.Strike || linePhase == FishingLinePhase.ReelingIn) ? 10.0f : 4.5f;
-            float legKick = Mathf.Sin(t * kickFreq) * kickAmp;
+            // 1. Seated Hips & Legs
+            // Position hips cleanly on top of the wooden stool surface (+0.14m in Armature local space).
+            // Legs hang calm and relaxed over the stool edge without erratic kicking.
+            float legKick = 0f;
+            float footFlex = 14f;
 
             if (hips != null)
             {
-                hips.localPosition = initHipsPos;
-                hips.localRotation = initHips * Quaternion.Euler(-4f, 0f, 0f);
+                hips.localPosition = CanonicalHipsPos + new Vector3(0f, 0f, 0.14f);
+                hips.localRotation = CanonicalHipsRot * Quaternion.Euler(-4f, 0f, 0f);
             }
-            if (rightUpLeg != null) rightUpLeg.localRotation = initRightUpLeg * Quaternion.Euler(78f, 7f, 0f);
-            if (leftUpLeg != null) leftUpLeg.localRotation = initLeftUpLeg * Quaternion.Euler(78f, -7f, 0f);
-            if (rightLeg != null) rightLeg.localRotation = initRightLeg * Quaternion.Euler(-78f + legKick, 0f, 0f);
-            if (leftLeg != null) leftLeg.localRotation = initLeftLeg * Quaternion.Euler(-78f - legKick, 0f, 0f);
-            if (rightFoot != null) rightFoot.localRotation = initRightFoot * Quaternion.Euler(legKick * 0.6f, 0f, 0f);
-            if (leftFoot != null) leftFoot.localRotation = initLeftFoot * Quaternion.Euler(-legKick * 0.6f, 0f, 0f);
 
-            // 2. Phase-driven Upper Body, Head & Arms
-            // Note on Stickman bone axes:
-            // RightArm / RightForeArm: +X lowers arm to side, +Z swings arm FORWARD (+Z world).
-            // LeftArm  / LeftForeArm : +X lowers arm to side, -Z swings arm FORWARD (+Z world).
-            float breathe = Mathf.Sin(t * 2.3f) * 2.2f;
+            // 2. Phase-driven Upper Body, Arms & Hand Posture
+            float breathe = Mathf.Sin(t * 2.1f) * 1.6f;
             float spinePitch = breathe * 0.5f;
             float spineYaw = 0f;
-            float headPitch = -breathe * 0.4f + 4f;
-            float headYaw = Mathf.Sin(t * 0.8f) * 6f;
+            float headPitch = -breathe * 0.4f + 3f;
+            float headYaw = Mathf.Sin(t * 0.6f) * 4f;
 
-            Vector3 rArmEuler = new Vector3(55f, 0f, 35f + breathe);
-            Vector3 rForeEuler = new Vector3(18f, 0f, 32f);
-            Vector3 rHandEuler = Vector3.zero;
+            // Default relaxed fishing: right arm holds rod elevated forward at waist (~32 deg),
+            // left hand rests naturally with palm and curved fingers on top of the left thigh
+            Vector3 rArmEuler = new Vector3(50f, 0f, 26f + breathe * 1.5f);
+            Vector3 rForeEuler = new Vector3(18f, 0f, 22f);
+            Vector3 rHandEuler = new Vector3(-16f, 0f, 0f);
 
-            // Default left arm resting on left knee/thigh
-            Vector3 lArmEuler = new Vector3(58f, 0f, -24f);
-            Vector3 lForeEuler = new Vector3(34f, 0f, -22f);
+            Vector3 lArmEuler = new Vector3(74f, 0f, -20f);
+            Vector3 lForeEuler = new Vector3(56f, 0f, -12f);
+            Vector3 lHandEuler = new Vector3(18f, 0f, 8f);
 
             switch (linePhase)
             {
+                case FishingLinePhase.Resting:
+                case FishingLinePhase.Drifting:
+                    // Peaceful seated waiting: gentle breathing sway, calm hanging legs
+                    legKick = Mathf.Sin(t * 1.2f) * 0.8f;
+                    footFlex = 14f;
+                    break;
+
                 case FishingLinePhase.CastingOut:
-                    // Wind-up (0..0.28s) then whip forward (0.28..0.85s)
+                    // Smooth over-the-shoulder wind-up and forward whip
                     if (castSubTimer < 0.28f)
                     {
                         float w = Mathf.Clamp01(castSubTimer / 0.28f);
                         float ease = Mathf.Sin(w * Mathf.PI * 0.5f);
-                        spinePitch = Mathf.Lerp(0f, -14f, ease);
-                        spineYaw = Mathf.Lerp(0f, 12f, ease);
+                        spinePitch = Mathf.Lerp(0f, -12f, ease);
+                        spineYaw = Mathf.Lerp(0f, 10f, ease);
                         headPitch = 6f;
                         headYaw = 0f;
-                        rArmEuler = new Vector3(Mathf.Lerp(55f, 38f, ease), 0f, Mathf.Lerp(35f, 8f, ease));
-                        rForeEuler = new Vector3(15f, 0f, Mathf.Lerp(32f, 48f, ease));
+                        rArmEuler = new Vector3(Mathf.Lerp(50f, 36f, ease), 0f, Mathf.Lerp(26f, 10f, ease));
+                        rForeEuler = new Vector3(Mathf.Lerp(18f, 22f, ease), 0f, Mathf.Lerp(22f, 52f, ease));
+                        rHandEuler = new Vector3(Mathf.Lerp(-16f, 8f, ease), 0f, 0f);
                     }
                     else
                     {
                         float w = Mathf.Clamp01((castSubTimer - 0.28f) / 0.45f);
                         float whip = Mathf.Sin(w * Mathf.PI);
-                        spinePitch = Mathf.Lerp(-14f, 12f, Mathf.Clamp01(w * 2f)) * (1f - w * 0.5f);
-                        spineYaw = Mathf.Lerp(12f, -6f, w);
+                        spinePitch = Mathf.Lerp(-12f, 10f, Mathf.Clamp01(w * 2f)) * (1f - w * 0.5f);
+                        spineYaw = Mathf.Lerp(10f, -4f, w);
                         headPitch = 4f;
                         headYaw = 0f;
-                        rArmEuler = new Vector3(52f, 0f, Mathf.Lerp(54f, 35f, w));
-                        rForeEuler = new Vector3(18f, 0f, Mathf.Lerp(18f, 32f, w));
-                        rHandEuler = new Vector3(0f, 0f, -whip * 18f);
+                        rArmEuler = new Vector3(52f, 0f, Mathf.Lerp(50f, 32f, w));
+                        rForeEuler = new Vector3(20f, 0f, Mathf.Lerp(16f, 28f, w));
+                        rHandEuler = new Vector3(-24f * whip, 0f, 0f);
                     }
+                    legKick = 0f;
+                    footFlex = 14f;
                     break;
 
                 case FishingLinePhase.Nibbling:
-                    // Alert lean forward watching the bobber
-                    float alertPulse = Mathf.Sin(t * 14f) * 2.5f;
-                    spinePitch = 9f + alertPulse * 0.3f;
+                    // Alert forward lean watching the bobber, rod tip twitching
+                    float alertPulse = Mathf.Sin(t * 12f) * 2.0f;
+                    spinePitch = 6f + alertPulse * 0.4f;
                     headPitch = 8f;
                     headYaw = 0f;
-                    rArmEuler = new Vector3(53f, 0f, 38f + alertPulse);
-                    rForeEuler = new Vector3(20f, 0f, 34f);
-                    // Left hand lifts slightly getting ready to grab the reel
-                    lArmEuler = new Vector3(55f, 0f, -32f);
-                    lForeEuler = new Vector3(38f, 0f, -28f);
+                    rArmEuler = new Vector3(48f, 0f, 28f + alertPulse);
+                    rForeEuler = new Vector3(20f, 0f, 24f);
+                    rHandEuler = new Vector3(-18f + alertPulse * 1.5f, 0f, 0f);
+                    lArmEuler = new Vector3(70f, 0f, -22f);
+                    lForeEuler = new Vector3(50f, 0f, -14f);
+                    lHandEuler = new Vector3(18f, 0f, 8f);
+                    legKick = 0f;
+                    footFlex = 18f;
                     break;
 
                 case FishingLinePhase.Strike:
-                case FishingLinePhase.ReelingIn:
-                    // Active tug-of-war: lean back, pump rod with right arm, crank reel in circles with left hand!
-                    float pump = Mathf.Sin(t * 13f);
-                    float crankSin = Mathf.Sin(t * 18f);
-                    float crankCos = Mathf.Cos(t * 18f);
-
-                    spinePitch = -11f + pump * 5f;
-                    spineYaw = -6f + pump * 3f;
-                    headPitch = 8f - pump * 3f;
+                    // Hook set! Sharp, energetic cartoon yank backward
+                    spinePitch = -15f;
+                    headPitch = 4f;
                     headYaw = 0f;
+                    rArmEuler = new Vector3(36f, 0f, 48f);
+                    rForeEuler = new Vector3(32f, 0f, 38f);
+                    rHandEuler = new Vector3(10f, 0f, 0f);
+                    lArmEuler = new Vector3(76f, 0f, -18f);
+                    lForeEuler = new Vector3(60f, 0f, -10f);
+                    lHandEuler = new Vector3(22f, 0f, 5f);
+                    legKick = 2.0f;
+                    footFlex = 22f;
+                    break;
 
-                    rArmEuler = new Vector3(46f, 0f, 42f + pump * 9f);
-                    rForeEuler = new Vector3(20f, 0f, 36f - pump * 6f);
-                    rHandEuler = new Vector3(0f, 0f, pump * 8f);
-
-                    // Left hand reaches across to the reel and cranks!
-                    lArmEuler = new Vector3(50f + crankCos * 6f, 0f, -38f + crankSin * 10f);
-                    lForeEuler = new Vector3(42f + crankSin * 8f, 0f, -32f + crankCos * 12f);
+                case FishingLinePhase.ReelingIn:
+                    // Rhythmic cartoon tug-of-war: fisherman pumps rod up and back, bracing on knee
+                    float pump = Mathf.Sin(t * 7.0f);
+                    spinePitch = -12f + pump * 6f;
+                    spineYaw = pump * 3f;
+                    headPitch = 6f - pump * 3f;
+                    headYaw = 0f;
+                    rArmEuler = new Vector3(42f - pump * 8f, 0f, 38f + pump * 12f);
+                    rForeEuler = new Vector3(25f + pump * 10f, 0f, 28f + pump * 8f);
+                    rHandEuler = new Vector3(-8f + pump * 12f, 0f, 0f);
+                    lArmEuler = new Vector3(75f - pump * 4f, 0f, -20f);
+                    lForeEuler = new Vector3(58f - pump * 3f, 0f, -12f);
+                    lHandEuler = new Vector3(20f, 0f, 6f);
+                    legKick = pump * 2.0f;
+                    footFlex = 18f + Mathf.Max(0f, pump) * 4f;
                     break;
             }
 
-            if (spine != null) spine.localRotation = initSpine * Quaternion.Euler(spinePitch * 0.6f, spineYaw * 0.5f, 0f);
-            if (spine1 != null) spine1.localRotation = initSpine1 * Quaternion.Euler(spinePitch * 0.5f, spineYaw * 0.5f, 0f);
-            if (neck != null) neck.localRotation = initNeck * Quaternion.Euler(headPitch * 0.35f, headYaw * 0.4f, 0f);
-            if (head != null) head.localRotation = initHead * Quaternion.Euler(headPitch * 0.65f, headYaw * 0.6f, 0f);
+            if (rightUpLeg != null) rightUpLeg.localRotation = CanonicalRightUpLegRot * Quaternion.Euler(78f, 6f, 0f);
+            if (leftUpLeg != null) leftUpLeg.localRotation = CanonicalLeftUpLegRot * Quaternion.Euler(78f, -6f, 0f);
+            if (rightLeg != null) rightLeg.localRotation = CanonicalRightLegRot * Quaternion.Euler(-84f + legKick, 0f, 0f);
+            if (leftLeg != null) leftLeg.localRotation = CanonicalLeftLegRot * Quaternion.Euler(-84f - legKick, 0f, 0f);
+            if (rightFoot != null) rightFoot.localRotation = CanonicalRightFootRot * Quaternion.Euler(footFlex, 0f, 0f);
+            if (leftFoot != null) leftFoot.localRotation = CanonicalLeftFootRot * Quaternion.Euler(footFlex, 0f, 0f);
 
-            if (rightArm != null) rightArm.localRotation = initRightArm * Quaternion.Euler(rArmEuler);
-            if (rightForeArm != null) rightForeArm.localRotation = initRightForeArm * Quaternion.Euler(rForeEuler);
-            if (rightHand != null) rightHand.localRotation = initRightHand * Quaternion.Euler(rHandEuler);
-            if (leftArm != null) leftArm.localRotation = initLeftArm * Quaternion.Euler(lArmEuler);
-            if (leftForeArm != null) leftForeArm.localRotation = initLeftForeArm * Quaternion.Euler(lForeEuler);
-            if (leftHand != null) leftHand.localRotation = initLeftHand;
+            if (spine != null) spine.localRotation = CanonicalSpineRot * Quaternion.Euler(spinePitch * 0.6f, spineYaw * 0.5f, 0f);
+            if (spine1 != null) spine1.localRotation = CanonicalSpine1Rot * Quaternion.Euler(spinePitch * 0.5f, spineYaw * 0.5f, 0f);
+            if (neck != null) neck.localRotation = CanonicalNeckRot * Quaternion.Euler(headPitch * 0.35f, headYaw * 0.4f, 0f);
+            if (head != null) head.localRotation = CanonicalHeadRot * Quaternion.Euler(headPitch * 0.65f, headYaw * 0.6f, 0f);
 
-            if (visualRoot != null) visualRoot.localScale = initVisualScale;
+            if (rightArm != null) rightArm.localRotation = CanonicalRightArmRot * Quaternion.Euler(rArmEuler);
+            if (rightForeArm != null) rightForeArm.localRotation = CanonicalRightForeArmRot * Quaternion.Euler(rForeEuler);
+            if (rightHand != null) rightHand.localRotation = CanonicalRightHandRot * Quaternion.Euler(rHandEuler);
+            if (leftArm != null) leftArm.localRotation = CanonicalLeftArmRot * Quaternion.Euler(lArmEuler);
+            if (leftForeArm != null) leftForeArm.localRotation = CanonicalLeftForeArmRot * Quaternion.Euler(lForeEuler);
+            if (leftHand != null) leftHand.localRotation = CanonicalLeftHandRot * Quaternion.Euler(lHandEuler);
+
+            ApplySittingFishermanFingers();
+
+            if (visualRoot != null) visualRoot.localScale = applyChubbyProportions ? chubbyRootScale : initVisualScale;
+            ApplyChubbyBones();
         }
 
         private void ApplyStandardLocomotionPose(float dt)
         {
-            float t = Time.time + idlePhaseOffset;
+            float t = CurrentAnimTime;
             float b = locomotionBlend;
 
             float sinCycle = Mathf.Sin(walkCycle);
@@ -621,12 +798,14 @@ namespace IdleFishing.Characters
                 float idleSquash = idleBreathe * 0.016f * (1f - b);
                 float totalSquash = walkSquash + idleSquash;
 
+                Vector3 baseScale = applyChubbyProportions ? chubbyRootScale : initVisualScale;
                 visualRoot.localScale = new Vector3(
-                    initVisualScale.x * (1f - totalSquash * 0.45f),
-                    initVisualScale.y * (1f + totalSquash),
-                    initVisualScale.z * (1f - totalSquash * 0.45f)
+                    baseScale.x * (1f - totalSquash * 0.45f),
+                    baseScale.y * (1f + totalSquash),
+                    baseScale.z * (1f - totalSquash * 0.45f)
                 );
             }
+            ApplyChubbyBones();
         }
 
         public void TriggerWhack(float duration = 0.28f)
@@ -703,7 +882,7 @@ namespace IdleFishing.Characters
 
         private void ApplyKnockoutPose()
         {
-            float t = Time.time + idlePhaseOffset;
+            float t = CurrentAnimTime;
             float dizzyRoll = Mathf.Sin(t * 5.5f) * 14f;
             float dizzyPitch = Mathf.Cos(t * 4.5f) * 10f;
             float legTwitch = Mathf.Sin(t * 9f) * 8f;
@@ -726,6 +905,9 @@ namespace IdleFishing.Characters
             if (leftUpLeg != null) leftUpLeg.localRotation = initLeftUpLeg * Quaternion.Euler(12f - legTwitch, -10f, 0f);
             if (rightLeg != null) rightLeg.localRotation = initRightLeg * Quaternion.Euler(-20f, 0f, 0f);
             if (leftLeg != null) leftLeg.localRotation = initLeftLeg * Quaternion.Euler(-20f, 0f, 0f);
+
+            if (visualRoot != null) visualRoot.localScale = applyChubbyProportions ? chubbyRootScale : initVisualScale;
+            ApplyChubbyBones();
         }
     }
 }

@@ -1,0 +1,1218 @@
+{
+  "schema_version": "1.0.0-design-prototype",
+  "document_title": "Idle Fishing 30 Stage Design Data",
+  "not_drop_in_scriptableobjects": true,
+  "notes": [
+    "Đây là dữ liệu thiết kế, chưa phải schema C# đã tích hợp vào Unity. Codex cần map tới enum/ScriptableObject thực tế.",
+    "Tất cả loài cá, boss và mechanic không xác nhận trong gameplay spec đều là đề xuất.",
+    "grant_fame_on_first_clear và income benchmark là số mục tiêu giả lập để balance, chưa phải thông số production."
+  ],
+  "worlds": [
+    {
+      "id": "world_1",
+      "name": "Temperate Bay",
+      "theme": "Tân thủ, vận hành cảng và Shark Boss",
+      "scale": 1,
+      "minutes": [
+        1.0,
+        1.75,
+        2.5,
+        3.0,
+        3.5,
+        5.0
+      ],
+      "boss": "Apex Blacktip Shark",
+      "gimmick": "Pirate bounty / Shark",
+      "species": [
+        "Sardine",
+        "Blue Snapper",
+        "Hermit Crab",
+        "Blacktip Shark"
+      ]
+    },
+    {
+      "id": "world_2",
+      "name": "Tropical Coral Atoll",
+      "theme": "Khám phá, tương tác và ngọc trai",
+      "scale": 20,
+      "minutes": [
+        2.5,
+        3.0,
+        3.5,
+        4.0,
+        4.5,
+        6.0
+      ],
+      "boss": "Colossal Manta Ray",
+      "gimmick": "Giant Clam: 3 Golden Pearls -> Pearl Frenzy x3 trong 20 giây",
+      "species": [
+        "Coral Snapper",
+        "Pufferfish",
+        "Electric Eel",
+        "Coral Ray",
+        "Colossal Manta Ray"
+      ]
+    },
+    {
+      "id": "world_3",
+      "name": "Autumn Smoker Haven",
+      "theme": "Chế biến, đơn hàng, quyết định kinh tế",
+      "scale": 400,
+      "minutes": [
+        3.0,
+        3.5,
+        4.0,
+        4.0,
+        5.0,
+        6.0
+      ],
+      "boss": "Smoker Kraken",
+      "gimmick": "Autumn Smoker Grill: cá hun khói x4",
+      "species": [
+        "Autumn Salmon",
+        "Armored Crab",
+        "Ember Eel",
+        "Ink Octopus",
+        "Smoker Kraken"
+      ]
+    },
+    {
+      "id": "world_4",
+      "name": "Arctic Frostfjord",
+      "theme": "Thời tiết, điểm nghẽn và xử lý rủi ro",
+      "scale": 8000,
+      "minutes": [
+        3.0,
+        4.0,
+        4.0,
+        4.5,
+        5.5,
+        7.0
+      ],
+      "boss": "Glacier Narwhal",
+      "gimmick": "Blizzard: -50% tốc câu; phá Treasure Iceberg -> x2 tốc câu",
+      "species": [
+        "Arctic Cod",
+        "Snow Crab",
+        "Frost Fish",
+        "Ice Ray",
+        "Glacier Narwhal"
+      ]
+    },
+    {
+      "id": "world_5",
+      "name": "Desert Oasis Harbor",
+      "theme": "Mastery, Caravan và 3 Sacred Relics",
+      "scale": 160000,
+      "minutes": [
+        3.5,
+        4.5,
+        5.0,
+        5.0,
+        6.0,
+        8.0
+      ],
+      "boss": "Oasis Leviathan",
+      "gimmick": "Caravan shipments -> Sacred Relics Speed, Price, Genie Lamp",
+      "species": [
+        "Oasis Carp",
+        "Sand Ray",
+        "Golden Catfish",
+        "Mirage Eel",
+        "Oasis Leviathan"
+      ]
+    }
+  ],
+  "stages": [
+    {
+      "id": "stage_01",
+      "stage_number": 1,
+      "world_id": "world_1",
+      "stage_in_world": 1,
+      "target_minutes": 1.0,
+      "entry_unlock": "world_start",
+      "estimated_base_gold_per_min": 120,
+      "reward_gold_equivalent_minutes": 0.35,
+      "grant_fame_on_first_clear": 1,
+      "replayable": false,
+      "name": "Mẻ cá đầu tiên",
+      "goals": [
+        {
+          "type": "catch_fish",
+          "count": 1
+        },
+        {
+          "type": "defeat_fish",
+          "count": 1
+        },
+        {
+          "type": "sell_item",
+          "count": 1
+        }
+      ],
+      "mechanic": "Tutorial câu -> cá nhảy lên sàn -> chạm để đánh -> bán; góc camera cố định vào hành động.",
+      "species": "Sardine (normal hop)",
+      "interaction": "Player tap 1–3 lần gây hit-stop 60 ms; auto trợ giúp nếu không tap sau 15 giây.",
+      "upgrade_focus": "Khởi đầu Fisherman Lv0; cho miễn phí Wrangler tutorial tối thiểu đủ auto-kill.",
+      "stage_reward": "Tặng 1 nâng cấp Fisherman cơ bản; mở Stage 2.",
+      "guardrail": "Kết thúc phải thấy vòng Gold đầu tiên trong <= 45 giây.",
+      "unlocks": [
+        "core_fishing",
+        "tutorial_auto_wrangler"
+      ],
+      "goals_required_all": true,
+      "hard_no_rng_objective": true
+    },
+    {
+      "id": "stage_02",
+      "stage_number": 2,
+      "world_id": "world_1",
+      "stage_in_world": 2,
+      "target_minutes": 1.75,
+      "entry_unlock": "stage_01",
+      "estimated_base_gold_per_min": 164,
+      "reward_gold_equivalent_minutes": 0.35,
+      "grant_fame_on_first_clear": 1,
+      "replayable": false,
+      "name": "Cầu cảng náo loạn",
+      "goals": [
+        {
+          "type": "defeat_fish",
+          "count": 4
+        },
+        {
+          "type": "hire_worker",
+          "count": 1,
+          "role": "wrangler"
+        }
+      ],
+      "mechanic": "Cá nhảy làm Wrangler choáng 4 giây; giới thiệu tự đánh và tuyển Worker.",
+      "species": "Blue Snapper",
+      "interaction": "Tap con cá chuẩn bị húc để xử lý nhanh hơn, không cần phản xạ bắt buộc.",
+      "upgrade_focus": "Gợi ý WranglerTeam Lv1 / hiển thị công dụng DPS.",
+      "stage_reward": "Mở Fish Wrangler chính thức và nhân sự tự động.",
+      "guardrail": "Sự kiện hất văng có hiệu ứng hài, không gây game-over.",
+      "unlocks": [
+        "wrangler_hiring"
+      ],
+      "goals_required_all": true,
+      "hard_no_rng_objective": true
+    },
+    {
+      "id": "stage_03",
+      "stage_number": 3,
+      "world_id": "world_1",
+      "stage_in_world": 3,
+      "target_minutes": 2.5,
+      "entry_unlock": "stage_02",
+      "estimated_base_gold_per_min": 225,
+      "reward_gold_equivalent_minutes": 0.35,
+      "grant_fame_on_first_clear": 1,
+      "replayable": false,
+      "name": "Xe cá đầu tiên",
+      "goals": [
+        {
+          "type": "hire_worker",
+          "count": 1,
+          "role": "transporter"
+        },
+        {
+          "type": "transport_payload",
+          "count": 6
+        }
+      ],
+      "mechanic": "Thùng cá chật, xe đẩy capacity mặc định 3, người chơi xử lý bottleneck đầu tiên.",
+      "species": "Hermit Crab (vỏ cứng hình ảnh, không áp giáp gameplay ở W1)",
+      "interaction": "Chạm vào xe để tăng tốc ngắn tùy chọn; auto logistics vẫn hoàn tất.",
+      "upgrade_focus": "Gợi ý nâng Fisherman hoặc thuê transporter; thuê 1 xe được trợ giá.",
+      "stage_reward": "Mở Logistics, kệ Market và Bestiary sơ cấp.",
+      "guardrail": "Khi tồn kho quá cao, tạm giảm nhịp spawn để tránh backlog vô hạn.",
+      "unlocks": [
+        "logistics",
+        "market_shelf",
+        "bestiary"
+      ],
+      "goals_required_all": true,
+      "hard_no_rng_objective": true
+    },
+    {
+      "id": "stage_04",
+      "stage_number": 4,
+      "world_id": "world_1",
+      "stage_in_world": 4,
+      "target_minutes": 3.0,
+      "entry_unlock": "stage_03",
+      "estimated_base_gold_per_min": 309,
+      "reward_gold_equivalent_minutes": 0.35,
+      "grant_fame_on_first_clear": 1,
+      "replayable": false,
+      "name": "Ngày hội chợ cá",
+      "goals": [
+        {
+          "type": "sell_item",
+          "count": 8
+        },
+        {
+          "type": "complete_order",
+          "count": 1
+        }
+      ],
+      "mechanic": "Mở Casual Shopper và một đơn hàng dễ, VIP ghé thoáng qua; giới thiệu Harbor Fame.",
+      "species": "Sardine, Blue Snapper",
+      "interaction": "Chọn nhận đơn, không cần kiếm loài hiếm ngẫu nhiên.",
+      "upgrade_focus": "Gợi ý FishValue Lv2 hoặc nâng kệ theo cấu hình.",
+      "stage_reward": "Mở Contract UI, Fame, Market Trend 120 giây.",
+      "guardrail": "Guaranteed contract dùng cá phổ biến, có đổi đơn miễn phí.",
+      "unlocks": [
+        "harbor_fame",
+        "contracts",
+        "market_trends"
+      ],
+      "goals_required_all": true,
+      "hard_no_rng_objective": true
+    },
+    {
+      "id": "stage_05",
+      "stage_number": 5,
+      "world_id": "world_1",
+      "stage_in_world": 5,
+      "target_minutes": 3.5,
+      "entry_unlock": "stage_04",
+      "estimated_base_gold_per_min": 423,
+      "reward_gold_equivalent_minutes": 0.35,
+      "grant_fame_on_first_clear": 1,
+      "replayable": false,
+      "name": "Cơn sốt đánh bắt",
+      "goals": [
+        {
+          "type": "defeat_fish",
+          "count": 8
+        },
+        {
+          "type": "activate_frenzy",
+          "count": 1
+        }
+      ],
+      "mechanic": "Mở Frenzy tích 6% mỗi cá bị hạ, khoảng 17 cá; thanh được tích trước Stage 5.",
+      "species": "Blue Snapper, Hermit Crab",
+      "interaction": "Khi đạt 100%, bấm kích hoạt vào thời điểm thích hợp; auto-trigger sau 30 giây nếu không chạm.",
+      "upgrade_focus": "Nhắc nâng Wrangler/Fisherman theo bottleneck thực tế.",
+      "stage_reward": "Mở Frenzy (20 s, 2x tốc câu, 1.5x Wrangler, 2x bán).",
+      "guardrail": "Nếu meter đã đầy từ stage trước, sẵn sàng kích hoạt tức thì.",
+      "unlocks": [
+        "standard_frenzy"
+      ],
+      "goals_required_all": true,
+      "hard_no_rng_objective": true
+    },
+    {
+      "id": "stage_06",
+      "stage_number": 6,
+      "world_id": "world_1",
+      "stage_in_world": 6,
+      "target_minutes": 5.0,
+      "entry_unlock": "stage_05",
+      "estimated_base_gold_per_min": 579,
+      "reward_gold_equivalent_minutes": 1.25,
+      "grant_fame_on_first_clear": 1,
+      "replayable": false,
+      "name": "Shark đại náo",
+      "goals": [
+        {
+          "type": "defeat_boss",
+          "count": 1,
+          "boss_id": "blacktip_shark"
+        },
+        {
+          "type": "complete_order",
+          "count": 1
+        }
+      ],
+      "mechanic": "2 phase: nhảy đập cầu cảng (100–60% HP), lao về vùng cảnh báo (60–0%).",
+      "species": "Apex Blacktip Shark",
+      "interaction": "Tap weak spot đúng nhịp có stun; Wrangler auto luôn thắng trong thời hạn mục tiêu.",
+      "upgrade_focus": "Đề xuất Fisherman/ Wranglers/FishValue 3/4/3, không là khóa cứng.",
+      "stage_reward": "Trophy Shark + Expedition Ship; mở World 2.",
+      "guardrail": "Phần thưởng Boss không phụ thuộc cá chất lượng Rainbow.",
+      "unlocks": [
+        "world_2_voyage",
+        "shark_trophy"
+      ],
+      "goals_required_all": true,
+      "hard_no_rng_objective": true,
+      "is_world_boss": true,
+      "world_voyage_unlock": "world_2"
+    },
+    {
+      "id": "stage_07",
+      "stage_number": 7,
+      "world_id": "world_2",
+      "stage_in_world": 1,
+      "target_minutes": 2.5,
+      "entry_unlock": "world_start",
+      "estimated_base_gold_per_min": 2400,
+      "reward_gold_equivalent_minutes": 0.35,
+      "grant_fame_on_first_clear": 1,
+      "replayable": false,
+      "name": "Biển san hô đầu tiên",
+      "goals": [
+        {
+          "type": "catch_fish",
+          "count": 6
+        },
+        {
+          "type": "discover_species",
+          "count": 1
+        }
+      ],
+      "mechanic": "World mới, giới thiệu Pufferfish dưới dạng silhouette và Bestiary mới.",
+      "species": "Coral Snapper, Pufferfish",
+      "interaction": "Tap để thu thập nhanh; tự động nhận loài mới theo spawn được đảm bảo.",
+      "upgrade_focus": "Nâng FishermanTeam của World 2 (reset level địa phương, giữ collection).",
+      "stage_reward": "Mở Coral Collection tab trong Bestiary và góc Coral Atoll.",
+      "guardrail": "Loài mới có guarantee ở tối đa catch thứ 6.",
+      "unlocks": [
+        "coral_collection"
+      ],
+      "goals_required_all": true,
+      "hard_no_rng_objective": true
+    },
+    {
+      "id": "stage_08",
+      "stage_number": 8,
+      "world_id": "world_2",
+      "stage_in_world": 2,
+      "target_minutes": 3.0,
+      "entry_unlock": "stage_07",
+      "estimated_base_gold_per_min": 3288,
+      "reward_gold_equivalent_minutes": 0.35,
+      "grant_fame_on_first_clear": 1,
+      "replayable": false,
+      "name": "Cá nóc nổi giận",
+      "goals": [
+        {
+          "type": "defeat_species",
+          "count": 3,
+          "species_id": "pufferfish"
+        },
+        {
+          "type": "catch_fish",
+          "count": 8
+        }
+      ],
+      "mechanic": "Pufferfish phồng người 2 giây, phản đòn nếu bị đánh lúc phòng thủ; AI Wrangler biết tạm đợi.",
+      "species": "Pufferfish",
+      "interaction": "Người chơi đánh lúc hết phòng thủ để kích hoạt break + thưởng Gold nhỏ.",
+      "upgrade_focus": "Gợi ý WranglerTeam Lv2 và animation trang bị mới.",
+      "stage_reward": "Mở Fish Behavior: Defensive/Telegraph.",
+      "guardrail": "Nếu người chơi idle thì Wrangler dừng đánh lúc guard, không bị softlock.",
+      "unlocks": [
+        "puffer_defense"
+      ],
+      "goals_required_all": true,
+      "hard_no_rng_objective": true
+    },
+    {
+      "id": "stage_09",
+      "stage_number": 9,
+      "world_id": "world_2",
+      "stage_in_world": 3,
+      "target_minutes": 3.5,
+      "entry_unlock": "stage_08",
+      "estimated_base_gold_per_min": 4505,
+      "reward_gold_equivalent_minutes": 0.35,
+      "grant_fame_on_first_clear": 1,
+      "replayable": false,
+      "name": "Đội xe đảo nhiệt đới",
+      "goals": [
+        {
+          "type": "transport_payload",
+          "count": 10
+        },
+        {
+          "type": "upgrade_reached",
+          "count": 2,
+          "pillar": "FishValue"
+        }
+      ],
+      "mechanic": "Vận chuyển đông hơn, kệ chứa nhiều mặt hàng; chỉ ra tắc nghẽn do cầu cảng/quầy.",
+      "species": "Coral Snapper, Electric Eel",
+      "interaction": "Người chơi chọn nâng đúng nút cổ chai để tăng throughput.",
+      "upgrade_focus": "FishValue Lv2; nâng Transporter capacity bằng unlock phụ riêng.",
+      "stage_reward": "Mở capacity improvement và KPI throughput.",
+      "guardrail": "UpgradeReached đọc level hiện tại, không bắt mua lại nếu đã đạt.",
+      "unlocks": [
+        "transporter_capacity"
+      ],
+      "goals_required_all": true,
+      "hard_no_rng_objective": true
+    },
+    {
+      "id": "stage_10",
+      "stage_number": 10,
+      "world_id": "world_2",
+      "stage_in_world": 4,
+      "target_minutes": 4.0,
+      "entry_unlock": "stage_09",
+      "estimated_base_gold_per_min": 6171,
+      "reward_gold_equivalent_minutes": 0.35,
+      "grant_fame_on_first_clear": 1,
+      "replayable": false,
+      "name": "Bí mật của Giant Clam",
+      "goals": [
+        {
+          "type": "collect_pearl",
+          "count": 3
+        },
+        {
+          "type": "activate_pearl_frenzy",
+          "count": 1
+        }
+      ],
+      "mechanic": "Giant Clam định kỳ mở; 3 Golden Pearls kích Pearl Frenzy x3 giá bán 20 giây.",
+      "species": "Giant Clam (environment gimmick)",
+      "interaction": "Tap khi hà mở để lấy ngọc nhanh; nếu idle có auto-harvest chậm/khả năng thu thập thụ động.",
+      "upgrade_focus": "Gợi ý FishValue Lv3 để thấy giá trị sự kiện.",
+      "stage_reward": "Mở Pearl Collection UI và Pearl Frenzy.",
+      "guardrail": "Cam mở theo lịch, không chỉ RNG; không mất ngọc vì nghỉ chơi.",
+      "unlocks": [
+        "giant_clam",
+        "pearl_frenzy"
+      ],
+      "goals_required_all": true,
+      "hard_no_rng_objective": true
+    },
+    {
+      "id": "stage_11",
+      "stage_number": 11,
+      "world_id": "world_2",
+      "stage_in_world": 5,
+      "target_minutes": 4.5,
+      "entry_unlock": "stage_10",
+      "estimated_base_gold_per_min": 8455,
+      "reward_gold_equivalent_minutes": 0.35,
+      "grant_fame_on_first_clear": 1,
+      "replayable": false,
+      "name": "Phiên chợ san hô",
+      "goals": [
+        {
+          "type": "trend_match_sale",
+          "count": 5
+        },
+        {
+          "type": "complete_order",
+          "count": 2
+        }
+      ],
+      "mechanic": "Thời điểm Market Trend + Pearl Frenzy tạo jackpot; ra hai đơn ngắn khác nhau.",
+      "species": "Electric Eel, Coral Ray",
+      "interaction": "Chọn giữ hàng phổ biến để bán đúng trend hoặc bán luôn; khác biệt lợi nhuận nhưng không chặn tiến trình.",
+      "upgrade_focus": "Gợi ý FishValue và đường vận chuyển; thêm 1 quầy.",
+      "stage_reward": "Mở đơn hàng chọn lựa, Aquarium placement preview.",
+      "guardrail": "Nếu không có trend khớp, sự kiện phù hợp bắt buộc xuất hiện sau 1 chu kỳ.",
+      "unlocks": [
+        "choice_orders"
+      ],
+      "goals_required_all": true,
+      "hard_no_rng_objective": true
+    },
+    {
+      "id": "stage_12",
+      "stage_number": 12,
+      "world_id": "world_2",
+      "stage_in_world": 6,
+      "target_minutes": 6.0,
+      "entry_unlock": "stage_11",
+      "estimated_base_gold_per_min": 11583,
+      "reward_gold_equivalent_minutes": 1.25,
+      "grant_fame_on_first_clear": 1,
+      "replayable": false,
+      "name": "Manta của vực san hô",
+      "goals": [
+        {
+          "type": "defeat_boss",
+          "count": 1,
+          "boss_id": "colossal_manta"
+        },
+        {
+          "type": "add_aquarium_species",
+          "count": 1
+        }
+      ],
+      "mechanic": "Boss Manta: phase 1 quạt nước hất Worker, phase 2 che chắn bằng bọt; tap bọt phá nhanh.",
+      "species": "Colossal Manta Ray",
+      "interaction": "Active break shield nhanh; auto Wrangler vẫn phá được.",
+      "upgrade_focus": "Gợi ý WranglerTeam 4/ Fisherman 3/ FishValue 4.",
+      "stage_reward": "Trophy Manta vào Aquarium; mở World 3.",
+      "guardrail": "Aquarium slot miễn phí được cấp ngay sau boss.",
+      "unlocks": [
+        "aquarium",
+        "world_3_voyage",
+        "manta_trophy"
+      ],
+      "goals_required_all": true,
+      "hard_no_rng_objective": true,
+      "is_world_boss": true,
+      "world_voyage_unlock": "world_3"
+    },
+    {
+      "id": "stage_13",
+      "stage_number": 13,
+      "world_id": "world_3",
+      "stage_in_world": 1,
+      "target_minutes": 3.0,
+      "entry_unlock": "world_start",
+      "estimated_base_gold_per_min": 48000,
+      "reward_gold_equivalent_minutes": 0.35,
+      "grant_fame_on_first_clear": 1,
+      "replayable": false,
+      "name": "Mùa cá hồi",
+      "goals": [
+        {
+          "type": "catch_fish",
+          "count": 8
+        },
+        {
+          "type": "sell_item",
+          "count": 8
+        }
+      ],
+      "mechanic": "Giới thiệu thị trường mùa thu, cá hồi mới và nguyên liệu cho chế biến.",
+      "species": "Autumn Salmon, Armored Crab",
+      "interaction": "Chủ động ưu tiên loài bán được giá theo trend.",
+      "upgrade_focus": "Gợi ý FishermanTeam và FishValue W3.",
+      "stage_reward": "Mở khu Smoker bị khóa chờ Stage 14.",
+      "guardrail": "Bảo đảm luồng bán cá thô hoạt động trước khi mở bếp.",
+      "unlocks": [
+        "smoker_preview"
+      ],
+      "goals_required_all": true,
+      "hard_no_rng_objective": true
+    },
+    {
+      "id": "stage_14",
+      "stage_number": 14,
+      "world_id": "world_3",
+      "stage_in_world": 2,
+      "target_minutes": 3.5,
+      "entry_unlock": "stage_13",
+      "estimated_base_gold_per_min": 65760,
+      "reward_gold_equivalent_minutes": 0.35,
+      "grant_fame_on_first_clear": 1,
+      "replayable": false,
+      "name": "Lò hun khói bừng cháy",
+      "goals": [
+        {
+          "type": "grill_batch",
+          "count": 3
+        },
+        {
+          "type": "complete_order",
+          "count": 1
+        }
+      ],
+      "mechanic": "Smoker Grill hiện có bán x4; player tap quạt lửa nhanh, auto bếp ở 50–60% tốc thao tác.",
+      "species": "Autumn Salmon",
+      "interaction": "Tap để rút thời gian nấu; active không phải điều kiện duy nhất.",
+      "upgrade_focus": "Mở Smoker Lv1; không thêm trụ nâng cấp chính thứ tư.",
+      "stage_reward": "Mở Smoker + ba công thức đơn giản theo data.",
+      "guardrail": "Nhân vật không ngừng hoạt động nếu thiếu thao tác.",
+      "unlocks": [
+        "smoker_grill"
+      ],
+      "goals_required_all": true,
+      "hard_no_rng_objective": true
+    },
+    {
+      "id": "stage_15",
+      "stage_number": 15,
+      "world_id": "world_3",
+      "stage_in_world": 3,
+      "target_minutes": 4.0,
+      "entry_unlock": "stage_14",
+      "estimated_base_gold_per_min": 90091,
+      "reward_gold_equivalent_minutes": 0.35,
+      "grant_fame_on_first_clear": 1,
+      "replayable": false,
+      "name": "Dây chuyền chế biến",
+      "goals": [
+        {
+          "type": "grill_batch",
+          "count": 6
+        },
+        {
+          "type": "transport_payload",
+          "count": 12
+        }
+      ],
+      "mechanic": "Một hàng chờ cá tươi -> bếp -> quầy; bếp có slot 2, nâng công suất dạng milestone.",
+      "species": "Autumn Salmon, Armored Crab",
+      "interaction": "Chọn phân bổ cá bán thô hay hun khói; auto chọn theo rule nếu idle.",
+      "upgrade_focus": "Smoker Queue Capacity unlock phụ; WranglerTeam tăng tốc chuyển cá.",
+      "stage_reward": "Mở Auto-Route cho Logistics / Recipe Queue.",
+      "guardrail": "Không tạo inventory deadlock khi tất cả cá vào bếp đang đầy.",
+      "unlocks": [
+        "recipe_queue",
+        "auto_route"
+      ],
+      "goals_required_all": true,
+      "hard_no_rng_objective": true
+    },
+    {
+      "id": "stage_16",
+      "stage_number": 16,
+      "world_id": "world_3",
+      "stage_in_world": 4,
+      "target_minutes": 4.0,
+      "entry_unlock": "stage_15",
+      "estimated_base_gold_per_min": 123425,
+      "reward_gold_equivalent_minutes": 0.35,
+      "grant_fame_on_first_clear": 1,
+      "replayable": false,
+      "name": "Khách VIP ghé thăm",
+      "goals": [
+        {
+          "type": "complete_vip_order",
+          "count": 2
+        },
+        {
+          "type": "sell_item",
+          "count": 12
+        }
+      ],
+      "mechanic": "VIP yêu cầu một mẻ cá hun khói/loài phổ thông; lợi nhuận hơn nhưng mất thời gian.",
+      "species": "Autumn Salmon, Ember Eel",
+      "interaction": "Chọn đơn VIP trong 2 lựa chọn; mọi đơn có tùy chọn refresh miễn phí.",
+      "upgrade_focus": "Gợi ý FishValue 4 và năng suất Smoker.",
+      "stage_reward": "Mở VIP Priority Order và cosmetic cho quầy.",
+      "guardrail": "Không yêu cầu Rainbow hoặc Colossal trong objective chính.",
+      "unlocks": [
+        "vip_priority_orders"
+      ],
+      "goals_required_all": true,
+      "hard_no_rng_objective": true
+    },
+    {
+      "id": "stage_17",
+      "stage_number": 17,
+      "world_id": "world_3",
+      "stage_in_world": 5,
+      "target_minutes": 5.0,
+      "entry_unlock": "stage_16",
+      "estimated_base_gold_per_min": 169092,
+      "reward_gold_equivalent_minutes": 0.35,
+      "grant_fame_on_first_clear": 1,
+      "replayable": false,
+      "name": "Combo khói lửa",
+      "goals": [
+        {
+          "type": "grill_batch",
+          "count": 8
+        },
+        {
+          "type": "activate_frenzy",
+          "count": 1
+        }
+      ],
+      "mechanic": "Tận dụng Frenzy + Smoker x4 và các đơn lớn, chuẩn bị Boss.",
+      "species": "Ember Eel, Ink Octopus",
+      "interaction": "Combo đánh cá + chốt đơn đúng trend cho hiệu ứng thưởng, không bắt buộc combo.",
+      "upgrade_focus": "Gợi ý cân bằng throughput giữa fishing/ wrangling/ kitchen.",
+      "stage_reward": "Mở tùy chọn gear Stun Hammer (nếu nằm trong scope).",
+      "guardrail": "Nếu income spike quá lớn, giới hạn tần suất sự kiện thay vì âm thầm sửa giá.",
+      "unlocks": [
+        "gear_option"
+      ],
+      "goals_required_all": true,
+      "hard_no_rng_objective": true
+    },
+    {
+      "id": "stage_18",
+      "stage_number": 18,
+      "world_id": "world_3",
+      "stage_in_world": 6,
+      "target_minutes": 6.0,
+      "entry_unlock": "stage_17",
+      "estimated_base_gold_per_min": 231656,
+      "reward_gold_equivalent_minutes": 1.25,
+      "grant_fame_on_first_clear": 1,
+      "replayable": false,
+      "name": "Kraken trong khói",
+      "goals": [
+        {
+          "type": "defeat_boss",
+          "count": 1,
+          "boss_id": "smoker_kraken"
+        },
+        {
+          "type": "complete_order",
+          "count": 1
+        }
+      ],
+      "mechanic": "Kraken phase 1 xúc tu chắn đường vận chuyển; phase 2 mực đen che một phần dock.",
+      "species": "Smoker Kraken (đề xuất mới)",
+      "interaction": "Tap phá mực và điểm yếu giúp tăng tốc; fallback tự động sau timer.",
+      "upgrade_focus": "Gợi ý Wrangler 5 và nâng Smoker Queue.",
+      "stage_reward": "Boss Trophy + mở World 4.",
+      "guardrail": "Các đường đi không bao giờ bị chặn vĩnh viễn.",
+      "unlocks": [
+        "world_4_voyage",
+        "kraken_trophy"
+      ],
+      "goals_required_all": true,
+      "hard_no_rng_objective": true,
+      "is_world_boss": true,
+      "world_voyage_unlock": "world_4"
+    },
+    {
+      "id": "stage_19",
+      "stage_number": 19,
+      "world_id": "world_4",
+      "stage_in_world": 1,
+      "target_minutes": 3.0,
+      "entry_unlock": "world_start",
+      "estimated_base_gold_per_min": 960000,
+      "reward_gold_equivalent_minutes": 0.35,
+      "grant_fame_on_first_clear": 1,
+      "replayable": false,
+      "name": "Khởi hành tới vùng băng",
+      "goals": [
+        {
+          "type": "catch_fish",
+          "count": 8
+        },
+        {
+          "type": "sell_item",
+          "count": 8
+        }
+      ],
+      "mechanic": "Dock tuyết phủ, giới thiệu môi trường lạnh, cá Arctic Cod.",
+      "species": "Arctic Cod, Snow Crab",
+      "interaction": "Nâng cấp cảng mới, nhìn thấy công nhân thích nghi với mùa đông.",
+      "upgrade_focus": "Gợi ý Fisherman W4 Lv1/Lv2.",
+      "stage_reward": "Mở thermal decor và hệ thống thời tiết (chưa gây phạt ở stage đầu).",
+      "guardrail": "Không có blizzard bất ngờ trong 30–45 giây đầu W4.",
+      "unlocks": [
+        "weather_preview"
+      ],
+      "goals_required_all": true,
+      "hard_no_rng_objective": true
+    },
+    {
+      "id": "stage_20",
+      "stage_number": 20,
+      "world_id": "world_4",
+      "stage_in_world": 2,
+      "target_minutes": 4.0,
+      "entry_unlock": "stage_19",
+      "estimated_base_gold_per_min": 1315200,
+      "reward_gold_equivalent_minutes": 0.35,
+      "grant_fame_on_first_clear": 1,
+      "replayable": false,
+      "name": "Cơn bão tuyết đầu tiên",
+      "goals": [
+        {
+          "type": "break_iceberg",
+          "count": 1
+        },
+        {
+          "type": "clear_blizzard",
+          "count": 1
+        }
+      ],
+      "mechanic": "Blizzard chậm 50% tốc câu; Treasure Iceberg được tạo theo lịch, phá băng cho Gold + x2 tốc câu.",
+      "species": "Treasure Iceberg (environment gimmick)",
+      "interaction": "Tap liên tục để phá nhanh; Worker tự đập băng theo chu kỳ nếu người chơi không chạm.",
+      "upgrade_focus": "Mở cold resistance perk nhỏ ngoài 3 trụ chính.",
+      "stage_reward": "Mở Blizzard Event + Icebreaker.",
+      "guardrail": "Blizzard có hard timeout và buff recovery; không thể stall vô hạn.",
+      "unlocks": [
+        "blizzard",
+        "icebreaker"
+      ],
+      "goals_required_all": true,
+      "hard_no_rng_objective": true
+    },
+    {
+      "id": "stage_21",
+      "stage_number": 21,
+      "world_id": "world_4",
+      "stage_in_world": 3,
+      "target_minutes": 4.0,
+      "entry_unlock": "stage_20",
+      "estimated_base_gold_per_min": 1801824,
+      "reward_gold_equivalent_minutes": 0.35,
+      "grant_fame_on_first_clear": 1,
+      "replayable": false,
+      "name": "Cua tuyết giáp băng",
+      "goals": [
+        {
+          "type": "defeat_species",
+          "count": 5,
+          "species_id": "snow_crab"
+        },
+        {
+          "type": "upgrade_reached",
+          "count": 3,
+          "pillar": "WranglerTeam"
+        }
+      ],
+      "mechanic": "Cua tuyết có guard phase/animation vỏ băng; Wrangler auto chọn điểm yếu sau telegraph.",
+      "species": "Snow Crab",
+      "interaction": "Tap lúc vỡ băng được combo break bonus.",
+      "upgrade_focus": "WranglerTeam Lv3 thay vũ khí / VFX.",
+      "stage_reward": "Mở Ice-Break equipment visual.",
+      "guardrail": "Không yêu cầu trang bị rơi ngẫu nhiên.",
+      "unlocks": [
+        "ice_break_visual"
+      ],
+      "goals_required_all": true,
+      "hard_no_rng_objective": true
+    },
+    {
+      "id": "stage_22",
+      "stage_number": 22,
+      "world_id": "world_4",
+      "stage_in_world": 4,
+      "target_minutes": 4.5,
+      "entry_unlock": "stage_21",
+      "estimated_base_gold_per_min": 2468499,
+      "reward_gold_equivalent_minutes": 0.35,
+      "grant_fame_on_first_clear": 1,
+      "replayable": false,
+      "name": "Tối ưu giữa bão",
+      "goals": [
+        {
+          "type": "transport_payload",
+          "count": 15
+        },
+        {
+          "type": "complete_order",
+          "count": 2
+        }
+      ],
+      "mechanic": "Bão có thể giảm tốc câu nhưng không làm giảm tốc độ mọi công đoạn; test cân bằng bottleneck.",
+      "species": "Arctic Cod, Ice Ray",
+      "interaction": "Người chơi chọn nâng khâu đang nghẽn để giữ cung ứng.",
+      "upgrade_focus": "Gợi ý Logistics capacity và FishValue.",
+      "stage_reward": "Mở Warehouse/Route status widget.",
+      "guardrail": "Mọi đơn có thời gian đủ dài; tránh race giữa bão và order timer.",
+      "unlocks": [
+        "warehouse_status"
+      ],
+      "goals_required_all": true,
+      "hard_no_rng_objective": true
+    },
+    {
+      "id": "stage_23",
+      "stage_number": 23,
+      "world_id": "world_4",
+      "stage_in_world": 5,
+      "target_minutes": 5.5,
+      "entry_unlock": "stage_22",
+      "estimated_base_gold_per_min": 3381843,
+      "reward_gold_equivalent_minutes": 0.35,
+      "grant_fame_on_first_clear": 1,
+      "replayable": false,
+      "name": "Kho báu băng trôi",
+      "goals": [
+        {
+          "type": "break_iceberg",
+          "count": 2
+        },
+        {
+          "type": "trend_match_sale",
+          "count": 4
+        }
+      ],
+      "mechanic": "Hai lần phá băng có lịch, có thể tận dụng Gold Shower với Market Trend.",
+      "species": "Frost Fish",
+      "interaction": "Canh event để tối ưu lợi nhuận, tự động vẫn qua stage.",
+      "upgrade_focus": "Gợi ý FishermanTeam + FishValue.",
+      "stage_reward": "Mở Trophy Iceberg và aquarium decor.",
+      "guardrail": "Nếu người chơi tắt máy, event còn tồn khi mở lại một khoảng grace.",
+      "unlocks": [
+        "iceberg_trophy"
+      ],
+      "goals_required_all": true,
+      "hard_no_rng_objective": true
+    },
+    {
+      "id": "stage_24",
+      "stage_number": 24,
+      "world_id": "world_4",
+      "stage_in_world": 6,
+      "target_minutes": 7.0,
+      "entry_unlock": "stage_23",
+      "estimated_base_gold_per_min": 4633126,
+      "reward_gold_equivalent_minutes": 1.25,
+      "grant_fame_on_first_clear": 1,
+      "replayable": false,
+      "name": "Narwhal băng giá",
+      "goals": [
+        {
+          "type": "defeat_boss",
+          "count": 1,
+          "boss_id": "glacier_narwhal"
+        },
+        {
+          "type": "add_aquarium_species",
+          "count": 1
+        }
+      ],
+      "mechanic": "Narwhal phase 1 húc theo vùng cảnh báo; phase 2 gây Blizzard + triệu hồi 2 Ice Fish.",
+      "species": "Glacier Narwhal (đề xuất mới)",
+      "interaction": "Ngắt đòn bằng tap weakspot; Wrangler tự xử lý adds.",
+      "upgrade_focus": "Gợi ý WranglerTeam 5 và hồi phục tốc câu.",
+      "stage_reward": "Trophy Narwhal + mở World 5.",
+      "guardrail": "Không spawn quá cap active LiveFish trên mobile.",
+      "unlocks": [
+        "world_5_voyage",
+        "narwhal_trophy"
+      ],
+      "goals_required_all": true,
+      "hard_no_rng_objective": true,
+      "is_world_boss": true,
+      "world_voyage_unlock": "world_5"
+    },
+    {
+      "id": "stage_25",
+      "stage_number": 25,
+      "world_id": "world_5",
+      "stage_in_world": 1,
+      "target_minutes": 3.5,
+      "entry_unlock": "world_start",
+      "estimated_base_gold_per_min": 19200000,
+      "reward_gold_equivalent_minutes": 0.35,
+      "grant_fame_on_first_clear": 1,
+      "replayable": false,
+      "name": "Đến cảng ốc đảo",
+      "goals": [
+        {
+          "type": "catch_fish",
+          "count": 10
+        },
+        {
+          "type": "sell_item",
+          "count": 10
+        }
+      ],
+      "mechanic": "Giới thiệu cá Oasis Carp, caravan đi qua nền xa; tạo mục tiêu thương mại mới.",
+      "species": "Oasis Carp, Sand Ray",
+      "interaction": "Đầu tư dàn Worker và mở hệ thống bán tự động.",
+      "upgrade_focus": "Gợi ý FishermanTeam/FishValue W5.",
+      "stage_reward": "Mở Oasis Harbor và Caravan board preview.",
+      "guardrail": "Cho bán cá thông thường trước khi đơn caravan xuất hiện.",
+      "unlocks": [
+        "caravan_preview"
+      ],
+      "goals_required_all": true,
+      "hard_no_rng_objective": true
+    },
+    {
+      "id": "stage_26",
+      "stage_number": 26,
+      "world_id": "world_5",
+      "stage_in_world": 2,
+      "target_minutes": 4.5,
+      "entry_unlock": "stage_25",
+      "estimated_base_gold_per_min": 26304000,
+      "reward_gold_equivalent_minutes": 0.35,
+      "grant_fame_on_first_clear": 1,
+      "replayable": false,
+      "name": "Chuyến hàng lạc đà",
+      "goals": [
+        {
+          "type": "complete_caravan_shipment",
+          "count": 1
+        },
+        {
+          "type": "transport_payload",
+          "count": 12
+        }
+      ],
+      "mechanic": "Caravan yêu cầu shipment đủ lượng cá phổ thông, luôn có phương án không cần cá hiếm.",
+      "species": "Oasis Carp, Sand Ray",
+      "interaction": "Tự quyết giữ hàng gửi caravan hay bán ngay; auto reserve stock nếu có đơn được chấp nhận.",
+      "upgrade_focus": "Gợi ý tăng Logistics capacity.",
+      "stage_reward": "Mở Caravan + quota progress.",
+      "guardrail": "Quota nhận được sau 2–3 phút chơi bình thường; không yêu cầu timer thực.",
+      "unlocks": [
+        "caravan"
+      ],
+      "goals_required_all": true,
+      "hard_no_rng_objective": true
+    },
+    {
+      "id": "stage_27",
+      "stage_number": 27,
+      "world_id": "world_5",
+      "stage_in_world": 3,
+      "target_minutes": 5.0,
+      "entry_unlock": "stage_26",
+      "estimated_base_gold_per_min": 36036480,
+      "reward_gold_equivalent_minutes": 0.35,
+      "grant_fame_on_first_clear": 1,
+      "replayable": false,
+      "name": "Di vật tốc độ",
+      "goals": [
+        {
+          "type": "complete_caravan_shipment",
+          "count": 2
+        },
+        {
+          "type": "unlock_relic",
+          "count": 1,
+          "relic_id": "speed_relic"
+        }
+      ],
+      "mechanic": "Tổng shipments tích lũy qua stage >= 3; nhận Sacred Relic #1 +30% speed.",
+      "species": "Golden Catfish",
+      "interaction": "Gom shipment theo bộ, mở chiếc relic đầu tiên.",
+      "upgrade_focus": "Relic tự gắn, không tốn Gold sau khi mở.",
+      "stage_reward": "Mở Relic #1 (Speed +30%).",
+      "guardrail": "Nếu người chơi đã làm đủ trước stage, objective đọc cumulative count.",
+      "unlocks": [
+        "speed_relic"
+      ],
+      "goals_required_all": true,
+      "hard_no_rng_objective": true
+    },
+    {
+      "id": "stage_28",
+      "stage_number": 28,
+      "world_id": "world_5",
+      "stage_in_world": 4,
+      "target_minutes": 5.0,
+      "entry_unlock": "stage_27",
+      "estimated_base_gold_per_min": 49369978,
+      "reward_gold_equivalent_minutes": 0.35,
+      "grant_fame_on_first_clear": 1,
+      "replayable": false,
+      "name": "Di vật thịnh vượng",
+      "goals": [
+        {
+          "type": "complete_caravan_shipment",
+          "count": 2
+        },
+        {
+          "type": "unlock_relic",
+          "count": 1,
+          "relic_id": "price_relic"
+        }
+      ],
+      "mechanic": "Tổng shipments >= 5; nhận Sacred Relic #2 +50% price.",
+      "species": "Mirage Eel",
+      "interaction": "Chọn order có hiệu quả cao, tối ưu chiến lược giữ hàng.",
+      "upgrade_focus": "Gợi ý FishValue và VIP order.",
+      "stage_reward": "Mở Relic #2 (Price +50%).",
+      "guardrail": "Relic không buộc chọn giữa các lựa chọn không thể đổi.",
+      "unlocks": [
+        "price_relic"
+      ],
+      "goals_required_all": true,
+      "hard_no_rng_objective": true
+    },
+    {
+      "id": "stage_29",
+      "stage_number": 29,
+      "world_id": "world_5",
+      "stage_in_world": 5,
+      "target_minutes": 6.0,
+      "entry_unlock": "stage_28",
+      "estimated_base_gold_per_min": 67636869,
+      "reward_gold_equivalent_minutes": 0.35,
+      "grant_fame_on_first_clear": 1,
+      "replayable": false,
+      "name": "Thần đèn ốc đảo",
+      "goals": [
+        {
+          "type": "complete_caravan_shipment",
+          "count": 3
+        },
+        {
+          "type": "activate_genie_lamp",
+          "count": 1
+        }
+      ],
+      "mechanic": "Tổng shipments >= 8; Sacred Relic #3 Genie Lamp (buff có cooldown).",
+      "species": "Golden Catfish, Mirage Eel",
+      "interaction": "Chủ động kích Genie cho burst; auto kích sau một khoảng idle nếu có charge.",
+      "upgrade_focus": "Gợi ý WranglerTeam / FishValue trước boss.",
+      "stage_reward": "Mở Relic #3 (Genie Lamp) và Mastery Board.",
+      "guardrail": "Genie charge đầu tiên cấp sẵn, không đòi RNG.",
+      "unlocks": [
+        "genie_lamp",
+        "mastery_board"
+      ],
+      "goals_required_all": true,
+      "hard_no_rng_objective": true
+    },
+    {
+      "id": "stage_30",
+      "stage_number": 30,
+      "world_id": "world_5",
+      "stage_in_world": 6,
+      "target_minutes": 8.0,
+      "entry_unlock": "stage_29",
+      "estimated_base_gold_per_min": 92662511,
+      "reward_gold_equivalent_minutes": 1.25,
+      "grant_fame_on_first_clear": 1,
+      "replayable": false,
+      "name": "Leviathan cuối chân trời",
+      "goals": [
+        {
+          "type": "defeat_boss",
+          "count": 1,
+          "boss_id": "oasis_leviathan"
+        },
+        {
+          "type": "complete_caravan_shipment",
+          "count": 1
+        }
+      ],
+      "mechanic": "Boss 3 phase: cát lốc, gọi Sand Ray, phá giáp yếu điểm; kết hợp các phép đã học.",
+      "species": "Oasis Leviathan (đề xuất mới)",
+      "interaction": "Active phá giáp để đánh nhanh, auto hoàn thành qua timeout phase.",
+      "upgrade_focus": "Khuyến nghị mỗi trụ 5–6 nhưng không ép mua.",
+      "stage_reward": "Trophy, Credits ngắn, Prestige tùy chọn, mở Mastery/Endless Goals.",
+      "guardrail": "Không tự prestige hoặc reset sau thắng boss; yêu cầu xác nhận tự nguyện.",
+      "unlocks": [
+        "oasis_trophy",
+        "endgame_mastery",
+        "prestige_opt_in"
+      ],
+      "goals_required_all": true,
+      "hard_no_rng_objective": true,
+      "is_world_boss": true,
+      "world_voyage_unlock": "endgame_mastery"
+    }
+  ],
+  "economic_defaults": {
+    "world_gold_scale": [
+      1,
+      20,
+      400,
+      8000,
+      160000
+    ],
+    "upgrade_base_cost_world1": 50,
+    "upgrade_ratio": 1.6,
+    "per_world_pillar_cap": 10,
+    "base_income_gpm_index_by_stage_in_world": [
+      120,
+      164,
+      225,
+      308,
+      423,
+      580
+    ],
+    "guaranteed_auto_frenzy_after_30s_while_full": true,
+    "global_coin_wallet_persist_between_worlds": true
+  },
+  "caravan_cumulative_shipment_thresholds": [
+    3,
+    5,
+    8
+  ]
+}

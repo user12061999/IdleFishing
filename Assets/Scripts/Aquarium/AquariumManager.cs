@@ -59,7 +59,10 @@ namespace IdleFishing.Aquarium
         public bool AutoTransferNewSpecies { get => autoTransferNewSpecies; set => autoTransferNewSpecies = value; }
         public bool AutoTransferBoss { get => autoTransferBoss; set => autoTransferBoss = value; }
 
+        private IdleFishing.Data.GameBalanceConfig balanceConfig;
+
         public event Action OnAquariumUpdated;
+        public event Action OnRevenueTick;
 
         private void Awake()
         {
@@ -73,8 +76,24 @@ namespace IdleFishing.Aquarium
             LoadAquariumState();
         }
 
+        private void EnsureBalanceConfig()
+        {
+            if (balanceConfig != null) return;
+            if (Core.GameManager.Instance != null && Core.GameManager.Instance.BalanceConfig != null)
+            {
+                balanceConfig = Core.GameManager.Instance.BalanceConfig;
+            }
+#if UNITY_EDITOR
+            if (balanceConfig == null)
+            {
+                balanceConfig = UnityEditor.AssetDatabase.LoadAssetAtPath<IdleFishing.Data.GameBalanceConfig>("Assets/GameData/Balance/DefaultGameBalanceConfig.asset");
+            }
+#endif
+        }
+
         private void Start()
         {
+            EnsureBalanceConfig();
             if (intakeStorage == null)
             {
                 var intakeObj = GameObject.Find("Harbor_IntakeStorage");
@@ -95,19 +114,24 @@ namespace IdleFishing.Aquarium
                 if (rate > 0f)
                 {
                     accumulatedRevenue += rate;
-                    OnAquariumUpdated?.Invoke();
+                    OnRevenueTick?.Invoke();
                 }
             }
         }
 
         public float GetDecorMultiplier()
         {
+            EnsureBalanceConfig();
+            float m2 = balanceConfig != null ? balanceConfig.aquariumDecorMultiplierLevel2 : 1.35f;
+            float m3 = balanceConfig != null ? balanceConfig.aquariumDecorMultiplierLevel3 : 1.80f;
+            float m4 = balanceConfig != null ? balanceConfig.aquariumDecorMultiplierLevel4 : 2.50f;
+
             switch (tankDecorLevel)
             {
                 case 1: return 1.0f; // Bể kính căn bản
-                case 2: return 1.35f; // Đèn LED San hô (+35%)
-                case 3: return 1.80f; // Thủy cung Nhiệt đới (+80%)
-                case 4: return 2.50f; // Lâu đài Ngọc trai (+150%)
+                case 2: return m2;
+                case 3: return m3;
+                case 4: return m4;
                 default: return 1.0f + (tankDecorLevel - 1) * 0.45f;
             }
         }
@@ -180,9 +204,10 @@ namespace IdleFishing.Aquarium
                 return false;
             }
 
-            // Tính toán doanh thu vé của con cá dựa trên Tier và Weight
-            float baseRate = (species.Tier * 1.5f) + (weightKg * 0.35f);
-            if (isBoss) baseRate += 12.0f; // Boss tạo sức hút cực lớn cho khách du lịch
+            // Tính toán doanh thu vé của con cá dựa trên Tier, Weight và Giá Trị Hải Sản (WholeFish BasePrice)
+            float priceContribution = (species.WholeFish != null ? species.WholeFish.BasePrice * 0.04f : 0f);
+            float baseRate = (species.Tier * 2.0f) + (weightKg * 0.5f) + priceContribution;
+            if (isBoss) baseRate += 15.0f; // Boss tạo sức hút cực lớn cho khách du lịch
 
             var instance = new AquariumFishInstance
             {
@@ -222,25 +247,22 @@ namespace IdleFishing.Aquarium
             captiveFish.RemoveAt(index);
 
             // Tìm ItemData cá nguyên con 3D để chuyển ra kho bến cảng / chợ
-            if (intakeStorage != null)
+            FishChainData removedChain = null;
+            if (BestiaryManager.Instance != null)
             {
-                ItemData wholeFishItem = null;
-                if (BestiaryManager.Instance != null)
+                var entry = BestiaryManager.Instance.GetEntry(fish.speciesId);
+                if (entry != null && entry.chainData != null)
                 {
-                    var entry = BestiaryManager.Instance.GetEntry(fish.speciesId);
-                    if (entry != null && entry.chainData != null)
+                    removedChain = entry.chainData;
+                    if (intakeStorage != null && entry.chainData.WholeFish != null)
                     {
-                        wholeFishItem = entry.chainData.WholeFish;
+                        intakeStorage.TryAdd(entry.chainData.WholeFish, 1, out _);
                     }
-                }
-
-                if (wholeFishItem != null)
-                {
-                    intakeStorage.TryAdd(wholeFishItem, 1, out _);
                 }
             }
 
             SaveAquariumState();
+            GameEvents.TriggerAquariumFishRemoved(removedChain);
             OnAquariumUpdated?.Invoke();
             Debug.Log($"[AquariumManager] Transferred {fish.speciesName} from Aquarium to Harbor Market!");
             return true;
@@ -280,8 +302,12 @@ namespace IdleFishing.Aquarium
         // ==================== UPGRADES ====================
         public int GetCapacityUpgradeCost()
         {
-            int level = (maxCapacity - baseCapacity) / 2;
-            return Mathf.RoundToInt(150f * Mathf.Pow(1.9f, level));
+            EnsureBalanceConfig();
+            int baseCost = balanceConfig != null ? balanceConfig.aquariumCapacityUpgradeBaseCost : 150;
+            float mult = balanceConfig != null ? balanceConfig.aquariumCapacityUpgradeMultiplier : 1.9f;
+            int step = balanceConfig != null ? balanceConfig.aquariumCapacitySlotsPerUpgrade : 2;
+            int level = (maxCapacity - baseCapacity) / Mathf.Max(1, step);
+            return Mathf.RoundToInt(baseCost * Mathf.Pow(mult, level));
         }
 
         public bool UpgradeTankCapacity()
@@ -292,7 +318,9 @@ namespace IdleFishing.Aquarium
                 return false;
             }
 
-            maxCapacity += 2;
+            EnsureBalanceConfig();
+            int step = balanceConfig != null ? balanceConfig.aquariumCapacitySlotsPerUpgrade : 2;
+            maxCapacity += step;
             GameEvents.TriggerAquariumUpgraded(maxCapacity, tankDecorLevel);
             SaveAquariumState();
             OnAquariumUpdated?.Invoke();
@@ -301,7 +329,10 @@ namespace IdleFishing.Aquarium
 
         public int GetDecorUpgradeCost()
         {
-            return Mathf.RoundToInt(300f * Mathf.Pow(2.4f, tankDecorLevel - 1));
+            EnsureBalanceConfig();
+            int baseCost = balanceConfig != null ? balanceConfig.aquariumDecorUpgradeBaseCost : 300;
+            float mult = balanceConfig != null ? balanceConfig.aquariumDecorUpgradeMultiplier : 2.4f;
+            return Mathf.RoundToInt(baseCost * Mathf.Pow(mult, tankDecorLevel - 1));
         }
 
         public bool UpgradeDecoration()
@@ -365,6 +396,17 @@ namespace IdleFishing.Aquarium
                     Debug.LogWarning($"[AquariumManager] Failed to load save: {e.Message}");
                 }
             }
+        }
+
+        public void ResetAquarium()
+        {
+            captiveFish.Clear();
+            accumulatedRevenue = 0f;
+            tankDecorLevel = 1;
+            maxCapacity = baseCapacity;
+            SaveAquariumState();
+            OnAquariumUpdated?.Invoke();
+            Debug.Log("[AquariumManager] VOYAGE RESET: Aquarium tank cleared for fresh start.");
         }
     }
 }

@@ -32,13 +32,15 @@ namespace IdleFishing.Data
         public GameObject Prefab => prefab;
         public Sprite Icon => icon;
 
-        public void Initialize(string id, string name, ItemType type, int price, GameObject prefabAsset)
+        public void Initialize(string id, string name, ItemType type, int price, GameObject prefab = null, Sprite icon = null, string desc = "")
         {
             itemId = id;
             itemName = name;
             itemType = type;
             basePrice = price;
-            prefab = prefabAsset;
+            this.prefab = prefab;
+            this.icon = icon;
+            this.description = desc;
         }
     }
 }

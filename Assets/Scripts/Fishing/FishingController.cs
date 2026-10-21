@@ -94,7 +94,7 @@ namespace IdleFishing.Fishing
         private IEnumerator CastingRoutine()
         {
             SetState(FishingState.Casting);
-            yield return new WaitForSeconds(0.6f);
+            yield return YieldCache.WaitForSeconds(0.6f);
 
             SetState(FishingState.WaitingForBite);
 
@@ -105,7 +105,7 @@ namespace IdleFishing.Fishing
             }
             float waitTime = Mathf.Max(0.5f, baseBiteDelay / efficiency);
 
-            yield return new WaitForSeconds(waitTime);
+            yield return YieldCache.WaitForSeconds(waitTime);
 
             if (boatCargo != null && boatCargo.IsFull)
             {
@@ -188,7 +188,7 @@ namespace IdleFishing.Fishing
         {
             while (currentState == FishingState.HookedMiniGame)
             {
-                yield return new WaitForSeconds(0.4f);
+                yield return YieldCache.WaitForSeconds(0.4f);
                 if (currentState == FishingState.HookedMiniGame)
                 {
                     TapReel();
@@ -207,7 +207,7 @@ namespace IdleFishing.Fishing
                 OnCatchSuccess?.Invoke(hookedFish);
             }
 
-            yield return new WaitForSeconds(0.8f);
+            yield return YieldCache.WaitForSeconds(0.8f);
 
             if (boatCargo != null && boatCargo.IsFull)
             {

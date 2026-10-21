@@ -34,13 +34,15 @@ namespace IdleFishing.UI
             obj.transform.SetParent(transform, false);
             alertText = obj.AddComponent<TextMeshProUGUI>();
             alertText.alignment = TextAlignmentOptions.Center;
-            alertText.fontSize = 28;
+            alertText.fontSize = 34;
             alertText.fontStyle = FontStyles.Bold;
             alertText.color = new Color(1f, 0.85f, 0.1f);
+            alertText.textWrappingMode = TextWrappingModes.NoWrap;
+            alertText.ApplyFont(UIFontCategory.Header);
 
             RectTransform rt = obj.GetComponent<RectTransform>();
-            rt.anchorMin = new Vector2(0.5f, 0.85f);
-            rt.anchorMax = new Vector2(0.5f, 0.85f);
+            rt.anchorMin = new Vector2(0.5f, 0.65f);
+            rt.anchorMax = new Vector2(0.5f, 0.65f);
             rt.pivot = new Vector2(0.5f, 0.5f);
             rt.anchoredPosition = Vector2.zero;
             rt.sizeDelta = new Vector2(900, 60);

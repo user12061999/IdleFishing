@@ -1,0 +1,44 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8fb4bf1520bf6cd4592f26e0e019b0f7, type: 3}
+  m_Name: Stage_13
+  m_EditorClassIdentifier: 
+  stageId: stage_13
+  stageNumber: 13
+  worldId: world_3
+  stageInWorld: 1
+  stageTitle: Golden Autumn Arrival
+  mechanicDescription: Arrive at Golden Autumn Cove! Catch salmon and introduce autumn
+    delicacies to the harbor.
+  targetMinutes: 3
+  estimatedBaseGoldPerMin: 48000
+  rewardGoldEquivalentMinutes: 0.35
+  grantFameOnFirstClear: 1
+  replayable: 0
+  goals:
+  - goalType: 0
+    targetCount: 8
+    targetId: 
+    targetLevel: 1
+    customDescription: Catch 8 Autumn Salmon
+  - goalType: 2
+    targetCount: 8
+    targetId: 
+    targetLevel: 1
+    customDescription: Sell 8 Fish at Market
+  guaranteedFirstCatch: {fileID: 11400000, guid: 24f3ca18fae0a7b44b5c3e21571963cf, type: 2}
+  bossToSpawn: {fileID: 0}
+  isWorldBossStage: 0
+  worldVoyageUnlock: 
+  featureUnlocks:
+  - autumn_cove
+  - salmon_fishery

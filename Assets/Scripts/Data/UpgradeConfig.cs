@@ -4,12 +4,18 @@ namespace IdleFishing.Data
 {
     public enum UpgradeType
     {
-        FishermanSlots,         // Số lượng slot cần thủ câu cá (Mở rộng từ 1 -> 5 slot)
-        FishermanSpeed,         // Tốc độ câu của cần thủ
-        HireWrangler,           // Thuê thợ bắt cá (Tối đa 4 thợ)
-        WranglerPower,          // Trang bị & sức mạnh thợ bắt cá (Tăng ATK, HP, Tốc chạy & Tap cá)
-        KitchenSpeed,           // Dây chuyền chế biến (Tăng tốc độ trạm phi lê, thái lát, đóng khay)
-        MarketValueMultiplier   // Thương hiệu hải sản (Tăng giá bán thành phẩm tại quầy hàng)
+        // 3 Trụ Cột Nâng Cấp Tinh Gọn (3 Streamlined Core Pillars)
+        FishermanTeam = 0,          // [Trụ Cột 1] Đội Cần Thủ (Tốc độ câu & Tự động mở rộng cần thủ)
+        WranglerTeam = 1,           // [Trụ Cột 2] Đội Thợ Săn Cá (Sát thương, HP, Tốc chạy & Thêm thợ bắt cá)
+        FishValue = 2,              // [Trụ Cột 3] Giá Trị Hải Sản (Tăng giá bán tất cả cá tại quầy)
+
+        // Tương thích ngược với các script hiện tại:
+        FishermanSlots = FishermanTeam,
+        FishermanSpeed = FishermanTeam,
+        HireWrangler = WranglerTeam,
+        WranglerPower = WranglerTeam,
+        KitchenSpeed = FishValue,
+        MarketValueMultiplier = FishValue
     }
 
     [System.Serializable]

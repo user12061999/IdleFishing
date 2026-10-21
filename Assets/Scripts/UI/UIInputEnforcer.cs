@@ -117,28 +117,11 @@ namespace IdleFishing.UI
 
         public void BindHUDButtons()
         {
-            // 1. Contracts Board Button
+            // 1. Contracts Board Button - Deactivated per user request
             var cBtnObj = GameObject.Find("Btn_ContractsBoard");
             if (cBtnObj != null)
             {
-                var btn = cBtnObj.GetComponent<Button>();
-                if (btn != null)
-                {
-                    var img = cBtnObj.GetComponent<Image>();
-                    if (img != null) btn.targetGraphic = img;
-
-                    btn.onClick.RemoveAllListeners();
-                    btn.onClick.AddListener(() =>
-                    {
-                        if (ContractBoardPopupUI.Instance != null)
-                        {
-                            ContractBoardPopupUI.Instance.Toggle();
-                        }
-                    });
-                }
-
-                var txts = cBtnObj.GetComponentsInChildren<TextMeshProUGUI>(true);
-                foreach (var t in txts) t.raycastTarget = false;
+                cBtnObj.SetActive(false);
             }
 
             // 2. Aquarium Button

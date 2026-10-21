@@ -1,0 +1,43 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8fb4bf1520bf6cd4592f26e0e019b0f7, type: 3}
+  m_Name: Stage_04
+  m_EditorClassIdentifier: 
+  stageId: stage_04
+  stageNumber: 4
+  worldId: world_1
+  stageInWorld: 4
+  stageTitle: Fish Market Fair
+  mechanicDescription: Casual shoppers arrive; expand market sales and upgrade fish value.
+  targetMinutes: 3
+  estimatedBaseGoldPerMin: 309
+  rewardGoldEquivalentMinutes: 0.35
+  grantFameOnFirstClear: 1
+  replayable: 0
+  goals:
+  - goalType: 2
+    targetCount: 10
+    targetId: 
+    targetLevel: 1
+    customDescription: Sell 10 Fish at Market
+  - goalType: 8
+    targetCount: 1
+    targetId: FishValue
+    targetLevel: 2
+    customDescription: Upgrade Fish Value to Level 2
+  guaranteedFirstCatch: {fileID: 0}
+  bossToSpawn: {fileID: 0}
+  isWorldBossStage: 0
+  worldVoyageUnlock: 
+  featureUnlocks:
+  - market_shelf
+  - market_trends

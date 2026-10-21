@@ -9,7 +9,7 @@ namespace IdleFishing.Editor
     {
         private const string OutputDir = "Assets/Prefabs/Characters";
         private const string MatDir = "Assets/EKstudio/HyperCasual Character Stickman/Material";
-        public const float CharacterScale = 1.45f;
+        public static readonly Vector3 ChubbyScale = new Vector3(1.36f, 1.10f, 1.26f);
 
         [MenuItem("IdleFishing/Generate Stickman Character Prefabs")]
         public static void GenerateAllPrefabs()
@@ -28,10 +28,10 @@ namespace IdleFishing.Editor
 
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
-            Debug.Log("[StickmanPrefabGenerator] Successfully generated all 6 Stickman Character Prefabs at 1.45x scale!");
+            Debug.Log("[StickmanPrefabGenerator] Successfully generated all 6 Stickman Character Prefabs with cute chubby/shorter proportions!");
         }
 
-        private static GameObject InstantiateStickmanBase(string sourcePrefabPath, string name, float scale = CharacterScale)
+        private static GameObject InstantiateStickmanBase(string sourcePrefabPath, string name, Vector3? scale = null)
         {
             var src = AssetDatabase.LoadAssetAtPath<GameObject>(sourcePrefabPath);
             if (src == null)
@@ -45,7 +45,11 @@ namespace IdleFishing.Editor
             visual.name = "Model_Stickman";
             visual.transform.localPosition = Vector3.zero;
             visual.transform.localRotation = Quaternion.identity;
-            visual.transform.localScale = Vector3.one * scale;
+            visual.transform.localScale = scale ?? ChubbyScale;
+
+            // Keep body bones at 1 so scale does not compound down spine chain, gently scale head for chibi look
+            var head = visual.transform.Find("Armature/Hips/Spine/Spine1/Neck/Head");
+            if (head != null) head.localScale = new Vector3(1.12f, 1.12f, 1.12f);
 
             // Turn off default Animator so procedural kinematics can animate cleanly
             var anim = visual.GetComponent<Animator>();
@@ -59,7 +63,7 @@ namespace IdleFishing.Editor
             var root = InstantiateStickmanBase(
                 "Assets/EKstudio/HyperCasual Character Stickman/Prefabs/Stickman_1.prefab",
                 "Stickman_Fisherman",
-                CharacterScale
+                ChubbyScale
             );
             if (root == null) return;
 
@@ -74,7 +78,7 @@ namespace IdleFishing.Editor
             {
                 var hatRoot = new GameObject("Fisherman_BucketHat");
                 hatRoot.transform.SetParent(headSocket, false);
-                hatRoot.transform.localPosition = new Vector3(0f, 0.18f, 0f);
+                hatRoot.transform.localPosition = new Vector3(0f, 0.46f, 0.02f);
 
                 var yellowMat = AssetDatabase.LoadAssetAtPath<Material>(Path.Combine(MatDir, "M_Yellow.mat"));
 
@@ -83,7 +87,7 @@ namespace IdleFishing.Editor
                 brim.name = "Hat_Brim";
                 brim.transform.SetParent(hatRoot.transform, false);
                 brim.transform.localPosition = new Vector3(0f, 0.02f, 0f);
-                brim.transform.localScale = new Vector3(0.52f, 0.015f, 0.52f);
+                brim.transform.localScale = new Vector3(0.50f, 0.015f, 0.50f);
                 if (yellowMat != null) brim.GetComponent<MeshRenderer>().sharedMaterial = yellowMat;
                 Object.DestroyImmediate(brim.GetComponent<Collider>());
 
@@ -92,7 +96,7 @@ namespace IdleFishing.Editor
                 crown.name = "Hat_Crown";
                 crown.transform.SetParent(hatRoot.transform, false);
                 crown.transform.localPosition = new Vector3(0f, 0.08f, 0f);
-                crown.transform.localScale = new Vector3(0.35f, 0.065f, 0.35f);
+                crown.transform.localScale = new Vector3(0.34f, 0.07f, 0.34f);
                 if (yellowMat != null) crown.GetComponent<MeshRenderer>().sharedMaterial = yellowMat;
                 Object.DestroyImmediate(crown.GetComponent<Collider>());
             }
@@ -148,9 +152,9 @@ namespace IdleFishing.Editor
 
             // Collider
             var col = root.AddComponent<CapsuleCollider>();
-            col.radius = 0.52f;
-            col.height = 2.45f;
-            col.center = new Vector3(0, 1.22f, 0);
+            col.radius = 0.58f;
+            col.height = 1.95f;
+            col.center = new Vector3(0, 0.98f, 0);
             col.isTrigger = true;
 
             cartoonVis.ResetToBindPose();
@@ -162,7 +166,7 @@ namespace IdleFishing.Editor
             var root = InstantiateStickmanBase(
                 "Assets/EKstudio/HyperCasual Character Stickman/Prefabs/Stickman_4.prefab",
                 "Stickman_Wrangler",
-                CharacterScale
+                ChubbyScale
             );
             if (root == null) return;
 
@@ -179,8 +183,8 @@ namespace IdleFishing.Editor
                 var band = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
                 band.name = "Headband";
                 band.transform.SetParent(headSocket, false);
-                band.transform.localPosition = new Vector3(0f, 0.16f, 0f);
-                band.transform.localScale = new Vector3(0.36f, 0.035f, 0.36f);
+                band.transform.localPosition = new Vector3(0f, 0.36f, 0.02f);
+                band.transform.localScale = new Vector3(0.38f, 0.035f, 0.38f);
                 if (redMat != null) band.GetComponent<MeshRenderer>().sharedMaterial = redMat;
                 Object.DestroyImmediate(band.GetComponent<Collider>());
             }
@@ -232,9 +236,9 @@ namespace IdleFishing.Editor
             }
 
             var col = root.AddComponent<CapsuleCollider>();
-            col.radius = 0.52f;
-            col.height = 2.45f;
-            col.center = new Vector3(0, 1.22f, 0);
+            col.radius = 0.58f;
+            col.height = 1.95f;
+            col.center = new Vector3(0, 0.98f, 0);
             col.isTrigger = true;
 
             cartoonVis.ResetToBindPose();
@@ -246,7 +250,7 @@ namespace IdleFishing.Editor
             var root = InstantiateStickmanBase(
                 "Assets/EKstudio/HyperCasual Character Stickman/Prefabs/Stickman_4.prefab",
                 "Stickman_Transporter",
-                CharacterScale
+                ChubbyScale
             );
             if (root == null) return;
 
@@ -263,8 +267,8 @@ namespace IdleFishing.Editor
                 var cap = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
                 cap.name = "Transporter_Cap";
                 cap.transform.SetParent(headSocket, false);
-                cap.transform.localPosition = new Vector3(0f, 0.18f, 0f);
-                cap.transform.localScale = new Vector3(0.35f, 0.05f, 0.35f);
+                cap.transform.localPosition = new Vector3(0f, 0.45f, 0.02f);
+                cap.transform.localScale = new Vector3(0.36f, 0.05f, 0.36f);
                 if (orangeMat != null) cap.GetComponent<MeshRenderer>().sharedMaterial = orangeMat;
                 Object.DestroyImmediate(cap.GetComponent<Collider>());
 
@@ -278,9 +282,9 @@ namespace IdleFishing.Editor
             }
 
             var col = root.AddComponent<CapsuleCollider>();
-            col.radius = 0.52f;
-            col.height = 2.45f;
-            col.center = new Vector3(0, 1.22f, 0);
+            col.radius = 0.58f;
+            col.height = 1.95f;
+            col.center = new Vector3(0, 0.98f, 0);
             col.isTrigger = true;
 
             cartoonVis.ResetToBindPose();
@@ -292,7 +296,7 @@ namespace IdleFishing.Editor
             var root = InstantiateStickmanBase(
                 "Assets/EKstudio/HyperCasual Character Stickman/Prefabs/Stickman_5.prefab",
                 "Stickman_Customer_Casual",
-                CharacterScale
+                ChubbyScale
             );
             if (root == null) return;
 
@@ -302,9 +306,9 @@ namespace IdleFishing.Editor
             cartoonVis.Initialize(true);
 
             var col = root.AddComponent<CapsuleCollider>();
-            col.radius = 0.52f;
-            col.height = 2.45f;
-            col.center = new Vector3(0, 1.22f, 0);
+            col.radius = 0.58f;
+            col.height = 1.95f;
+            col.center = new Vector3(0, 0.98f, 0);
             col.isTrigger = true;
 
             cartoonVis.ResetToBindPose();
@@ -316,7 +320,7 @@ namespace IdleFishing.Editor
             var root = InstantiateStickmanBase(
                 "Assets/EKstudio/HyperCasual Character Stickman/Prefabs/Stickman_2.prefab",
                 "Stickman_Customer_VIP",
-                CharacterScale
+                ChubbyScale
             );
             if (root == null) return;
 
@@ -326,9 +330,9 @@ namespace IdleFishing.Editor
             cartoonVis.Initialize(true);
 
             var col = root.AddComponent<CapsuleCollider>();
-            col.radius = 0.52f;
-            col.height = 2.45f;
-            col.center = new Vector3(0, 1.22f, 0);
+            col.radius = 0.58f;
+            col.height = 1.95f;
+            col.center = new Vector3(0, 0.98f, 0);
             col.isTrigger = true;
 
             cartoonVis.ResetToBindPose();
@@ -340,7 +344,7 @@ namespace IdleFishing.Editor
             var root = InstantiateStickmanBase(
                 "Assets/EKstudio/HyperCasual Character Stickman/Prefabs/Stickman_3.prefab",
                 "Stickman_Customer_Tourist",
-                CharacterScale
+                ChubbyScale
             );
             if (root == null) return;
 
@@ -357,16 +361,16 @@ namespace IdleFishing.Editor
                 var flower = GameObject.CreatePrimitive(PrimitiveType.Sphere);
                 flower.name = "Tourist_FlowerClip";
                 flower.transform.SetParent(headSocket, false);
-                flower.transform.localPosition = new Vector3(0.18f, 0.16f, 0f);
-                flower.transform.localScale = new Vector3(0.09f, 0.09f, 0.09f);
+                flower.transform.localPosition = new Vector3(0.24f, 0.38f, 0.08f);
+                flower.transform.localScale = new Vector3(0.10f, 0.10f, 0.10f);
                 if (redMat != null) flower.GetComponent<MeshRenderer>().sharedMaterial = redMat;
                 Object.DestroyImmediate(flower.GetComponent<Collider>());
             }
 
             var col = root.AddComponent<CapsuleCollider>();
-            col.radius = 0.52f;
-            col.height = 2.45f;
-            col.center = new Vector3(0, 1.22f, 0);
+            col.radius = 0.58f;
+            col.height = 1.95f;
+            col.center = new Vector3(0, 0.98f, 0);
             col.isTrigger = true;
 
             cartoonVis.ResetToBindPose();

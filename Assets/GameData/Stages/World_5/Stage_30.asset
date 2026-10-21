@@ -1,0 +1,44 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8fb4bf1520bf6cd4592f26e0e019b0f7, type: 3}
+  m_Name: Stage_30
+  m_EditorClassIdentifier: 
+  stageId: stage_30
+  stageNumber: 30
+  worldId: world_5
+  stageInWorld: 6
+  stageTitle: Golden Leviathan Finale
+  mechanicDescription: 'Final Grand Boss of Idle Fishing: The Mythic Golden Leviathan!
+    Conquer the ultimate apex beast and claim the Master Tycoon Trophy!'
+  targetMinutes: 8
+  estimatedBaseGoldPerMin: 92662511
+  rewardGoldEquivalentMinutes: 2.5
+  grantFameOnFirstClear: 5
+  replayable: 0
+  goals:
+  - goalType: 7
+    targetCount: 1
+    targetId: great_white_shark
+    targetLevel: 1
+    customDescription: Defeat Golden Leviathan
+  - goalType: 2
+    targetCount: 40
+    targetId: 
+    targetLevel: 1
+    customDescription: Sell 40 Fish at Market
+  guaranteedFirstCatch: {fileID: 0}
+  bossToSpawn: {fileID: 11400000, guid: 3b7179d9f5541054a9c70853ccf3b66d, type: 2}
+  isWorldBossStage: 1
+  worldVoyageUnlock: grand_master
+  featureUnlocks:
+  - leviathan_trophy
+  - grand_master_tycoon

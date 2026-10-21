@@ -1,0 +1,43 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8fb4bf1520bf6cd4592f26e0e019b0f7, type: 3}
+  m_Name: Stage_10
+  m_EditorClassIdentifier: 
+  stageId: stage_10
+  stageNumber: 10
+  worldId: world_2
+  stageInWorld: 4
+  stageTitle: Giant Clam Secrets
+  mechanicDescription: The Giant Clam of Coral Atoll surges with pearls! Trigger frenzy to maximize market profits.
+  targetMinutes: 4.0
+  estimatedBaseGoldPerMin: 6171
+  rewardGoldEquivalentMinutes: 0.35
+  grantFameOnFirstClear: 1
+  replayable: 0
+  goals:
+  - goalType: 6
+    targetCount: 1
+    targetId: 
+    targetLevel: 1
+    customDescription: Activate Fishing Frenzy 1x
+  - goalType: 2
+    targetCount: 15
+    targetId: 
+    targetLevel: 1
+    customDescription: Sell 15 Fish at Market
+  guaranteedFirstCatch: {fileID: 0}
+  bossToSpawn: {fileID: 0}
+  isWorldBossStage: 0
+  worldVoyageUnlock: 
+  featureUnlocks:
+  - giant_clam
+  - pearl_frenzy

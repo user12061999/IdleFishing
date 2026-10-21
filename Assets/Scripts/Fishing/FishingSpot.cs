@@ -13,12 +13,48 @@ namespace IdleFishing.Fishing
         public string SpotName => spotName;
         public IReadOnlyList<FishChainData> AvailableSpecies => availableSpecies;
 
+        public static FishingSpot Instance { get; private set; }
+
+        private void Awake()
+        {
+            if (Instance == null) Instance = this;
+        }
+
         public void AddSpecies(FishChainData fish)
         {
             if (fish != null && !availableSpecies.Contains(fish))
             {
                 availableSpecies.Add(fish);
             }
+        }
+
+        private readonly System.Collections.Generic.Queue<(FishChainData species, bool asBoss)> guaranteedCatchQueue = new System.Collections.Generic.Queue<(FishChainData, bool)>();
+
+        public void QueueGuaranteedCatch(FishChainData species, bool asBoss = false)
+        {
+            if (species != null)
+            {
+                guaranteedCatchQueue.Enqueue((species, asBoss));
+            }
+        }
+
+        public bool TryPopGuaranteedCatch(out FishChainData species, out bool asBoss)
+        {
+            if (guaranteedCatchQueue.Count > 0)
+            {
+                var item = guaranteedCatchQueue.Dequeue();
+                species = item.species;
+                asBoss = item.asBoss;
+                return true;
+            }
+            species = null;
+            asBoss = false;
+            return false;
+        }
+
+        public void ClearGuaranteedCatches()
+        {
+            guaranteedCatchQueue.Clear();
         }
 
         public void ClearAndSetSpecies(IEnumerable<FishChainData> newSpecies)

@@ -23,26 +23,34 @@ namespace IdleFishing.Market
             inventory = GetComponent<Inventory.Inventory>();
         }
 
+        public event System.Action OnGoodsChanged;
+
         private readonly System.Collections.Generic.List<CustomerNPC> queuedCustomers = new System.Collections.Generic.List<CustomerNPC>();
 
         public Vector3 RegisterAndGetStandPosition(CustomerNPC customer)
         {
-            queuedCustomers.RemoveAll(c => c == null);
-            if (!queuedCustomers.Contains(customer))
+            queuedCustomers.RemoveAll(c => c == null || !c.gameObject.activeInHierarchy);
+            if (customer != null && !queuedCustomers.Contains(customer))
             {
                 queuedCustomers.Add(customer);
             }
-            int index = queuedCustomers.IndexOf(customer);
-            float spacing = 0.95f;
+            int index = customer != null ? queuedCustomers.IndexOf(customer) : 0;
+            if (index < 0) index = 0;
+
+            float spacing = 1.15f;
             float offsetX = ((index % 3) - 1f) * spacing;
-            float offsetZ = (index / 3) * 0.9f;
+            float offsetZ = (index / 3) * 0.85f;
             Vector3 basePoint = customerStandPoint != null ? customerStandPoint.position : (transform.position + new Vector3(0, 0, -1.8f));
             return basePoint + new Vector3(offsetX, 0, -offsetZ);
         }
 
         public void UnregisterCustomer(CustomerNPC customer)
         {
-            queuedCustomers.Remove(customer);
+            if (customer != null)
+            {
+                queuedCustomers.Remove(customer);
+            }
+            queuedCustomers.RemoveAll(c => c == null || !c.gameObject.activeInHierarchy);
         }
 
         public bool TryBuyOne(out ItemData boughtItem)
@@ -50,7 +58,12 @@ namespace IdleFishing.Market
             boughtItem = null;
             if (inventory == null || inventory.TotalItemCount == 0) return false;
 
-            return inventory.TryPopFirst(out boughtItem);
+            bool success = inventory.TryPopFirst(out boughtItem);
+            if (success)
+            {
+                OnGoodsChanged?.Invoke();
+            }
+            return success;
         }
     }
 }

@@ -15,7 +15,7 @@ MonoBehaviour:
   itemId: salmon_whole
   itemName: Fresh Salmon
   itemType: 0
-  description: 
-  basePrice: 95
+  description: 'Fresh 3D fish: Fresh Salmon'
+  basePrice: 60
   prefab: {fileID: 3318259717643607601, guid: 85aeec092b2c3124cbb3dca707aeccbc, type: 3}
   icon: {fileID: 0}

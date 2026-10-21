@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2bfd1c534ea581c4bacca64caa0c5d0f, type: 3}
+  m_Name: UIFontConfig
+  m_EditorClassIdentifier: 
+  defaultFont: {fileID: 11400000, guid: c1482dbce654844b9ba1c753cbea5d80, type: 2}
+  headerFont: {fileID: 11400000, guid: c2f49fe8c22d94f9a9e6cd06ad490155, type: 2}
+  numberFont: {fileID: 11400000, guid: 50c12c23294124aa48490c44ac65a9e4, type: 2}
+  buttonFont: {fileID: 11400000, guid: 50c12c23294124aa48490c44ac65a9e4, type: 2}
+  headerMaterial: {fileID: 0}
+  numberMaterial: {fileID: 0}
+  buttonMaterial: {fileID: 0}

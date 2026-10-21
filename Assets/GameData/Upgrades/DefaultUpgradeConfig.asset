@@ -14,56 +14,29 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   upgrades:
   - type: 0
-    title: Expand Fishermen
-    description: Unlock additional fishing slots on the pier (Max 5 fishermen)
-    baseCost: 100
-    costMultiplier: 2.5
+    title: Fisherman Crew
+    description: Boosts casting speed and recruits additional skilled fishermen.
+    baseCost: 75
+    costMultiplier: 1.4
     baseValue: 1
-    valueIncreasePerLevel: 1
-    maxLevel: 4
-    icon: {fileID: 0}
+    valueIncreasePerLevel: 0.12
+    maxLevel: 50
+    icon: {fileID: 21300000, guid: ce973eb4e3b71f64c88831dbc006e918, type: 3}
   - type: 1
-    title: Fishing Technique
-    description: Fishermen reel in fish faster, increasing catch rate
-    baseCost: 50
-    costMultiplier: 1.55
+    title: Wrangler Crew
+    description: Increases wrangling damage, speed and recruits more wranglers.
+    baseCost: 85
+    costMultiplier: 1.42
     baseValue: 1
     valueIncreasePerLevel: 0.15
-    maxLevel: 10
-    icon: {fileID: 0}
+    maxLevel: 50
+    icon: {fileID: 21300000, guid: b62575f55b5997444a673974af95ffe2, type: 3}
   - type: 2
-    title: Hire Fish Wranglers
-    description: Hire wranglers to battle and carry fish (Max 4 wranglers)
+    title: Fish Market Value
+    description: Increases the gold revenue from all fish sold at market stalls.
     baseCost: 100
-    costMultiplier: 2.2
-    baseValue: 0
-    valueIncreasePerLevel: 1
-    maxLevel: 4
-    icon: {fileID: 0}
-  - type: 3
-    title: Wrangler Gear
-    description: Boost wrangler power, health, speed & tap damage
-    baseCost: 70
-    costMultiplier: 1.55
+    costMultiplier: 1.44
     baseValue: 1
-    valueIncreasePerLevel: 0.25
-    maxLevel: 10
-    icon: {fileID: 0}
-  - type: 4
-    title: Express Logistics
-    description: Increase transporter cart speed and harbor fish delivery rate
-    baseCost: 80
-    costMultiplier: 1.55
-    baseValue: 1
-    valueIncreasePerLevel: 0.2
-    maxLevel: 10
-    icon: {fileID: 0}
-  - type: 5
-    title: Seafood Brand
-    description: Increase wholesale value and gold earned at the market stall
-    baseCost: 120
-    costMultiplier: 1.65
-    baseValue: 1
-    valueIncreasePerLevel: 0.15
-    maxLevel: 10
-    icon: {fileID: 0}
+    valueIncreasePerLevel: 0.18
+    maxLevel: 50
+    icon: {fileID: 21300000, guid: 730c6f8637fc9db43bd2ee5356a77fe6, type: 3}

@@ -15,8 +15,8 @@ MonoBehaviour:
   speciesId: great_white_shark
   speciesName: Great White Leviathan
   tier: 5
-  catchDifficulty: 4.8
-  spawnWeight: 12
+  catchDifficulty: 4.9
+  spawnWeight: 10
   minWeightKg: 80
   maxWeightKg: 220
   isApexBoss: 1

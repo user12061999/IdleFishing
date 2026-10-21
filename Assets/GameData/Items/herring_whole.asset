@@ -15,7 +15,7 @@ MonoBehaviour:
   itemId: herring_whole
   itemName: Fresh Herring
   itemType: 0
-  description: 
-  basePrice: 20
+  description: 'Fresh 3D fish: Fresh Herring'
+  basePrice: 15
   prefab: {fileID: 1090111983686138834, guid: cece3b410bbedb143b3b98419fe7581b, type: 3}
   icon: {fileID: 0}
